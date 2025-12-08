@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "playwright test",
     "db:generate": "drizzle-kit generate --config database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config database/drizzle.config.ts",
     "db:migrate:prod": "tsx scripts/migrate.ts",
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
