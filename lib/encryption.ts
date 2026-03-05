@@ -65,7 +65,7 @@ export function encrypt(text: string): string {
  */
 export function decrypt(encryptedData: string): string {
 	try {
-		if (!encryptedData || encryptedData.trim() === "") {
+		if (!encryptedData || encryptedData?.trim() === "") {
 			return encryptedData; // Return empty strings as-is
 		}
 
