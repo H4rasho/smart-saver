@@ -4,6 +4,7 @@ export const revalidate = 0;
 import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
 import { getMovmentsAction } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
+import { MovementsTable } from "@/app/core/movements/components/movements-table";
 import {
 	getUserCurrency,
 	getUserId,
@@ -18,7 +19,7 @@ export default async function Movements() {
 	const categories = await getUserCategoriesAction(userId);
 
 	return (
-		<main className="flex flex-col min-h-screen max-w-md mx-auto py-6 md:hidden">
+		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			{/* Header mejorado */}
 			<div className="mb-8">
 				<div className="flex items-center gap-3 mb-3">
@@ -35,7 +36,7 @@ export default async function Movements() {
 			</div>
 
 			{/* Estadísticas rápidas */}
-			<div className="mb-3">
+			<div className="mb-6">
 				<div className="bg-secondary p-4 rounded-xl border border-secondary-dark/20 shadow-sm">
 					<div className="flex justify-between items-start">
 						<div className="flex-1 min-w-0 pr-3">
@@ -56,12 +57,28 @@ export default async function Movements() {
 			</div>
 
 			{/* Lista de movimientos */}
-			<FinancialMovementsList
-				movements={movements}
-				userCurrency={userCurrency}
-				showActions={true}
-				categories={categories}
-			/>
+			<div className="md:hidden">
+				<FinancialMovementsList
+					movements={movements}
+					userCurrency={userCurrency}
+					showActions={true}
+					categories={categories}
+				/>
+			</div>
+			<div className="hidden md:block">
+				{movements.length === 0 ? (
+					<div className="text-center py-16">
+						<h3 className="text-lg font-semibold text-foreground mb-2">
+							No hay movimientos
+						</h3>
+						<p className="text-muted-foreground text-sm">
+							Agrega tu primer movimiento para comenzar
+						</p>
+					</div>
+				) : (
+					<MovementsTable movements={movements} userCurrency={userCurrency} />
+				)}
+			</div>
 		</main>
 	);
 }
