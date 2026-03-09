@@ -79,6 +79,10 @@ test.describe("Homepage", () => {
 	test('should open sign-in dialog when clicking "Iniciar Sesión"', async ({
 		page,
 	}) => {
+		test.skip(
+			!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+			"Clerk no esta configurado en este entorno",
+		);
 		// Click login button
 		await page.getByRole("button", { name: "Iniciar Sesión" }).click();
 
@@ -115,6 +119,10 @@ test.describe("Homepage", () => {
 	test('should open sign-in dialog when clicking "Comenzar Gratis"', async ({
 		page,
 	}) => {
+		test.skip(
+			!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+			"Clerk no esta configurado en este entorno",
+		);
 		// Click the main CTA button
 		await page.getByRole("button", { name: "Comenzar Gratis" }).click();
 
