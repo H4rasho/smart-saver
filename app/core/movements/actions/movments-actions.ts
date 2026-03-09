@@ -327,6 +327,12 @@ export async function extractMovementsFromAudioAction(
 		);
 
 		if (!transcription.ok) {
+			const errorBody = await transcription.text();
+			console.error("Error transcribiendo audio en OpenAI", {
+				status: transcription.status,
+				statusText: transcription.statusText,
+				body: errorBody,
+			});
 			throw new Error("Error al transcribir el audio");
 		}
 
@@ -374,6 +380,7 @@ export async function extractMovementsFromAudioAction(
 
 		return { movements, error: null };
 	} catch (e: unknown) {
+		console.error("Error en extractMovementsFromAudioAction", e);
 		return {
 			movements: [],
 			error: e instanceof Error ? e.message : "Error al procesar el audio",
