@@ -1,13 +1,14 @@
 "use client";
 
+import {
+	deleteUserOpenAIKey,
+	getUserOpenAIKeyStatus,
+	testUserOpenAIKey,
+	updateUserOpenAIKey,
+} from "@/app/core/user/actions/user-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	getOpenAIKey,
-	removeOpenAIKey,
-	setOpenAIKey,
-} from "@/lib/openai-client";
 import { Eye, EyeOff, Key, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,15 +20,14 @@ export function OpenAISettings() {
 	const [hasExistingKey, setHasExistingKey] = useState(false);
 
 	useEffect(() => {
-		// Cargar la API key del localStorage al montar el componente
-		const storedKey = getOpenAIKey();
-		if (storedKey) {
-			setApiKey(storedKey);
-			setHasExistingKey(true);
-		}
+		const loadStatus = async () => {
+			const status = await getUserOpenAIKeyStatus();
+			setHasExistingKey(status);
+		};
+		loadStatus();
 	}, []);
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if (!apiKey.trim()) {
 			toast.error("Por favor, ingresa una API key válida");
 			return;
@@ -41,9 +41,13 @@ export function OpenAISettings() {
 
 		setIsSaving(true);
 		try {
-			setOpenAIKey(apiKey.trim());
-			setHasExistingKey(true);
-			toast.success("API key guardada correctamente en tu navegador");
+			const result = await updateUserOpenAIKey(apiKey.trim());
+			if (result.success) {
+				setHasExistingKey(true);
+				toast.success(result.message);
+				return;
+			}
+			toast.error(result.message);
 		} catch (error) {
 			toast.error("Error al guardar la API key");
 			console.error(error);
@@ -52,12 +56,16 @@ export function OpenAISettings() {
 		}
 	};
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		try {
-			removeOpenAIKey();
-			setApiKey("");
-			setHasExistingKey(false);
-			toast.success("API key eliminada correctamente");
+			const result = await deleteUserOpenAIKey();
+			if (result.success) {
+				setApiKey("");
+				setHasExistingKey(false);
+				toast.success(result.message);
+				return;
+			}
+			toast.error(result.message);
 		} catch (error) {
 			toast.error("Error al eliminar la API key");
 			console.error(error);
@@ -65,26 +73,29 @@ export function OpenAISettings() {
 	};
 
 	const handleTest = async () => {
-		if (!apiKey.trim()) {
-			toast.error("Por favor, guarda una API key primero");
-			return;
-		}
-
 		toast.info("Probando conexión con OpenAI...");
 
 		try {
-			const response = await fetch("https://api.openai.com/v1/models", {
-				headers: {
-					Authorization: `Bearer ${apiKey.trim()}`,
-				},
-			});
-
-			if (response.ok) {
-				toast.success("✅ API key válida y funcionando correctamente");
-			} else {
-				const error = await response.json();
-				toast.error(`❌ Error: ${error.error?.message || "API key inválida"}`);
+			if (!apiKey.trim() && !hasExistingKey) {
+				toast.error("Por favor, guarda una API key primero");
+				return;
 			}
+
+			if (apiKey.trim()) {
+				const saveResult = await updateUserOpenAIKey(apiKey.trim());
+				if (!saveResult.success) {
+					toast.error(saveResult.message);
+					return;
+				}
+				setHasExistingKey(true);
+			}
+
+			const result = await testUserOpenAIKey();
+			if (result.success) {
+				toast.success(`✅ ${result.message}`);
+				return;
+			}
+			toast.error(`❌ ${result.message}`);
 		} catch (error) {
 			toast.error("Error al conectar con OpenAI");
 			console.error(error);
@@ -102,8 +113,8 @@ export function OpenAISettings() {
 						</p>
 						<ul className="text-muted-foreground space-y-1">
 							<li>
-								• Tu API key se guarda <strong>solo en tu navegador</strong>, no
-								en nuestros servidores
+								• Tu API key se guarda <strong>cifrada en el servidor</strong> y
+								solo se usa para ejecutar las funciones de IA
 							</li>
 							<li>• La API key es personal y no debe compartirse con nadie</li>
 							<li>

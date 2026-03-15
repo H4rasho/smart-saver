@@ -1,9 +1,12 @@
 "use server";
 
 import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
-import { getUserId } from "@/app/core/user/actions/user-actions";
+import {
+	getUserId,
+	getUserOpenAIKey,
+} from "@/app/core/user/actions/user-actions";
 import { CONFIG } from "@/config/config";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -28,6 +31,11 @@ import type {
 import { CreateMovementSchema } from "../types/movement-type";
 
 const { OPENAI_API_KEY } = CONFIG;
+
+async function getOpenAIKeyForUser(): Promise<string | null> {
+	const userOpenAIKey = await getUserOpenAIKey();
+	return userOpenAIKey || OPENAI_API_KEY || null;
+}
 
 export async function createMovmentAction(
 	_prevState: unknown,
@@ -127,8 +135,13 @@ export async function addMovmentsFromFileAction(
 		.map((cat) => `${cat.name} (id: ${cat.id})`)
 		.join(", ");
 
+	const openAiKey = await getOpenAIKeyForUser();
+	if (!openAiKey) {
+		throw new Error("API key de OpenAI no configurada");
+	}
+	const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 	const result = await generateObject({
-		model: openai("gpt-4o"),
+		model: scopedOpenAI("gpt-4o"),
 		schema: z.object({
 			expenses: CreateMovementSchema.array(),
 		}),
@@ -182,8 +195,13 @@ export async function extractMovementsFromFileAction(
 			.map((cat) => `${cat.name} (id: ${cat.id})`)
 			.join(", ");
 
+		const openAiKey = await getOpenAIKeyForUser();
+		if (!openAiKey) {
+			return { movements: [], error: "API key de OpenAI no configurada" };
+		}
+		const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 		const result = await generateObject({
-			model: openai("gpt-4o"),
+			model: scopedOpenAI("gpt-4o"),
 			schema: z.object({
 				expenses: CreateMovementSchema.array(),
 			}),
@@ -302,6 +320,11 @@ export async function extractMovementsFromAudioAction(
 		const categoriesDescription = userCategories
 			.map((cat) => `${cat.name} (id: ${cat.id})`)
 			.join(", ");
+		const openAiKey = await getOpenAIKeyForUser();
+		if (!openAiKey) {
+			return { movements: [], error: "API key de OpenAI no configurada" };
+		}
+		const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 
 		// Convert audio to text using OpenAI Whisper
 		const arrayBuffer = await audioFile.arrayBuffer();
@@ -310,7 +333,7 @@ export async function extractMovementsFromAudioAction(
 			{
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${OPENAI_API_KEY}`,
+					Authorization: `Bearer ${openAiKey}`,
 				},
 				body: (() => {
 					const formData = new FormData();
@@ -341,7 +364,7 @@ export async function extractMovementsFromAudioAction(
 
 		// Process the transcribed text to extract movements
 		const result = await generateObject({
-			model: openai("gpt-4o"),
+			model: scopedOpenAI("gpt-4o"),
 			schema: z.object({
 				expenses: CreateMovementSchema.array(),
 			}),

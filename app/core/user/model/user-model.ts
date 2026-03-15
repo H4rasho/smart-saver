@@ -6,4 +6,5 @@ export const users = sqliteTable("users", {
 	name: text("name").notNull(),
 	currency: text("currency").notNull(),
 	clerk_id: text("clerk_id").notNull().unique(),
+	openai_api_key: text("openai_api_key"),
 });

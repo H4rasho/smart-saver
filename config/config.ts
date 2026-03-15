@@ -1,5 +1,3 @@
-import { getOpenAIKey } from "@/lib/openai-client";
-
 const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, ENCRYPTION_KEY, OPENAI_API_KEY } =
 	process.env;
 
@@ -8,5 +6,5 @@ export const CONFIG = {
 	DATABASE_AUTH_TOKEN: TURSO_AUTH_TOKEN ?? "",
 	ENCRYPTION_KEY: ENCRYPTION_KEY ?? "",
 	APP_NAME: "SmartSaver",
-	OPENAI_API_KEY: OPENAI_API_KEY ?? getOpenAIKey() ?? "",
+	OPENAI_API_KEY: OPENAI_API_KEY ?? "",
 } as const;
