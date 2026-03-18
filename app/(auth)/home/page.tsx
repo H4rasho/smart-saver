@@ -4,6 +4,7 @@ import {
 	getTotalsByTypeAction,
 } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
+import { MovementsTable } from "@/app/core/movements/components/movements-table";
 import {
 	getCurrentUser,
 	getUserCurrency,
@@ -120,13 +121,31 @@ export default async function Home() {
 						Gestiona tus transacciones
 					</p>
 				</div>
-				<div className="block sm:hidden">
+				<div className="md:hidden">
 					<FinancialMovementsList
 						movements={movements}
 						userCurrency={userCurrency}
 						showActions={false}
 						maxItems={5}
 					/>
+				</div>
+
+				<div className="hidden md:block">
+					{movements.length === 0 ? (
+						<div className="text-center py-12">
+							<h3 className="text-lg font-semibold text-foreground mb-2">
+								No hay movimientos
+							</h3>
+							<p className="text-muted-foreground text-sm">
+								Agrega tu primer movimiento para comenzar
+							</p>
+						</div>
+					) : (
+						<MovementsTable
+							movements={movements.slice(0, 5)}
+							userCurrency={userCurrency}
+						/>
+					)}
 				</div>
 			</section>
 		</main>
