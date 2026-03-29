@@ -36,6 +36,8 @@ import { CreateMovementSchema } from "../types/movement-type";
 
 const { OPENAI_API_KEY } = CONFIG;
 
+const FILE_EXTRACTION_MODEL = "gpt-5.4";
+
 function getTodayDateString(): string {
 	return new Date().toISOString().slice(0, 10);
 }
@@ -113,6 +115,7 @@ async function buildFileContentParts(
 	categoriesDescription: string,
 ): Promise<UserContent> {
 	const mimeType = getFileMimeType(file);
+	const today = getTodayDateString();
 
 	const promptText = `Extract ALL expenses and incomes from this file and categorize them using ONLY the following user-defined categories:
 ${categoriesDescription}.
@@ -121,7 +124,9 @@ Rules:
 - Use the corresponding category ID in the category_id field.
 - If an expense doesn't clearly match any category, use the closest match.
 - movement_type_id: 1 = income, 3 = expense.
+- Include only real transaction rows/items. Ignore balances, totals, summaries, headers, page numbers, and repeated labels.
 - Always include the transaction_date field (the date of the movement).
+- Normalize transaction_date to YYYY-MM-DD when possible. If the file does not provide a date, use ${today}.
 - The incomes or expenses could be in different columns, pages, sections, etc. — look for them all.
 - Each item must include all required fields from the schema.`;
 
@@ -269,7 +274,7 @@ export async function addMovmentsFromFileAction(
 	const contentParts = await buildFileContentParts(file, categoriesDescription);
 	const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 	const result = await generateObject({
-		model: scopedOpenAI("gpt-5.4-mini"),
+		model: scopedOpenAI(FILE_EXTRACTION_MODEL),
 		schema: z.object({
 			expenses: CreateMovementSchema.array(),
 		}),
@@ -307,7 +312,7 @@ export async function extractMovementsFromFileAction(
 		);
 		const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 		const result = await generateObject({
-			model: scopedOpenAI("gpt-4o"),
+			model: scopedOpenAI(FILE_EXTRACTION_MODEL),
 			schema: z.object({
 				expenses: CreateMovementSchema.array(),
 			}),
