@@ -1,5 +1,6 @@
 "use client";
 
+import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -8,9 +9,11 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Category } from "@/types/income";
 import { Mic, Play, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
+import { toast } from "sonner";
 import {
 	extractMovementsFromAudioAction,
 	saveManyMovementsAction,
@@ -18,7 +21,15 @@ import {
 import type { CreateMovement } from "../types/movement-type";
 import { MovementsPreviewModal } from "./movements-preview-modal";
 
-export function CreateMovementFromAudio() {
+interface CreateMovementFromAudioProps {
+	categories: Category[];
+	movementTypes: MovementType[];
+}
+
+export function CreateMovementFromAudio({
+	categories,
+	movementTypes,
+}: CreateMovementFromAudioProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
@@ -96,7 +107,9 @@ export function CreateMovementFromAudio() {
 			setRecordingDuration(0);
 		} catch (error) {
 			console.error("Error accessing microphone:", error);
-			alert("Error al acceder al micrófono. Por favor, permite el acceso.");
+			toast.error(
+				"Error al acceder al micrófono. Por favor, permite el acceso.",
+			);
 		}
 	};
 
@@ -255,6 +268,8 @@ export function CreateMovementFromAudio() {
 			<MovementsPreviewModal
 				open={previewOpen}
 				movements={state.movements}
+				categories={categories}
+				movementTypes={movementTypes}
 				onCancel={() => setPreviewOpen(false)}
 				onConfirm={handleConfirm}
 			/>

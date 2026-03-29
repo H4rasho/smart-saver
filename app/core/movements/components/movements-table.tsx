@@ -2,6 +2,7 @@ import {
 	MovementType,
 	type MovementWithCategoryAndMovementType,
 } from "@/app/core/movements/types/movement-type";
+import { getLocaleAndCurrency } from "@/app/core/user/lib/user-lib";
 import { Badge } from "@/components/ui/badge";
 import {
 	Table,
@@ -22,9 +23,11 @@ export function MovementsTable({
 	userCurrency,
 }: MovementsTableProps) {
 	const formatAmount = (amount: number) => {
-		return new Intl.NumberFormat("es-ES", {
+		const { locale, currency: resolvedCurrency } =
+			getLocaleAndCurrency(userCurrency);
+		return new Intl.NumberFormat(locale, {
 			style: "currency",
-			currency: userCurrency,
+			currency: resolvedCurrency,
 		}).format(Math.abs(amount));
 	};
 
@@ -85,7 +88,10 @@ export function MovementsTable({
 								</TableCell>
 								<TableCell>
 									{movement.category_name ? (
-										<Badge variant="outline" className="capitalize bg-card">
+										<Badge
+											variant="outline"
+											className="capitalize border-border/70 bg-secondary/40 text-foreground dark:border-secondary/70 dark:bg-secondary/20"
+										>
 											{movement.category_name}
 										</Badge>
 									) : (
@@ -100,10 +106,10 @@ export function MovementsTable({
 										variant="outline"
 										className={
 											isIncome
-												? "text-green-700 border-green-200 bg-green-50"
+												? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300"
 												: isFixedExpense
-													? "text-orange-700 border-orange-200 bg-orange-50"
-													: "text-red-700 border-red-200 bg-red-50"
+													? "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+													: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300"
 										}
 									>
 										{movement.movement_type_name}

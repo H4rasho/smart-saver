@@ -34,16 +34,16 @@ export function FixedExpensesForm({
 
 	return (
 		<div className="flex flex-col gap-4">
-			<h3 className="font-medium text-sm sm:text-base">Fixed Expenses</h3>
+			<h3 className="font-medium text-sm sm:text-base">Gastos fijos</h3>
 			<div className="flex flex-col sm:flex-row gap-2">
 				<Input
-					placeholder="Expense name"
+					placeholder="Nombre del gasto"
 					value={expenseName}
 					onChange={(e) => setExpenseName(e.target.value)}
 					className="text-sm"
 				/>
 				<Input
-					placeholder="Amount"
+					placeholder="Monto"
 					type="number"
 					value={amount}
 					onChange={(e) => setAmount(e.target.value)}
@@ -53,7 +53,7 @@ export function FixedExpensesForm({
 					onClick={handleAddExpense}
 					className="text-xs sm:text-sm whitespace-nowrap"
 				>
-					Add
+					Agregar
 				</Button>
 			</div>
 			<ul className="flex flex-col gap-2">
@@ -71,7 +71,7 @@ export function FixedExpensesForm({
 							onClick={() => handleRemoveExpense(index)}
 							className="text-xs w-full sm:w-auto"
 						>
-							Delete
+							Eliminar
 						</Button>
 					</li>
 				))}

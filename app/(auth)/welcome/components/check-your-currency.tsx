@@ -13,7 +13,7 @@ export const CheckYourCurrency = ({
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-2">
 				<label htmlFor="currency" className="text-sm font-medium text-start">
-					Currency
+					Moneda
 				</label>
 				<Input
 					id="currency"

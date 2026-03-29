@@ -5,6 +5,8 @@ import type { CreateMovement } from "../types/movement-type";
 
 interface MovementMobileCardProps {
 	movement: CreateMovement;
+	categoryName?: string;
+	typeName?: string;
 	isEditing: boolean;
 	onEdit: () => void;
 	onDelete: () => void;
@@ -15,6 +17,8 @@ interface MovementMobileCardProps {
 
 export function MovementMobileCard({
 	movement,
+	categoryName,
+	typeName,
 	isEditing,
 	onEdit,
 	onDelete,
@@ -112,7 +116,7 @@ export function MovementMobileCard({
 					<div className="flex items-center gap-1">
 						<Tag className="h-3 w-3" />
 						<span className="truncate max-w-[120px]">
-							{movement.category_id}
+							{categoryName ?? "Sin categoría"}
 						</span>
 					</div>
 				)}
@@ -150,7 +154,7 @@ export function MovementMobileCard({
 				) : (
 					<>
 						<span className="font-semibold">{movement.amount}</span>
-						<span className="text-xs">Tipo: {movement.movement_type_id}</span>
+						<span className="text-xs">Tipo: {typeName ?? "Sin tipo"}</span>
 						<span className="text-xs">
 							Transacción: {movement.transaction_date?.slice(0, 10)}
 						</span>

@@ -21,32 +21,32 @@ const { APP_NAME } = CONFIG;
 const { useStepper, steps, utils } = defineStepper(
 	{
 		id: "checkYourCurrency",
-		title: "Check your Currency",
-		description: "Enter your payment details",
+		title: "Revisa tu moneda",
+		description: "Confirma la moneda que usas a diario",
 	},
 	{
 		id: "selectYourCategories",
-		title: "Select your Categories",
-		description: "Select your Categories",
+		title: "Elige tus categorías",
+		description: "Selecciona las categorías que quieres usar",
 	},
 	{
 		id: "income",
-		title: "Income",
-		description: "Add your income sources",
+		title: "Ingresos",
+		description: "Agrega tus fuentes de ingreso",
 	},
 	{
 		id: "fixedExpenses",
-		title: "Fixed Expenses",
-		description: "Add your fixed expenses",
+		title: "Gastos fijos",
+		description: "Agrega tus gastos fijos",
 	},
 	{
 		id: "createProfile",
-		title: "Create Profile",
-		description: "Finalize your profile",
+		title: "Crear perfil",
+		description: "Finaliza la configuración de tu perfil",
 	},
 );
 
-const initialCategories = ["food", "transport", "health", "education"];
+const initialCategories = ["comida", "transporte", "salud", "educación"];
 interface StepperOnboardingProps {
 	currency: string;
 }
@@ -79,19 +79,19 @@ export function StepperOnboarding({ currency }: StepperOnboardingProps) {
 			});
 
 			if (response.ok) {
-				toast.success("Profile created successfully!");
+				toast.success("¡Perfil creado con éxito!");
 				router.push("/home");
 			} else {
 				const errorData = await response.json();
-				toast.error("Error creating profile", {
-					description: errorData.message || "Please try again later.",
+				toast.error("No se pudo crear el perfil", {
+					description: errorData.message || "Inténtalo de nuevo más tarde.",
 				});
 				setIsLoading(false);
 			}
 		} catch (error) {
 			console.error(error);
-			toast.error("Error creating profile", {
-				description: "An unexpected error occurred. Please try again.",
+			toast.error("No se pudo crear el perfil", {
+				description: "Ocurrió un error inesperado. Inténtalo nuevamente.",
 			});
 			setIsLoading(false);
 		}
@@ -101,16 +101,16 @@ export function StepperOnboarding({ currency }: StepperOnboardingProps) {
 		<div className="space-y-4 sm:space-y-6 p-4 sm:p-6 border rounded-lg w-full max-w-[500px] mx-auto">
 			<div className="flex flex-col sm:flex-row justify-between gap-2">
 				<h2 className="text-lg sm:text-xl font-medium">
-					Welcome to {APP_NAME}
+					Bienvenido a {APP_NAME}
 				</h2>
 				<div className="flex items-center gap-2">
 					<span className="text-xs sm:text-sm text-muted-foreground">
-						Step {currentIndex + 1} of {steps.length}
+						Paso {currentIndex + 1} de {steps.length}
 					</span>
 					<div />
 				</div>
 			</div>
-			<nav aria-label="Checkout Steps" className="group my-4">
+			<nav aria-label="Pasos de configuración" className="group my-4">
 				<ol className="flex flex-col gap-2">
 					{stepper.all.map((step, index, array) => (
 						<Fragment key={step.id}>
@@ -199,13 +199,13 @@ export function StepperOnboarding({ currency }: StepperOnboardingProps) {
 							disabled={stepper.isFirst}
 							className="text-xs sm:text-sm px-3 sm:px-4"
 						>
-							Back
+							Atrás
 						</Button>
 						<Button
 							onClick={stepper.next}
 							className="text-xs sm:text-sm px-3 sm:px-4"
 						>
-							{stepper.isLast ? "Complete" : "Next"}
+							{stepper.isLast ? "Completar" : "Siguiente"}
 						</Button>
 					</div>
 				) : (
@@ -213,7 +213,7 @@ export function StepperOnboarding({ currency }: StepperOnboardingProps) {
 						onClick={stepper.reset}
 						className="text-xs sm:text-sm px-3 sm:px-4"
 					>
-						Reset
+						Reiniciar
 					</Button>
 				)}
 			</div>

@@ -40,7 +40,7 @@ export const SelectYourCategories = ({
 				))}
 			</div>
 			<Input
-				placeholder="Add Category"
+				placeholder="Agregar categoría"
 				value={newCategory}
 				onChange={(e) => setNewCategory(e.target.value)}
 				className="text-sm"
@@ -49,7 +49,7 @@ export const SelectYourCategories = ({
 				onClick={() => handleAddCategory({ category: newCategory })}
 				className="text-xs sm:text-sm"
 			>
-				Add Category
+				Agregar categoría
 			</Button>
 		</div>
 	);

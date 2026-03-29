@@ -1,5 +1,7 @@
 "use client";
 
+import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
+import { MovementTypeDict } from "@/app/core/movements/const/movement-type-dict";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -8,6 +10,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import type { Category } from "@/types/income";
 import { useEffect, useMemo, useState } from "react";
 import type { CreateMovement } from "../types/movement-type";
 import { MovementMobileCard } from "./movement-mobile-card";
@@ -15,6 +18,8 @@ import { MovementMobileCard } from "./movement-mobile-card";
 interface MovementsPreviewModalProps {
 	open: boolean;
 	movements: CreateMovement[];
+	categories?: Category[];
+	movementTypes?: MovementType[];
 	onCancel: () => void;
 	onConfirm: (movements: CreateMovement[]) => void;
 }
@@ -22,6 +27,8 @@ interface MovementsPreviewModalProps {
 export function MovementsPreviewModal({
 	open,
 	movements,
+	categories = [],
+	movementTypes = [],
 	onCancel,
 	onConfirm,
 }: MovementsPreviewModalProps) {
@@ -35,6 +42,26 @@ export function MovementsPreviewModal({
 		setEditingIdx(null);
 		setEditDraft(null);
 	}, [movements]);
+
+	const categoryNamesById = useMemo(() => {
+		return new Map(
+			categories.map((category) => [Number(category.id), category.name]),
+		);
+	}, [categories]);
+
+	const movementTypeNamesById = useMemo(() => {
+		const fallbackMovementTypes: MovementType[] = [
+			{ id: MovementTypeDict.INCOME, name: "INCOME" },
+			{ id: MovementTypeDict.FIXED_EXPENSE, name: "FIXED_EXPENSE" },
+			{ id: MovementTypeDict.EXPENSE, name: "EXPENSE" },
+		];
+
+		return new Map(
+			(movementTypes.length > 0 ? movementTypes : fallbackMovementTypes).map(
+				(movementType) => [Number(movementType.id), movementType.name],
+			),
+		);
+	}, [movementTypes]);
 
 	const handleFieldChange = (
 		field: keyof CreateMovement,
@@ -91,18 +118,32 @@ export function MovementsPreviewModal({
 							No hay movimientos para mostrar.
 						</div>
 					)}
-					{movementsWithUuid.map((mov, idx) => (
-						<MovementMobileCard
-							key={mov._uuid}
-							movement={editingIdx === idx && editDraft ? editDraft : mov}
-							isEditing={editingIdx === idx}
-							onEdit={() => handleEdit(idx)}
-							onDelete={() => handleDelete(idx)}
-							onChange={handleFieldChange}
-							onSave={handleSave}
-							onCancel={handleCancel}
-						/>
-					))}
+					{movementsWithUuid.map((mov, idx) => {
+						const currentMovement =
+							editingIdx === idx && editDraft ? editDraft : mov;
+						const categoryName =
+							currentMovement.category_id !== null
+								? categoryNamesById.get(currentMovement.category_id)
+								: undefined;
+						const typeName = movementTypeNamesById.get(
+							currentMovement.movement_type_id,
+						);
+
+						return (
+							<MovementMobileCard
+								key={mov._uuid}
+								movement={currentMovement}
+								categoryName={categoryName}
+								typeName={typeName}
+								isEditing={editingIdx === idx}
+								onEdit={() => handleEdit(idx)}
+								onDelete={() => handleDelete(idx)}
+								onChange={handleFieldChange}
+								onSave={handleSave}
+								onCancel={handleCancel}
+							/>
+						);
+					})}
 				</div>
 				<DialogFooter className="mt-4 flex gap-2">
 					<Button variant="outline" type="button" onClick={onCancel}>

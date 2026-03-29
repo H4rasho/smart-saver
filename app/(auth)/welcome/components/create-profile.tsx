@@ -12,17 +12,17 @@ interface CreateProfileProps {
 export function CreateProfile({ onSubmit, isLoading }: CreateProfileProps) {
 	return (
 		<div className="flex flex-col gap-4 items-center">
-			<h3 className="font-medium text-sm sm:text-base">Create your Profile</h3>
+			<h3 className="font-medium text-sm sm:text-base">Crea tu perfil</h3>
 			<p className="text-muted-foreground text-center max-w-xs text-xs sm:text-sm">
-				You are almost done! Please review your information and create your
-				profile to get started with {APP_NAME}.
+				¡Ya casi terminas! Revisa tu información y crea tu perfil para comenzar
+				a usar {APP_NAME}.
 			</p>
 			<Button
 				type="submit"
 				className="mt-4 w-full max-w-xs text-xs sm:text-sm"
 				onClick={onSubmit}
 			>
-				{isLoading ? <Spinner className="mr-2" /> : "Create Profile"}
+				{isLoading ? <Spinner className="mr-2" /> : "Crear perfil"}
 			</Button>
 		</div>
 	);

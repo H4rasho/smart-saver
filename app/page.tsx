@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 
 const { APP_NAME } = CONFIG;
+const CURRENT_YEAR = new Date().getFullYear();
 
 export default function LandingPage() {
 	return (
@@ -189,7 +190,7 @@ export default function LandingPage() {
 						</h2>
 						<p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
 							Únete a miles de usuarios que ya están ahorrando más y gastando
-							mejor con ExpenseFlow
+							mejor con {APP_NAME}
 						</p>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<SignInButton mode="modal">
@@ -242,7 +243,7 @@ export default function LandingPage() {
 						</div>
 					</div>
 					<div className="text-center text-sm text-gray-500 mt-4 pt-4 border-t border-gray-800">
-						© 202 {APP_NAME}. Todos los derechos reservados.
+						© {CURRENT_YEAR} {APP_NAME}. Todos los derechos reservados.
 					</div>
 				</div>
 			</footer>

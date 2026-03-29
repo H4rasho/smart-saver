@@ -1,7 +1,9 @@
 "use client";
 
+import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Category } from "@/types/income";
 import { FileText, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
@@ -12,7 +14,15 @@ import {
 import type { CreateMovement } from "../types/movement-type";
 import { MovementsPreviewModal } from "./movements-preview-modal";
 
-export function ReadFileModalButton() {
+interface ReadFileModalButtonProps {
+	categories: Category[];
+	movementTypes: MovementType[];
+}
+
+export function ReadFileModalButton({
+	categories,
+	movementTypes,
+}: ReadFileModalButtonProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const modalRef = useRef<HTMLDivElement>(null);
@@ -126,6 +136,8 @@ export function ReadFileModalButton() {
 			<MovementsPreviewModal
 				open={previewOpen}
 				movements={state.movements}
+				categories={categories}
+				movementTypes={movementTypes}
 				onCancel={() => setPreviewOpen(false)}
 				onConfirm={handleConfirm}
 			/>

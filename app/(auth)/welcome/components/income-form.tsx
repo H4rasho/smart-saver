@@ -36,16 +36,16 @@ export function IncomeForm({
 
 	return (
 		<div className="flex flex-col gap-4">
-			<h3 className="font-medium text-sm sm:text-base">Income</h3>
+			<h3 className="font-medium text-sm sm:text-base">Ingresos</h3>
 			<div className="flex flex-col sm:flex-row gap-2">
 				<Input
-					placeholder="Income source"
+					placeholder="Fuente de ingreso"
 					value={source}
 					onChange={(e) => setSource(e.target.value)}
 					className="text-sm"
 				/>
 				<Input
-					placeholder="Amount"
+					placeholder="Monto"
 					type="number"
 					value={amount}
 					onChange={(e) => setAmount(e.target.value)}
@@ -55,7 +55,7 @@ export function IncomeForm({
 					onClick={handleAddIncome}
 					className="text-xs sm:text-sm whitespace-nowrap"
 				>
-					Add
+					Agregar
 				</Button>
 			</div>
 			<ul className="flex flex-col gap-2">
@@ -73,7 +73,7 @@ export function IncomeForm({
 							onClick={() => handleRemoveIncome(income.id)}
 							className="text-xs w-full sm:w-auto"
 						>
-							Delete
+							Eliminar
 						</Button>
 					</li>
 				))}

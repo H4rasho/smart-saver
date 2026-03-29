@@ -10,12 +10,19 @@ const protectedRoutes = createRouteMatcher([
 	"/welcome(.*)",
 ]);
 
+const legacyDashboardRoutes = createRouteMatcher(["/dashboard(.*)"]);
+
 // Rutas que deberían redirigir a /home si el usuario ya está autenticado
 const redirectIfAuthenticatedRoutes = createRouteMatcher(["/"]);
 
 export default clerkMiddleware(async (auth, req) => {
 	const { userId } = await auth();
 	const url = req.nextUrl.clone();
+
+	if (legacyDashboardRoutes(req)) {
+		url.pathname = "/home";
+		return NextResponse.redirect(url);
+	}
 
 	// Si la ruta está protegida, verificar autenticación
 	if (protectedRoutes(req)) {
@@ -25,7 +32,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 	// Si el usuario está autenticado y está intentando acceder a rutas que deberían redirigir
 	if (userId && redirectIfAuthenticatedRoutes(req)) {
-		console.log("Redirigiendo a /home");
 		url.pathname = "/home";
 		return NextResponse.redirect(url);
 	}
