@@ -1,7 +1,5 @@
-import {
-	addUserCategoryAction,
-	getUserCategoriesAction,
-} from "@/app/core/categories/actions/categories-actions";
+import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
+import { createCategory } from "@/app/core/categories/repository/categories-repository";
 import { getMovementTypes } from "@/app/core/movement-types.ts/repository/movement-type-repository";
 import {
 	createMovementForUser,
@@ -134,7 +132,7 @@ const handler = createMcpHandler((server) => {
 					};
 				}
 
-				const result = await addUserCategoryAction(params.name as string);
+				const result = await createCategory(userId, params.name as string);
 
 				return {
 					content: [
