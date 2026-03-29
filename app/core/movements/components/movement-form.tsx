@@ -14,6 +14,7 @@ import {
 	CalendarDays,
 	ReceiptText,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MovementType } from "../types/movement-type";
@@ -78,6 +79,7 @@ export function AddMovementForm({
 		null,
 	);
 	const formRef = useRef<HTMLFormElement>(null);
+	const router = useRouter();
 
 	const movementConfig = useMemo(
 		() => getMovementConfig(movementType),
@@ -100,13 +102,14 @@ export function AddMovementForm({
 			formRef.current?.reset();
 			setSelectedCategory("");
 			setMovementType(DEFAULT_MOVEMENT_TYPE);
+			router.refresh();
 			onSuccess?.();
 		} else if (state?.error) {
 			toast.error("Error al crear movimiento", {
 				description: state.error,
 			});
 		}
-	}, [state, onSuccess]);
+	}, [state, onSuccess, router]);
 
 	return (
 		<section className="space-y-5">

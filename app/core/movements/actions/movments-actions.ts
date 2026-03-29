@@ -10,6 +10,10 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
+import {
+	MOVEMENTS_CACHE_TAG,
+	MOVEMENT_REVALIDATE_PATHS,
+} from "../const/movement-cache";
 import { MovementTypeDict } from "../const/movement-type-dict";
 import {
 	createMovementForUser,
@@ -63,6 +67,14 @@ async function getOpenAIKeyForUser(): Promise<string | null> {
 	return userOpenAIKey || OPENAI_API_KEY || null;
 }
 
+function revalidateMovementViews(): void {
+	revalidateTag(MOVEMENTS_CACHE_TAG);
+
+	for (const path of MOVEMENT_REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+}
+
 export async function createMovmentAction(
 	_prevState: unknown,
 	formData: FormData,
@@ -95,7 +107,7 @@ export async function createMovmentAction(
 		validateMovementData(movementData);
 		await createMovementForUser(movementData, userId.toString());
 
-		revalidatePath("/home");
+		revalidateMovementViews();
 		return { success: true };
 	} catch (error) {
 		console.error(error);
@@ -206,7 +218,7 @@ export async function addMovmentsFromFileAction(
 	const movements = result.object.expenses;
 	console.log(movements);
 	await createManyMovements(movements);
-	revalidateTag("movement");
+	revalidateMovementViews();
 }
 
 export async function extractMovementsFromFileAction(
@@ -289,17 +301,24 @@ export async function saveManyMovementsAction(
 ): Promise<void> {
 	if (!movements || movements.length === 0) return;
 	await createManyMovements(movements);
-	revalidateTag("movement");
+	revalidateMovementViews();
 }
 
-export async function deleteMovmentAction(_prevState: unknown, id: number) {
+export async function deleteMovmentAction(
+	_prevState: unknown,
+	id: number,
+): Promise<{ success: boolean; error?: string }> {
 	if (!id) throw new Error("No id provided");
 	try {
 		await deleteMovement(id);
-		revalidateTag("movement");
+		revalidateMovementViews();
+		return { success: true };
 	} catch (error) {
 		console.error(error);
-		throw error;
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Error al eliminar",
+		};
 	}
 }
 
@@ -322,7 +341,7 @@ export async function updateMovementAction(
 
 	try {
 		await updateMovement(id, { name, amount, category_id, transaction_date });
-		revalidateTag("movement");
+		revalidateMovementViews();
 		return { success: true };
 	} catch (error) {
 		console.error(error);

@@ -5,6 +5,7 @@ import {
 } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
 import { MovementsTable } from "@/app/core/movements/components/movements-table";
+import { MOVEMENTS_CACHE_TAG } from "@/app/core/movements/const/movement-cache";
 import {
 	getCurrentUser,
 	getUserCurrency,
@@ -23,7 +24,7 @@ export default async function Home() {
 		async (userId: string) => getMovmentsAction(userId),
 		["movements-list"],
 		{
-			tags: ["movements"],
+			tags: [MOVEMENTS_CACHE_TAG],
 			revalidate: 60,
 		},
 	);

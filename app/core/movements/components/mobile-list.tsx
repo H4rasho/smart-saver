@@ -23,7 +23,9 @@ import {
 	Tag,
 	Trash2,
 } from "lucide-react";
-import { startTransition, useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { deleteMovmentAction } from "../actions/movments-actions";
 import {
 	MovementType,
@@ -53,7 +55,7 @@ export default function FinancialMovementsList({
 	className,
 	categories = [],
 }: FinancialMovementsListProps) {
-	const [_, deleteAction, _isPending] = useActionState(
+	const [deleteState, deleteAction, _isPending] = useActionState(
 		deleteMovmentAction,
 		null,
 	);
@@ -61,6 +63,7 @@ export default function FinancialMovementsList({
 	const [selectedMovement, setSelectedMovement] =
 		useState<MovementWithCategoryAndMovementType | null>(null);
 	const [dropdownOpen, setDropdownOpen] = useState<Record<number, boolean>>({});
+	const router = useRouter();
 
 	const formatAmount = (amount: number) => {
 		return formatCurrencyAmount(amount, userCurrency, { absolute: true });
@@ -84,6 +87,17 @@ export default function FinancialMovementsList({
 	const displayedMovements = maxItems
 		? movements.slice(0, maxItems)
 		: movements;
+
+	useEffect(() => {
+		if (deleteState?.success) {
+			toast.success("Movimiento eliminado exitosamente");
+			router.refresh();
+		} else if (deleteState?.error) {
+			toast.error("Error al eliminar movimiento", {
+				description: deleteState.error,
+			});
+		}
+	}, [deleteState, router]);
 
 	if (movements.length === 0) {
 		return (

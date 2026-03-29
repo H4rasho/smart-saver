@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { SelectCombobox } from "@/components/ui/select-combobox";
 import type { Category } from "@/types/income";
 import { CalendarDays, PencilLine, Tag, Wallet } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { updateMovementAction } from "../actions/movments-actions";
 import type { MovementWithCategoryAndMovementType } from "../types/movement-type";
@@ -39,6 +40,7 @@ export function EditMovementDialog({
 		updateMovementAction,
 		null,
 	);
+	const router = useRouter();
 
 	useEffect(() => {
 		if (movement) {
@@ -48,9 +50,10 @@ export function EditMovementDialog({
 
 	useEffect(() => {
 		if (state?.success) {
+			router.refresh();
 			onOpenChange(false);
 		}
-	}, [state, onOpenChange]);
+	}, [state, onOpenChange, router]);
 
 	const categoryOptions = useMemo(
 		() =>
