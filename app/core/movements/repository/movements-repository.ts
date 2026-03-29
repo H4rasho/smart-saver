@@ -19,7 +19,89 @@ import {
 	encryptMovementUpdateData,
 	encryptMovements,
 } from "@/lib/encrypted_movements";
+import { decryptNumber } from "@/lib/encryption";
 import { and, eq, sql } from "drizzle-orm";
+
+function getCurrentMonthDateRange(): { firstDay: string; lastDay: string } {
+	const now = new Date();
+
+	return {
+		firstDay: new Date(now.getFullYear(), now.getMonth(), 1)
+			.toISOString()
+			.slice(0, 10),
+		lastDay: new Date(now.getFullYear(), now.getMonth() + 1, 0)
+			.toISOString()
+			.slice(0, 10),
+	};
+}
+
+function parseStoredMovementAmount(value: unknown): number {
+	if (typeof value === "number") {
+		return value;
+	}
+
+	if (typeof value === "string") {
+		return decryptNumber(value);
+	}
+
+	return 0;
+}
+
+async function getCurrentMonthMovementAmounts(userId: string): Promise<
+	Array<{
+		amount: number;
+		movement_type_name: string;
+	}>
+> {
+	const { firstDay, lastDay } = getCurrentMonthDateRange();
+
+	const rows = await db
+		.select({
+			amount: movements.amount,
+			movement_type_name: movement_types.name,
+		})
+		.from(movements)
+		.innerJoin(
+			movement_types,
+			eq(movements.movement_type_id, movement_types.id),
+		)
+		.where(
+			and(
+				eq(movements.clerk_id, userId),
+				sql`${movements.transaction_date} >= ${firstDay}`,
+				sql`${movements.transaction_date} <= ${lastDay}`,
+			),
+		);
+
+	return rows.map((row) => ({
+		amount: parseStoredMovementAmount(row.amount),
+		movement_type_name: row.movement_type_name,
+	}));
+}
+
+function getTotalsFromMovementAmounts(
+	movementAmounts: Array<{ amount: number; movement_type_name: string }>,
+): { total_expenses: number; total_income: number } {
+	return movementAmounts.reduce(
+		(accumulator, movement) => {
+			const typeName = movement.movement_type_name.toUpperCase();
+
+			if (typeName === MovementType.INCOME) {
+				accumulator.total_income += movement.amount;
+			}
+
+			if (
+				typeName === MovementType.EXPENSE ||
+				typeName === MovementType.FIXED_EXPENSE
+			) {
+				accumulator.total_expenses += movement.amount;
+			}
+
+			return accumulator;
+		},
+		{ total_expenses: 0, total_income: 0 },
+	);
+}
 
 export async function createManyMovements(
 	movementsData: CreateNotRecurringMovement[],
@@ -110,13 +192,7 @@ export async function createMovement(
 export async function getCurrentMonthMovements(
 	userId: string,
 ): Promise<MovementWithCategoryAndMovementType[]> {
-	const now = new Date();
-	const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-		.toISOString()
-		.slice(0, 10);
-	const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-		.toISOString()
-		.slice(0, 10);
+	const { firstDay, lastDay } = getCurrentMonthDateRange();
 
 	const rows = await db
 		.select({
@@ -198,68 +274,17 @@ export async function getAllMovements(
 export async function getTotalsByType(
 	userId: string,
 ): Promise<{ total_expenses: number; total_income: number }> {
-	const now = new Date();
-	const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-		.toISOString()
-		.slice(0, 10);
-	const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-		.toISOString()
-		.slice(0, 10);
+	const movementAmounts = await getCurrentMonthMovementAmounts(userId);
 
-	const rows = await db
-		.select({
-			total_expenses: sql`SUM(CASE WHEN ${movement_types.name} = ${MovementType.EXPENSE} THEN ${movements.amount} ELSE 0 END)`,
-			total_income: sql`SUM(CASE WHEN ${movement_types.name} = ${MovementType.INCOME} THEN ${movements.amount} ELSE 0 END)`,
-		})
-		.from(movements)
-		.innerJoin(
-			movement_types,
-			eq(movements.movement_type_id, movement_types.id),
-		)
-		.where(
-			and(
-				eq(movements.clerk_id, userId),
-				sql`${movements.transaction_date} >= ${firstDay}`,
-				sql`${movements.transaction_date} <= ${lastDay}`,
-			),
-		);
-	const result = rows[0] as unknown as {
-		total_expenses: number;
-		total_income: number;
-	};
-	return {
-		total_expenses: result?.total_expenses ?? 0,
-		total_income: result?.total_income ?? 0,
-	};
+	return getTotalsFromMovementAmounts(movementAmounts);
 }
 
 export async function getBalance(userId: string): Promise<number> {
-	const now = new Date();
-	const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-		.toISOString()
-		.slice(0, 10);
-	const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-		.toISOString()
-		.slice(0, 10);
+	const movementAmounts = await getCurrentMonthMovementAmounts(userId);
+	const { total_expenses, total_income } =
+		getTotalsFromMovementAmounts(movementAmounts);
 
-	const rows = await db
-		.select({
-			balance: sql`SUM(CASE WHEN ${movement_types.name} = ${MovementType.INCOME} THEN ${movements.amount} ELSE 0 END) - SUM(CASE WHEN ${movement_types.name} = ${MovementType.EXPENSE} THEN ${movements.amount} ELSE 0 END)`,
-		})
-		.from(movements)
-		.innerJoin(
-			movement_types,
-			eq(movements.movement_type_id, movement_types.id),
-		)
-		.where(
-			and(
-				eq(movements.clerk_id, userId),
-				sql`${movements.transaction_date} >= ${firstDay}`,
-				sql`${movements.transaction_date} <= ${lastDay}`,
-			),
-		);
-	const result = rows[0] as unknown as { balance: number };
-	return result?.balance ?? 0;
+	return total_income - total_expenses;
 }
 
 export async function deleteMovement(id: number): Promise<void> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { getLocaleAndCurrency } from "@/app/core/user/lib/user-lib";
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,12 +63,7 @@ export default function FinancialMovementsList({
 	const [dropdownOpen, setDropdownOpen] = useState<Record<number, boolean>>({});
 
 	const formatAmount = (amount: number) => {
-		const { locale, currency: resolvedCurrency } =
-			getLocaleAndCurrency(userCurrency);
-		return new Intl.NumberFormat(locale, {
-			style: "currency",
-			currency: resolvedCurrency,
-		}).format(Math.abs(amount));
+		return formatCurrencyAmount(amount, userCurrency, { absolute: true });
 	};
 
 	const getAmountColor = (typeName: string) => {

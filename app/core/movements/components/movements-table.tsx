@@ -2,7 +2,7 @@ import {
 	MovementType,
 	type MovementWithCategoryAndMovementType,
 } from "@/app/core/movements/types/movement-type";
-import { getLocaleAndCurrency } from "@/app/core/user/lib/user-lib";
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Badge } from "@/components/ui/badge";
 import {
 	Table,
@@ -23,12 +23,7 @@ export function MovementsTable({
 	userCurrency,
 }: MovementsTableProps) {
 	const formatAmount = (amount: number) => {
-		const { locale, currency: resolvedCurrency } =
-			getLocaleAndCurrency(userCurrency);
-		return new Intl.NumberFormat(locale, {
-			style: "currency",
-			currency: resolvedCurrency,
-		}).format(Math.abs(amount));
+		return formatCurrencyAmount(amount, userCurrency, { absolute: true });
 	};
 
 	return (

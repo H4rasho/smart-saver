@@ -1,3 +1,4 @@
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -8,11 +9,13 @@ interface FixedExpense {
 }
 
 interface FixedExpensesFormProps {
+	currency: string;
 	fixedExpenses: string[];
 	onFixedExpensesChange: (fixedExpenses: string[]) => void;
 }
 
 export function FixedExpensesForm({
+	currency,
 	fixedExpenses,
 	onFixedExpensesChange,
 }: FixedExpensesFormProps) {
@@ -63,7 +66,7 @@ export function FixedExpensesForm({
 						className="flex flex-col sm:flex-row justify-between items-start sm:items-center border p-2 rounded gap-2"
 					>
 						<span className="text-xs sm:text-sm">
-							{expense.name}: ${expense.amount}
+							{expense.name}: {formatCurrencyAmount(expense.amount, currency)}
 						</span>
 						<Button
 							size="sm"

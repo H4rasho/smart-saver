@@ -18,6 +18,7 @@ import { MovementMobileCard } from "./movement-mobile-card";
 interface MovementsPreviewModalProps {
 	open: boolean;
 	movements: CreateMovement[];
+	userCurrency: string;
 	categories?: Category[];
 	movementTypes?: MovementType[];
 	onCancel: () => void;
@@ -27,6 +28,7 @@ interface MovementsPreviewModalProps {
 export function MovementsPreviewModal({
 	open,
 	movements,
+	userCurrency,
 	categories = [],
 	movementTypes = [],
 	onCancel,
@@ -135,6 +137,7 @@ export function MovementsPreviewModal({
 								movement={currentMovement}
 								categoryName={categoryName}
 								typeName={typeName}
+								userCurrency={userCurrency}
 								isEditing={editingIdx === idx}
 								onEdit={() => handleEdit(idx)}
 								onDelete={() => handleDelete(idx)}

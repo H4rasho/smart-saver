@@ -17,11 +17,13 @@ import { MovementsPreviewModal } from "./movements-preview-modal";
 interface ReadFileModalButtonProps {
 	categories: Category[];
 	movementTypes: MovementType[];
+	userCurrency: string;
 }
 
 export function ReadFileModalButton({
 	categories,
 	movementTypes,
+	userCurrency,
 }: ReadFileModalButtonProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
@@ -136,6 +138,7 @@ export function ReadFileModalButton({
 			<MovementsPreviewModal
 				open={previewOpen}
 				movements={state.movements}
+				userCurrency={userCurrency}
 				categories={categories}
 				movementTypes={movementTypes}
 				onCancel={() => setPreviewOpen(false)}

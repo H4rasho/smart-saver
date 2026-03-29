@@ -1,3 +1,4 @@
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Edit, RefreshCw, Tag, Trash2, X } from "lucide-react";
@@ -7,6 +8,7 @@ interface MovementMobileCardProps {
 	movement: CreateMovement;
 	categoryName?: string;
 	typeName?: string;
+	userCurrency: string;
 	isEditing: boolean;
 	onEdit: () => void;
 	onDelete: () => void;
@@ -19,6 +21,7 @@ export function MovementMobileCard({
 	movement,
 	categoryName,
 	typeName,
+	userCurrency,
 	isEditing,
 	onEdit,
 	onDelete,
@@ -153,7 +156,9 @@ export function MovementMobileCard({
 					</>
 				) : (
 					<>
-						<span className="font-semibold">{movement.amount}</span>
+						<span className="font-semibold">
+							{formatCurrencyAmount(movement.amount, userCurrency)}
+						</span>
 						<span className="text-xs">Tipo: {typeName ?? "Sin tipo"}</span>
 						<span className="text-xs">
 							Transacción: {movement.transaction_date?.slice(0, 10)}

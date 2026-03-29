@@ -11,11 +11,13 @@ import { useState } from "react";
 interface InputOptionsButtonProps {
 	categories: Category[];
 	movementTypes: MovementType[];
+	userCurrency: string;
 }
 
 export function InputOptionsButton({
 	categories,
 	movementTypes,
+	userCurrency,
 }: InputOptionsButtonProps) {
 	const [showOptions, setShowOptions] = useState(false);
 
@@ -50,6 +52,7 @@ export function InputOptionsButton({
 							<ReadFileModalButton
 								categories={categories}
 								movementTypes={movementTypes}
+								userCurrency={userCurrency}
 							/>
 							<span className="text-xs text-foreground/60 font-medium mt-1">
 								Archivo
@@ -60,6 +63,7 @@ export function InputOptionsButton({
 								<CreateMovementFromAudio
 									categories={categories}
 									movementTypes={movementTypes}
+									userCurrency={userCurrency}
 								/>
 								<span className="text-xs text-foreground/60 font-medium mt-1">
 									Audio

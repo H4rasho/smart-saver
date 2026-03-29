@@ -9,6 +9,7 @@ import {
 	getCurrentUser,
 	getUserCurrency,
 } from "@/app/core/user/actions/user-actions";
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Scale, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
@@ -30,6 +31,15 @@ export default async function Home() {
 	const { total_expenses, total_income } = await getTotalsByTypeAction();
 	const balance = await getBalanceAction();
 	const userCurrency = await getUserCurrency();
+	const formattedBalance = formatCurrencyAmount(balance, userCurrency, {
+		maximumFractionDigits: 0,
+	});
+	const formattedIncome = formatCurrencyAmount(total_income, userCurrency, {
+		maximumFractionDigits: 0,
+	});
+	const formattedExpenses = formatCurrencyAmount(total_expenses, userCurrency, {
+		maximumFractionDigits: 0,
+	});
 
 	return (
 		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-10">
@@ -50,7 +60,7 @@ export default async function Home() {
 									Balance Total
 								</p>
 								<p className="text-2xl font-bold text-foreground">
-									${balance.toLocaleString()}
+									{formattedBalance}
 								</p>
 							</div>
 							<div className="p-3 bg-secondary-vibrant rounded-lg">
@@ -66,7 +76,7 @@ export default async function Home() {
 									Ingresos
 								</p>
 								<p className="text-2xl font-bold text-green-800 dark:text-green-200">
-									${total_income.toLocaleString()}
+									{formattedIncome}
 								</p>
 							</div>
 							<div className="p-3 bg-green-500 rounded-lg">
@@ -82,7 +92,7 @@ export default async function Home() {
 									Gastos
 								</p>
 								<p className="text-2xl font-bold text-red-800 dark:text-red-200">
-									${total_expenses.toLocaleString()}
+									{formattedExpenses}
 								</p>
 							</div>
 							<div className="p-3 bg-red-500 rounded-lg">

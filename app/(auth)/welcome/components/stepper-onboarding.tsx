@@ -167,12 +167,14 @@ export function StepperOnboarding({ currency }: StepperOnboardingProps) {
 											),
 											income: () => (
 												<IncomeForm
+													currency={selectedCurrency}
 													incomeSources={incomeSources}
 													onIncomeSourcesChange={setIncomeSources}
 												/>
 											),
 											fixedExpenses: () => (
 												<FixedExpensesForm
+													currency={selectedCurrency}
 													fixedExpenses={fixedExpenses}
 													onFixedExpensesChange={setFixedExpenses}
 												/>

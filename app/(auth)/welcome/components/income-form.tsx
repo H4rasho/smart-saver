@@ -1,3 +1,4 @@
+import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -9,11 +10,13 @@ interface Income {
 }
 
 interface IncomeFormProps {
+	currency: string;
 	incomeSources: Income[];
 	onIncomeSourcesChange: (incomeSources: Income[]) => void;
 }
 
 export function IncomeForm({
+	currency,
 	incomeSources,
 	onIncomeSourcesChange,
 }: IncomeFormProps) {
@@ -65,7 +68,7 @@ export function IncomeForm({
 						className="flex flex-col sm:flex-row justify-between items-start sm:items-center border p-2 rounded gap-2"
 					>
 						<span className="text-xs sm:text-sm">
-							{income.source}: ${income.amount}
+							{income.source}: {formatCurrencyAmount(income.amount, currency)}
 						</span>
 						<Button
 							size="sm"

@@ -24,11 +24,13 @@ import { MovementsPreviewModal } from "./movements-preview-modal";
 interface CreateMovementFromAudioProps {
 	categories: Category[];
 	movementTypes: MovementType[];
+	userCurrency: string;
 }
 
 export function CreateMovementFromAudio({
 	categories,
 	movementTypes,
+	userCurrency,
 }: CreateMovementFromAudioProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
@@ -268,6 +270,7 @@ export function CreateMovementFromAudio({
 			<MovementsPreviewModal
 				open={previewOpen}
 				movements={state.movements}
+				userCurrency={userCurrency}
 				categories={categories}
 				movementTypes={movementTypes}
 				onCancel={() => setPreviewOpen(false)}

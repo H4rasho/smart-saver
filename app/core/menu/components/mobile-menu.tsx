@@ -3,7 +3,7 @@ import { getMovementTypes } from "@/app/core/movement-types.ts/repository/moveme
 import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
 import { AddMovement } from "@/app/core/movements/components/create-movment";
 import type { Category } from "@/types/income";
-import { getUserId } from "../../user/actions/user-actions";
+import { getUserCurrency, getUserId } from "../../user/actions/user-actions";
 import { InputOptionsButton } from "./input-options-button";
 import { NavLink } from "./nav-link";
 
@@ -12,6 +12,7 @@ export async function NavigationMenu() {
 	if (!userId) return null;
 	const categories = await getUserCategoriesAction(userId);
 	const movementTypes = await getMovementTypes();
+	const userCurrency = await getUserCurrency();
 	const categoriesData: Category[] = categories.map((category) => ({
 		id: Number(category.id),
 		name: category.name as string,
@@ -38,6 +39,7 @@ export async function NavigationMenu() {
 					<InputOptionsButton
 						categories={categoriesData}
 						movementTypes={movementTypesData}
+						userCurrency={userCurrency}
 					/>
 
 					<NavLink href="/movements" icon="history" label="Historial" />
