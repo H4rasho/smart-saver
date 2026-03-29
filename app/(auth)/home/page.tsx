@@ -33,7 +33,7 @@ export default async function Home() {
 
 	return (
 		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-10">
-			<section className="flex-grow">
+			<section className="">
 				<div className="mb-6">
 					<h2 className="text-2xl font-bold text-foreground mb-2">Dashboard</h2>
 					<p className="text-muted-foreground">
