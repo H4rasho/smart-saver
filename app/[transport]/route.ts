@@ -1,4 +1,7 @@
-import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
+import {
+	addUserCategoryAction,
+	getUserCategoriesAction,
+} from "@/app/core/categories/actions/categories-actions";
 import { getMovementTypes } from "@/app/core/movement-types.ts/repository/movement-type-repository";
 import {
 	createMovementForUser,
@@ -15,6 +18,7 @@ import {
 	createMcpHandler,
 	experimental_withMcpAuth as withMcpAuth,
 } from "@vercel/mcp-adapter";
+import { z } from "zod";
 
 const clerk = await clerkClient();
 
@@ -107,6 +111,55 @@ const handler = createMcpHandler((server) => {
 			return {
 				content: [{ type: "text", text: JSON.stringify(categories) }],
 			};
+		},
+	);
+
+	server.tool(
+		"create-category",
+		"Creates a new category for the authorized user",
+		{
+			name: z.string().min(1, "Category name is required"),
+		},
+		async (params, context) => {
+			try {
+				let userId = context?.authInfo?.extra?.userId as string | undefined;
+				if (!userId) {
+					const clerkAuth = await auth({ acceptsToken: "oauth_token" });
+					userId = clerkAuth?.userId ?? undefined;
+				}
+				if (!userId) {
+					return {
+						content: [{ type: "text", text: "Unauthorized: missing user id" }],
+					};
+				}
+
+				const result = await addUserCategoryAction(params.name as string);
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify(result),
+						},
+					],
+				};
+			} catch (error) {
+				console.error(error);
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify({
+								success: false,
+								message:
+									error instanceof Error
+										? error.message
+										: "Error creating category",
+							}),
+						},
+					],
+				};
+			}
 		},
 	);
 
