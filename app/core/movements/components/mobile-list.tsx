@@ -87,8 +87,8 @@ export default function FinancialMovementsList({
 
 	if (movements.length === 0) {
 		return (
-			<div className="text-center py-16">
-				<Inbox className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+			<div className="rounded-2xl border border-dashed bg-muted/20 py-16 text-center">
+				<Inbox className="mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50" />
 				<h3 className="text-lg font-semibold text-foreground mb-2">
 					No hay movimientos
 				</h3>
@@ -106,65 +106,74 @@ export default function FinancialMovementsList({
 			{displayedMovements.map((movement) => (
 				<div
 					key={movement.id}
-					className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-200"
+					className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5"
 				>
-					{/* Layout unificado */}
-					<div className="flex justify-between items-start">
+					<div className="flex items-start justify-between gap-3">
 						<div className="flex-1 min-w-0 pr-3">
-							{/* Header con nombre y badges */}
-							<div className="flex items-center gap-2 mb-2">
+							<div className="mb-3 flex items-center gap-2">
 								{isIncome(movement.movement_type_name) ? (
-									<ArrowUpCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+									<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
+										<ArrowUpCircle className="h-4 w-4 flex-shrink-0" />
+									</div>
 								) : (
-									<ArrowDownCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-								)}
-								<h3 className="font-semibold text-foreground text-sm truncate">
-									{movement.name}
-								</h3>
-								{movement.is_recurring && (
-									<RefreshCw className="h-3 w-3 text-blue-500 flex-shrink-0" />
-								)}
-								{isFixedExpense(movement.movement_type_name) && (
-									<Badge
-										variant="outline"
-										className="text-xs bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 flex-shrink-0"
-									>
-										Fijo
-									</Badge>
-								)}
-							</div>
-
-							{/* Información adicional */}
-							<div className="flex items-center gap-3 text-xs">
-								<div className="flex items-center gap-1">
-									<Calendar className="w-3 h-3 text-secondary-foreground/60 flex-shrink-0" />
-									<span className="text-secondary-foreground/70">
-										{movement.created_at}
-									</span>
-								</div>
-								{movement.category_name && (
-									<div className="flex items-center gap-1">
-										<Tag className="w-3 h-3 text-secondary-foreground/60 flex-shrink-0" />
-										<span className="text-secondary-foreground/80 bg-secondary-subtle px-2 py-1 rounded-md capitalize">
-											{movement.category_name}
-										</span>
+									<div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-2 text-rose-600 dark:text-rose-400">
+										<ArrowDownCircle className="h-4 w-4 flex-shrink-0" />
 									</div>
 								)}
+								<div className="min-w-0 flex-1 space-y-2">
+									<div className="flex flex-wrap items-center gap-2">
+										<h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
+											{movement.name}
+										</h3>
+										{movement.is_recurring && (
+											<Badge
+												variant="outline"
+												className="rounded-full px-2 py-0.5 text-[11px]"
+											>
+												<RefreshCw className="h-3 w-3 text-blue-500" />
+												Recurrente
+											</Badge>
+										)}
+										{isFixedExpense(movement.movement_type_name) && (
+											<Badge
+												variant="outline"
+												className="rounded-full border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+											>
+												Fijo
+											</Badge>
+										)}
+									</div>
+									<div className="flex flex-wrap items-center gap-2 text-xs text-secondary-foreground/75">
+										<div className="flex items-center gap-1 rounded-full bg-secondary-subtle px-2.5 py-1">
+											<Calendar className="h-3 w-3 flex-shrink-0 text-secondary-foreground/60" />
+											<span>{movement.created_at}</span>
+										</div>
+										{movement.category_name && (
+											<div className="flex items-center gap-1 rounded-full bg-secondary-subtle px-2.5 py-1 capitalize">
+												<Tag className="h-3 w-3 flex-shrink-0 text-secondary-foreground/60" />
+												<span>{movement.category_name}</span>
+											</div>
+										)}
+									</div>
+								</div>
 							</div>
 						</div>
 
-						{/* Monto y menú condicional */}
 						<div className="flex items-center gap-2 flex-shrink-0">
-							<div
-								className={`text-sm font-bold ${getAmountColor(movement.movement_type_name)}`}
-							>
-								<span className="text-xs">
-									{isIncome(movement.movement_type_name) ? "+" : "-"}
-								</span>
-								{formatAmount(movement.amount)}
+							<div className="rounded-2xl border bg-background px-3 py-2 text-right shadow-xs">
+								<p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+									Total
+								</p>
+								<div
+									className={`mt-1 text-sm font-bold sm:text-base ${getAmountColor(movement.movement_type_name)}`}
+								>
+									<span className="text-xs">
+										{isIncome(movement.movement_type_name) ? "+" : "-"}
+									</span>
+									{formatAmount(movement.amount)}
+								</div>
 							</div>
 
-							{/* Menú de acciones - solo si showActions es true */}
 							{showActions && (
 								<DropdownMenu
 									open={dropdownOpen[movement.id] || false}
@@ -235,6 +244,7 @@ export default function FinancialMovementsList({
 				onOpenChange={setEditOpen}
 				movement={selectedMovement}
 				categories={categories}
+				userCurrency={userCurrency}
 			/>
 		</div>
 	);

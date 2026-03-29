@@ -1,16 +1,18 @@
 "use client";
 
 import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import type { Category } from "@/types/income";
-import { Mic, Play, Square } from "lucide-react";
+import { Mic, Play, Sparkles, Square, Waves } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { toast } from "sonner";
@@ -25,6 +27,12 @@ interface CreateMovementFromAudioProps {
 	categories: Category[];
 	movementTypes: MovementType[];
 	userCurrency: string;
+}
+
+function formatDuration(seconds: number): string {
+	const mins = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+	return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 export function CreateMovementFromAudio({
@@ -42,20 +50,18 @@ export function CreateMovementFromAudio({
 	const audioChunksRef = useRef<Blob[]>([]);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-	// useActionState para manejar la extracción de movimientos
 	const [state, formAction, isPending] = useActionState(
 		extractMovementsFromAudioAction,
 		{ movements: [], error: null },
 	);
 
-	// Abre el modal de preview cuando hay movimientos extraídos
 	useEffect(() => {
 		if (state.movements && state.movements.length > 0) {
 			setPreviewOpen(true);
+			setIsOpen(false);
 		}
 	}, [state.movements]);
 
-	// Limpiar recursos al cerrar modal
 	useEffect(() => {
 		if (!isOpen) {
 			stopRecording();
@@ -64,17 +70,15 @@ export function CreateMovementFromAudio({
 		}
 	}, [isOpen]);
 
-	// Timer para la duración de grabación
 	useEffect(() => {
 		if (isRecording) {
 			timerRef.current = setInterval(() => {
 				setRecordingDuration((prev) => prev + 1);
 			}, 1000);
-		} else {
-			if (timerRef.current) {
-				clearInterval(timerRef.current);
-			}
+		} else if (timerRef.current) {
+			clearInterval(timerRef.current);
 		}
+
 		return () => {
 			if (timerRef.current) {
 				clearInterval(timerRef.current);
@@ -120,6 +124,7 @@ export function CreateMovementFromAudio({
 			mediaRecorderRef.current.stop();
 			setIsRecording(false);
 		}
+
 		if (streamRef.current) {
 			for (const track of streamRef.current.getTracks()) {
 				track.stop();
@@ -132,6 +137,7 @@ export function CreateMovementFromAudio({
 		if (recordedBlob) {
 			const audioUrl = URL.createObjectURL(recordedBlob);
 			const audio = new Audio(audioUrl);
+			audio.onended = () => URL.revokeObjectURL(audioUrl);
 			audio.play();
 		}
 	};
@@ -143,13 +149,6 @@ export function CreateMovementFromAudio({
 		}
 	};
 
-	const formatDuration = (seconds: number) => {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, "0")}`;
-	};
-
-	// Guardar movimientos editados
 	const handleConfirm = async (editedMovements: CreateMovement[]) => {
 		await saveManyMovementsAction(editedMovements);
 		setPreviewOpen(false);
@@ -162,111 +161,160 @@ export function CreateMovementFromAudio({
 				<DialogTrigger asChild>
 					<button
 						type="button"
-						aria-label="Grabar Audio"
+						aria-label="Grabar audio"
 						className="flex flex-col items-center justify-center"
 					>
 						<Mic
 							size={20}
-							className="text-foreground/70 hover:text-primary transition-colors"
+							className="text-foreground/70 transition-colors hover:text-primary"
 						/>
 					</button>
 				</DialogTrigger>
-				<DialogContent className="max-w-3xl mx-auto fixed top-auto bottom-0 left-0 right-0 translate-x-0 translate-y-0 rounded-t-2xl rounded-b-none max-h-[90vh] w-full data-[state=open]:!animate-fade-in-up">
-					<DialogHeader>
-						<DialogTitle>Grabar gastos e ingresos</DialogTitle>
+				<DialogContent className="top-auto bottom-0 left-0 right-0 flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-[1.75rem] rounded-b-none border-x-0 border-b-0 p-0 sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:right-auto sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border">
+					<DialogHeader className="border-b bg-gradient-to-b from-primary/[0.08] via-background to-background px-5 pt-6 pb-5 text-left sm:px-6">
+						<div className="flex items-center gap-2">
+							<Badge
+								variant="outline"
+								className="rounded-full border-primary/20 bg-primary/10 px-3 py-1 text-primary"
+							>
+								<Sparkles className="size-3.5" />
+								Captura por voz
+							</Badge>
+						</div>
+						<div className="space-y-2">
+							<DialogTitle className="text-xl sm:text-2xl">
+								Graba tus movimientos y revísalos después
+							</DialogTitle>
+							<DialogDescription className="text-sm leading-6">
+								Habla con naturalidad: puedes mencionar fecha, monto, categoría
+								o si es ingreso/gasto. Luego te mostraremos una vista previa
+								editable.
+							</DialogDescription>
+						</div>
 					</DialogHeader>
 
-					<div className="space-y-4">
-						{/* Estado de grabación */}
-						<div className="text-center py-4">
-							{isRecording && (
-								<div className="space-y-2">
-									<div className="text-red-500 font-semibold">
-										🔴 Grabando...
-									</div>
-									<div className="text-lg font-mono">
-										{formatDuration(recordingDuration)}
-									</div>
-								</div>
-							)}
-							{recordedBlob && !isRecording && (
-								<div className="space-y-2">
-									<div className="text-green-500 font-semibold">
-										✓ Grabación lista
-									</div>
-									<div className="text-sm text-zinc-500">
-										Duración: {formatDuration(recordingDuration)}
-									</div>
-								</div>
-							)}
-							{!isRecording && !recordedBlob && (
-								<div className="text-zinc-500">
-									Presiona grabar para comenzar
-								</div>
-							)}
-						</div>
-
-						{/* Controles de grabación */}
-						<div className="flex justify-center gap-4">
-							{!isRecording && !recordedBlob && (
-								<Button
-									type="button"
-									onClick={startRecording}
-									className="bg-red-500 hover:bg-red-600"
+					<div className="space-y-5 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+						<div className="rounded-2xl border bg-card p-5 shadow-sm">
+							<div className="flex flex-col items-center justify-center gap-4 text-center">
+								<div
+									className={`rounded-full border p-5 ${isRecording ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400" : "border-primary/20 bg-primary/10 text-primary"}`}
 								>
-									<Mic className="mr-2 h-4 w-4" />
-									Grabar
-								</Button>
-							)}
+									{isRecording ? (
+										<Waves className="size-8 animate-pulse" />
+									) : (
+										<Mic className="size-8" />
+									)}
+								</div>
 
-							{isRecording && (
-								<Button type="button" onClick={stopRecording} variant="outline">
-									<Square className="mr-2 h-4 w-4" />
-									Detener
-								</Button>
-							)}
+								<div className="space-y-1">
+									<p className="text-lg font-semibold">
+										{isRecording
+											? "Grabando ahora"
+											: recordedBlob
+												? "Grabación lista para procesar"
+												: "Listo para comenzar"}
+									</p>
+									<p className="text-sm text-muted-foreground">
+										{isRecording
+											? "Habla con calma y separa cada movimiento para mejorar el resultado."
+											: recordedBlob
+												? "Puedes escucharlo o enviarlo para extraer los movimientos."
+												: "Presiona grabar cuando tengas listo el resumen de tus movimientos."}
+									</p>
+								</div>
 
-							{recordedBlob && !isRecording && (
-								<>
-									<Button
-										type="button"
-										onClick={playRecording}
-										variant="outline"
-									>
-										<Play className="mr-2 h-4 w-4" />
-										Reproducir
-									</Button>
-									<Button
-										type="button"
-										onClick={() => {
-											setRecordedBlob(null);
-											setRecordingDuration(0);
-										}}
-										variant="outline"
-									>
-										Nueva grabación
-									</Button>
-								</>
-							)}
+								<div className="rounded-2xl border bg-muted/25 px-4 py-3 text-center shadow-xs">
+									<p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+										Duración
+									</p>
+									<p className="mt-1 text-2xl font-semibold tabular-nums">
+										{formatDuration(recordingDuration)}
+									</p>
+								</div>
+
+								<div className="flex flex-wrap justify-center gap-3">
+									{!isRecording && !recordedBlob && (
+										<Button
+											type="button"
+											onClick={startRecording}
+											className="h-11 rounded-full px-6"
+										>
+											<Mic className="mr-2 h-4 w-4" />
+											Grabar
+										</Button>
+									)}
+
+									{isRecording && (
+										<Button
+											type="button"
+											onClick={stopRecording}
+											variant="outline"
+											className="h-11 rounded-full px-6"
+										>
+											<Square className="mr-2 h-4 w-4" />
+											Detener
+										</Button>
+									)}
+
+									{recordedBlob && !isRecording && (
+										<>
+											<Button
+												type="button"
+												onClick={playRecording}
+												variant="outline"
+												className="h-11 rounded-full px-6"
+											>
+												<Play className="mr-2 h-4 w-4" />
+												Reproducir
+											</Button>
+											<Button
+												type="button"
+												onClick={() => {
+													setRecordedBlob(null);
+													setRecordingDuration(0);
+												}}
+												variant="outline"
+												className="h-11 rounded-full px-6"
+											>
+												Nueva grabación
+											</Button>
+										</>
+									)}
+								</div>
+							</div>
 						</div>
 
-						{/* Formulario de procesamiento */}
 						{recordedBlob && !isRecording && (
-							<form action={handleFormSubmit} className="space-y-4">
-								<Button type="submit" className="w-full" disabled={isPending}>
-									{isPending ? "Procesando..." : "Procesar audio"}
+							<form
+								action={handleFormSubmit}
+								className="rounded-2xl border border-dashed bg-muted/20 p-4 sm:p-5"
+							>
+								<div className="mb-4 space-y-1">
+									<h3 className="font-semibold">Procesar grabación</h3>
+									<p className="text-sm text-muted-foreground">
+										Convertiremos el audio en movimientos sugeridos para que los
+										ajustes antes de guardar.
+									</p>
+								</div>
+								<Button
+									type="submit"
+									className="h-11 w-full"
+									disabled={isPending}
+								>
+									{isPending ? "Procesando audio..." : "Extraer movimientos"}
 								</Button>
 							</form>
 						)}
 
 						{state.error && (
-							<div className="text-red-500 text-sm text-center">
+							<div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 								{state.error}
 							</div>
 						)}
 					</div>
 				</DialogContent>
 			</Dialog>
+
 			<MovementsPreviewModal
 				open={previewOpen}
 				movements={state.movements}
