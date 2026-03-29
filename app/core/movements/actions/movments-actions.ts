@@ -32,6 +32,32 @@ import { CreateMovementSchema } from "../types/movement-type";
 
 const { OPENAI_API_KEY } = CONFIG;
 
+function getTodayDateString(): string {
+	return new Date().toISOString().slice(0, 10);
+}
+
+function parseOptionalPositiveNumber(
+	value: FormDataEntryValue | null,
+): number | null {
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const trimmedValue = value.trim();
+
+	if (trimmedValue === "") {
+		return null;
+	}
+
+	const parsedValue = Number(trimmedValue);
+
+	if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+		throw new Error("La categoría seleccionada no es válida");
+	}
+
+	return parsedValue;
+}
+
 async function getOpenAIKeyForUser(): Promise<string | null> {
 	const userOpenAIKey = await getUserOpenAIKey();
 	return userOpenAIKey || OPENAI_API_KEY || null;
@@ -52,13 +78,18 @@ export async function createMovmentAction(
 		const movementType =
 			MovementTypeDict[form.movementType as keyof typeof MovementTypeDict];
 
+		const transactionDate =
+			typeof form.date === "string" && form.date.trim() !== ""
+				? form.date
+				: getTodayDateString();
+
 		const movementData: CreateNotRecurringMovement = {
 			amount: Number(form.amount),
 			name: form.description as string,
 			movement_type_id: movementType,
-			category_id: Number(form.category),
-			transaction_date: form.date as string,
-			created_at: Date.now().toString(),
+			category_id: parseOptionalPositiveNumber(formData.get("category")),
+			transaction_date: transactionDate,
+			created_at: new Date().toISOString(),
 		};
 
 		validateMovementData(movementData);
@@ -282,8 +313,7 @@ export async function updateMovementAction(
 
 	const name = String(formData.get("name") ?? "");
 	const amount = Number(formData.get("amount") ?? 0);
-	const categoryIdRaw = formData.get("category_id");
-	const category_id = categoryIdRaw ? Number(categoryIdRaw) : null;
+	const category_id = parseOptionalPositiveNumber(formData.get("category_id"));
 	const transaction_date = (formData.get("transaction_date") as string) ?? null;
 
 	if (!name) return { success: false, error: "Name is required" };

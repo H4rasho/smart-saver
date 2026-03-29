@@ -30,6 +30,10 @@ export async function createMovementForUser(
 		return createdMovement;
 	} catch (error) {
 		console.error("Error creating movement:", error);
+		if (error instanceof Error) {
+			throw error;
+		}
+
 		throw new Error("Failed to create movement");
 	}
 }
@@ -46,12 +50,23 @@ export function validateMovementData(
 		throw new Error("Movement name is required");
 	}
 
-	if (!movementData.amount || movementData.amount <= 0) {
+	if (!Number.isFinite(movementData.amount) || movementData.amount <= 0) {
 		throw new Error("Movement amount must be greater than 0");
 	}
 
-	if (!movementData.movement_type_id) {
+	if (
+		!Number.isInteger(movementData.movement_type_id) ||
+		movementData.movement_type_id <= 0
+	) {
 		throw new Error("Movement type is required");
+	}
+
+	if (
+		movementData.category_id !== null &&
+		(!Number.isInteger(movementData.category_id) ||
+			movementData.category_id <= 0)
+	) {
+		throw new Error("Movement category is invalid");
 	}
 
 	if (!movementData.transaction_date) {

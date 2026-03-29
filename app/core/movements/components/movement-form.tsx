@@ -93,8 +93,8 @@ export function AddMovementForm({
 				) : (
 					<>
 						<div>
-							<Label htmlFor="name">Nombre</Label>
-							<Input id="name" name="name" required />
+							<Label htmlFor="description">Nombre</Label>
+							<Input id="description" name="description" required />
 						</div>
 						<div>
 							<Label htmlFor="amount">Monto</Label>
