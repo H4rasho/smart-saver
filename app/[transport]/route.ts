@@ -10,6 +10,7 @@ import {
 import {
 	getAllMovements,
 	getCurrentMonthMovements,
+	updateMovement,
 } from "@/app/core/movements/repository/movements-repository";
 import { CreateMovementSchema } from "@/app/core/movements/types/movement-type";
 import { verifyClerkToken } from "@clerk/mcp-tools/next";
@@ -238,6 +239,85 @@ const handler = createMcpHandler((server) => {
 									error instanceof Error
 										? error.message
 										: "Error creating movement",
+							}),
+						},
+					],
+				};
+			}
+		},
+	);
+
+	server.tool(
+		"update-movement",
+		"Updates an existing movement for the authorized user",
+		{
+			id: z.number().int().positive("ID must be a positive integer"),
+			name: z.string().min(1, "Name is required"),
+			amount: z.number(),
+			category_id: z.number().int().positive().nullable(),
+			transaction_date: z.string().nullable(),
+		},
+		async (params, context) => {
+			try {
+				let userId = context?.authInfo?.extra?.userId as string | undefined;
+				if (!userId) {
+					const clerkAuth = await auth({ acceptsToken: "oauth_token" });
+					userId = clerkAuth?.userId ?? undefined;
+				}
+				if (!userId) {
+					return {
+						content: [{ type: "text", text: "Unauthorized: missing user id" }],
+					};
+				}
+
+				// Verify movement belongs to user
+				const userMovements = await getAllMovements(userId);
+				const movement = userMovements.find((m) => m.id === params.id);
+
+				if (!movement) {
+					return {
+						content: [
+							{
+								type: "text",
+								text: JSON.stringify({
+									success: false,
+									message: "Movement not found or does not belong to user",
+								}),
+							},
+						],
+					};
+				}
+
+				await updateMovement(params.id, {
+					name: params.name,
+					amount: params.amount,
+					category_id: params.category_id,
+					transaction_date: params.transaction_date,
+				});
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify({
+								success: true,
+								message: "Movement updated successfully",
+							}),
+						},
+					],
+				};
+			} catch (error) {
+				console.error(error);
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify({
+								success: false,
+								message:
+									error instanceof Error
+										? error.message
+										: "Error updating movement",
 							}),
 						},
 					],
