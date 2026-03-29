@@ -7,7 +7,7 @@ import {
 } from "@/app/core/user/actions/user-actions";
 import { CONFIG } from "@/config/config";
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject } from "ai";
+import { type UserContent, generateObject } from "ai";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import {
@@ -73,6 +73,90 @@ function revalidateMovementViews(): void {
 	for (const path of MOVEMENT_REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
+}
+
+const IMAGE_MIME_TYPES = new Set([
+	"image/png",
+	"image/jpeg",
+	"image/jpg",
+	"image/webp",
+	"image/gif",
+	"image/heic",
+]);
+
+const TEXT_MIME_TYPES = new Set(["text/csv", "text/plain"]);
+
+function getFileMimeType(file: File): string {
+	if (file.type) return file.type;
+
+	const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+	const extensionToMime: Record<string, string> = {
+		pdf: "application/pdf",
+		csv: "text/csv",
+		xls: "application/vnd.ms-excel",
+		xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		doc: "application/msword",
+		docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		png: "image/png",
+		jpg: "image/jpeg",
+		jpeg: "image/jpeg",
+		webp: "image/webp",
+		gif: "image/gif",
+		heic: "image/heic",
+	};
+
+	return extensionToMime[extension] ?? "application/octet-stream";
+}
+
+async function buildFileContentParts(
+	file: File,
+	categoriesDescription: string,
+): Promise<UserContent> {
+	const mimeType = getFileMimeType(file);
+
+	const promptText = `Extract ALL expenses and incomes from this file and categorize them using ONLY the following user-defined categories:
+${categoriesDescription}.
+
+Rules:
+- Use the corresponding category ID in the category_id field.
+- If an expense doesn't clearly match any category, use the closest match.
+- movement_type_id: 1 = income, 3 = expense.
+- Always include the transaction_date field (the date of the movement).
+- The incomes or expenses could be in different columns, pages, sections, etc. — look for them all.
+- Each item must include all required fields from the schema.`;
+
+	if (TEXT_MIME_TYPES.has(mimeType) || mimeType === "text/csv") {
+		const textContent = await file.text();
+		return [
+			{
+				type: "text",
+				text: `${promptText}\n\nFile content (${file.name}):\n\`\`\`\n${textContent}\n\`\`\``,
+			},
+		];
+	}
+
+	if (IMAGE_MIME_TYPES.has(mimeType)) {
+		const fileContent = await file.arrayBuffer();
+		return [
+			{ type: "text", text: promptText },
+			{
+				type: "image",
+				image: new Uint8Array(fileContent),
+				mimeType,
+			},
+		];
+	}
+
+	const fileContent = await file.arrayBuffer();
+	return [
+		{ type: "text", text: promptText },
+		{
+			type: "file",
+			data: fileContent,
+			mimeType,
+			filename: file.name ?? "file",
+		},
+	];
 }
 
 export async function createMovmentAction(
@@ -173,7 +257,6 @@ export async function addMovmentsFromFileAction(
 	const userId = await getUserId();
 	if (!userId) throw new Error("No user id");
 	const userCategories = await getUserCategoriesAction(userId);
-	const fileContent = await file.arrayBuffer();
 	const categoriesDescription = userCategories
 		.map((cat) => `${cat.name} (id: ${cat.id})`)
 		.join(", ");
@@ -182,41 +265,17 @@ export async function addMovmentsFromFileAction(
 	if (!openAiKey) {
 		throw new Error("API key de OpenAI no configurada");
 	}
+
+	const contentParts = await buildFileContentParts(file, categoriesDescription);
 	const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 	const result = await generateObject({
-		model: scopedOpenAI("gpt-4o"),
+		model: scopedOpenAI("gpt-5.4-mini"),
 		schema: z.object({
 			expenses: CreateMovementSchema.array(),
 		}),
-		messages: [
-			{
-				role: "user",
-				content: [
-					{
-						type: "text",
-						text: `Extract the expenses and incomes from the PDF file and categorize them using ONLY the following user-defined categories:
-            ${categoriesDescription}.
-
-            When categorizing an expense, you must use the corresponding category ID in the category_id field.
-            If an expense doesn't clearly match any of these categories, use the category with the closest match.
-
-            The identifier of movement_type_id is a number that represents the type of movement (income or expense), which can be either 1 for income or 3 for expense.
-			Don't forget about the transaction_date field, it should be the date of the movement.
-
-            Each expense should include all required fields from the schema, with the category_id being one of the IDs listed above.`,
-					},
-					{
-						type: "file",
-						data: fileContent,
-						mimeType: "application/pdf",
-						filename: file.name,
-					},
-				],
-			},
-		],
+		messages: [{ role: "user", content: contentParts }],
 	});
 	const movements = result.object.expenses;
-	console.log(movements);
 	await createManyMovements(movements);
 	revalidateMovementViews();
 }
@@ -233,7 +292,6 @@ export async function extractMovementsFromFileAction(
 		const userId = await getUserId();
 		if (!userId) return { movements: [], error: "No user id" };
 		const userCategories = await getUserCategoriesAction(userId);
-		const fileContent = await file.arrayBuffer();
 		const categoriesDescription = userCategories
 			.map((cat) => `${cat.name} (id: ${cat.id})`)
 			.join(", ");
@@ -242,39 +300,18 @@ export async function extractMovementsFromFileAction(
 		if (!openAiKey) {
 			return { movements: [], error: "API key de OpenAI no configurada" };
 		}
+
+		const contentParts = await buildFileContentParts(
+			file,
+			categoriesDescription,
+		);
 		const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 		const result = await generateObject({
 			model: scopedOpenAI("gpt-4o"),
 			schema: z.object({
 				expenses: CreateMovementSchema.array(),
 			}),
-			messages: [
-				{
-					role: "user",
-					content: [
-						{
-							type: "text",
-							text: `Extract the expenses and incomes from the PDF file and categorize them using ONLY the following user-defined categories:
-              ${categoriesDescription}. 
-
-			  The incones or expenses could be in different columns, pages etc look for them all.
-              When categorizing an expense, you must use the corresponding category ID in the category_id field.
-              If an expense doesn't clearly match any of these categories, use the category with the closest match.
-
-            The identifier of movement_type_id is a number that represents the type of movement (income or expense), which can be either 1 for income or 3 for expense.
-  			Don't forget about the transaction_date field, it should be the date of the movement.
-
-              Each expense should include all required fields from the schema, with the category_id being one of the IDs listed above.`,
-						},
-						{
-							type: "file",
-							data: fileContent,
-							mimeType: "application/pdf",
-							filename: file.name ?? "file.pdf",
-						},
-					],
-				},
-			],
+			messages: [{ role: "user", content: contentParts }],
 		});
 		const movementsRaw = result.object.expenses;
 		const movements: CreateMovement[] = movementsRaw.map(
