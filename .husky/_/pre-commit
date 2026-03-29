@@ -5,6 +5,12 @@ if [ "$LEFTHOOK_VERBOSE" = "1" -o "$LEFTHOOK_VERBOSE" = "true" ]; then
 fi
 
 if [ "$LEFTHOOK" = "0" ]; then
+
+# ======== GGA START ========
+# Gentleman Guardian Angel - Code Review
+gga run || exit 1
+# ======== GGA END ========
+
   exit 0
 fi
 
