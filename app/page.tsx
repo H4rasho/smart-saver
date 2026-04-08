@@ -1,10 +1,8 @@
+import { SignInCtaButton } from "@/components/sign_in_cta_button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CONFIG } from "@/config/config";
-import { SignInButton } from "@clerk/nextjs";
 import {
-	ArrowRight,
 	PieChart,
 	Shield,
 	Smartphone,
@@ -29,14 +27,11 @@ export default function LandingPage() {
 						</div>
 						<span className="text-xl font-bold">{APP_NAME}</span>
 					</div>
-					<SignInButton mode="modal">
-						<Button
-							variant="outline"
-							className="border-gray-700 hover:bg-gray-800 bg-transparent"
-						>
-							Iniciar Sesión
-						</Button>
-					</SignInButton>
+					<SignInCtaButton
+						label="Iniciar Sesión"
+						variant="outline"
+						className="border-gray-700 hover:bg-gray-800 bg-transparent"
+					/>
 				</div>
 			</header>
 
@@ -64,24 +59,18 @@ export default function LandingPage() {
 				</p>
 
 				<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-					<SignInButton mode="modal">
-						<Button
-							size="lg"
-							className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-black font-semibold px-8"
-						>
-							Comenzar Gratis
-							<ArrowRight className="w-4 h-4 ml-2" />
-						</Button>
-					</SignInButton>
-					<SignInButton mode="modal">
-						<Button
-							variant="outline"
-							size="lg"
-							className="border-gray-700 hover:bg-gray-800 bg-transparent"
-						>
-							Ver Demo
-						</Button>
-					</SignInButton>
+					<SignInCtaButton
+						label="Comenzar Gratis"
+						size="lg"
+						showArrow
+						className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-black font-semibold px-8"
+					/>
+					<SignInCtaButton
+						label="Ver Demo"
+						variant="outline"
+						size="lg"
+						className="border-gray-700 hover:bg-gray-800 bg-transparent"
+					/>
 				</div>
 			</section>
 
@@ -193,24 +182,18 @@ export default function LandingPage() {
 							mejor con {APP_NAME}
 						</p>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<SignInButton mode="modal">
-								<Button
-									size="lg"
-									className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white font-semibold px-8 shadow-lg"
-								>
-									Crear Cuenta Gratis
-									<ArrowRight className="w-4 h-4 ml-2" />
-								</Button>
-							</SignInButton>
-							<SignInButton mode="modal">
-								<Button
-									variant="outline"
-									size="lg"
-									className="border-gray-500 hover:bg-gray-800 bg-transparent text-gray-200 hover:text-white"
-								>
-									¿Ya tienes cuenta? Inicia Sesión
-								</Button>
-							</SignInButton>
+							<SignInCtaButton
+								label="Crear Cuenta Gratis"
+								size="lg"
+								showArrow
+								className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white font-semibold px-8 shadow-lg"
+							/>
+							<SignInCtaButton
+								label="¿Ya tienes cuenta? Inicia Sesión"
+								variant="outline"
+								size="lg"
+								className="border-gray-500 hover:bg-gray-800 bg-transparent text-gray-200 hover:text-white"
+							/>
 						</div>
 						<p className="text-sm text-gray-400 mt-4">
 							Sin tarjeta de crédito • Gratis por 30 días • Cancela cuando
