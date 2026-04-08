@@ -2,7 +2,8 @@
 import { db } from "@/database/database";
 import { currentUser } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { NAVIGATION_CACHE_TAG } from "../../menu/const/navigation-cache";
 import { categories } from "../model/categories-model";
 
 export const getUserCategoriesAction = async (userId: string) => {
@@ -45,6 +46,7 @@ export const addUserCategoryAction = async (
 		});
 
 		revalidatePath("/settings");
+		revalidateTag(NAVIGATION_CACHE_TAG, "max");
 		return { success: true, message: "Categoría agregada correctamente" };
 	} catch (error) {
 		console.error("Error adding category:", error);
@@ -67,6 +69,7 @@ export const deleteUserCategoryAction = async (
 			);
 
 		revalidatePath("/settings");
+		revalidateTag(NAVIGATION_CACHE_TAG, "max");
 		return { success: true, message: "Categoría eliminada correctamente" };
 	} catch (error) {
 		console.error("Error deleting category:", error);

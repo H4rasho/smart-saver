@@ -1,18 +1,13 @@
-import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
 import { AddMovement } from "@/app/core/movements/components/create-movment";
+import type { Category } from "@/types/income";
 import { PanelLeftOpen } from "lucide-react";
-import { getUserId } from "../../user/actions/user-actions";
 import { NavLink } from "./nav-link";
 
-export async function DesktopNav() {
-	const userId = await getUserId();
-	if (!userId) return null;
-	const categories = await getUserCategoriesAction(userId);
-	const categoriesData = categories.map((category) => ({
-		id: Number(category.id),
-		name: category.name as string,
-	}));
+interface DesktopNavProps {
+	categories: Category[];
+}
 
+export function DesktopNav({ categories }: DesktopNavProps) {
 	return (
 		<aside className="hidden md:flex w-72 shrink-0 border-r border-border/60 bg-muted/20">
 			<div className="sticky top-0 flex min-h-screen w-full flex-col px-4 py-6">
@@ -49,7 +44,7 @@ export async function DesktopNav() {
 					<p className="mb-4 text-sm text-muted-foreground">
 						Registra ingresos o gastos sin salir de la vista actual.
 					</p>
-					<AddMovement categories={categoriesData} />
+					<AddMovement categories={categories} />
 				</div>
 			</div>
 		</aside>

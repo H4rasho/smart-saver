@@ -5,10 +5,14 @@ import { db } from "@/database/database";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { currentUser } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { cache } from "react";
+import { USER_PREFERENCES_CACHE_TAG } from "../../menu/const/navigation-cache";
 
-export async function getCurrentUser(): Promise<User> {
-	const userLogged = await currentUser();
+const getCurrentClerkUser = cache(async () => currentUser());
+
+const getCurrentUserRecord = cache(async (): Promise<User> => {
+	const userLogged = await getCurrentClerkUser();
 	const clerkId = userLogged?.id;
 	if (!clerkId) throw new Error("No clerk id found");
 	const userDb = await db
@@ -17,10 +21,14 @@ export async function getCurrentUser(): Promise<User> {
 		.where(eq(users.clerk_id, clerkId));
 	const user = userDb[0] as User;
 	return user;
+});
+
+export async function getCurrentUser(): Promise<User> {
+	return getCurrentUserRecord();
 }
 
 export async function getUserId(): Promise<string | undefined> {
-	const userLogged = await currentUser();
+	const userLogged = await getCurrentClerkUser();
 	const clerkId = userLogged?.id;
 	return clerkId;
 }
@@ -42,6 +50,7 @@ export const updateUserCurrency = async (
 
 		revalidatePath("/settings");
 		revalidatePath("/home");
+		revalidateTag(USER_PREFERENCES_CACHE_TAG, "max");
 
 		return { success: true, message: "Moneda actualizada correctamente" };
 	} catch (error) {

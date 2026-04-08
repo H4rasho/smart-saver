@@ -14,9 +14,11 @@ import { ArrowLeftRight, List } from "lucide-react";
 export default async function Movements() {
 	const userId = await getUserId();
 	if (!userId) return;
-	const movements = await getMovmentsAction(userId);
-	const userCurrency = await getUserCurrency();
-	const categories = await getUserCategoriesAction(userId);
+	const [movements, userCurrency, categories] = await Promise.all([
+		getMovmentsAction(userId),
+		getUserCurrency(),
+		getUserCategoriesAction(userId),
+	]);
 
 	return (
 		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
