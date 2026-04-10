@@ -70,7 +70,7 @@ async function getOpenAIKeyForUser(): Promise<string | null> {
 }
 
 function revalidateMovementViews(): void {
-	revalidateTag(MOVEMENTS_CACHE_TAG);
+	revalidateTag(MOVEMENTS_CACHE_TAG, "max");
 
 	for (const path of MOVEMENT_REVALIDATE_PATHS) {
 		revalidatePath(path);
@@ -147,7 +147,7 @@ Rules:
 			{
 				type: "image",
 				image: new Uint8Array(fileContent),
-				mimeType,
+				mediaType: mimeType,
 			},
 		];
 	}
@@ -158,7 +158,7 @@ Rules:
 		{
 			type: "file",
 			data: fileContent,
-			mimeType,
+			mediaType: mimeType,
 			filename: file.name ?? "file",
 		},
 	];

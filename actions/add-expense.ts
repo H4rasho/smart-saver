@@ -70,7 +70,7 @@ export async function addExpensesFromFile(
 					{
 						type: "file",
 						data: fileContent,
-						mimeType: "application/pdf",
+						mediaType: "application/pdf",
 						filename: file.name,
 					},
 				],
@@ -79,7 +79,7 @@ export async function addExpensesFromFile(
 	});
 
 	await addExpenses(result.object.expenses);
-	revalidateTag("expenses");
+	revalidateTag("expenses", "max");
 }
 
 export async function addExpenses(expenses: CreateExpense[]) {

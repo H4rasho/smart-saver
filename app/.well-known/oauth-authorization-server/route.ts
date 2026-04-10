@@ -4,5 +4,10 @@ import {
 } from "@clerk/mcp-tools/next";
 
 const handler = authServerMetadataHandlerClerk();
+const optionsHandler = metadataCorsOptionsRequestHandler();
 
-export { handler as GET, metadataCorsOptionsRequestHandler as OPTIONS };
+export async function OPTIONS(): Promise<Response> {
+	return optionsHandler();
+}
+
+export { handler as GET };

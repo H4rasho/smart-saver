@@ -7,4 +7,10 @@ const handler = protectedResourceHandlerClerk({
 	scopes_supported: ["profile", "email"],
 });
 
-export { handler as GET, metadataCorsOptionsRequestHandler as OPTIONS };
+const optionsHandler = metadataCorsOptionsRequestHandler();
+
+export async function OPTIONS(): Promise<Response> {
+	return optionsHandler();
+}
+
+export { handler as GET };
