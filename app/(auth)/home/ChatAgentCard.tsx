@@ -1,4 +1,5 @@
 import { ArrowRight, Bot, MessageCircleMore } from "lucide-react";
+import Link from "next/link";
 
 export function ChatAgentCard() {
 	return (
@@ -15,9 +16,9 @@ export function ChatAgentCard() {
 				</p>
 			</div>
 			<div className="flex-shrink-0">
-				<a href="/chat" aria-label="Ir al chat IA">
+				<Link href="/chat" aria-label="Ir al chat IA">
 					<ArrowRight size={44} />
-				</a>
+				</Link>
 			</div>
 		</div>
 	);

@@ -35,18 +35,14 @@ export function EditMovementDialog({
 	categories,
 	userCurrency = "USD",
 }: EditMovementDialogProps) {
-	const [selectedCategory, setSelectedCategory] = useState<string>("");
+	const [selectedCategory, setSelectedCategory] = useState<string>(
+		String(movement?.category_id ?? ""),
+	);
 	const [state, formAction, isPending] = useActionState(
 		updateMovementAction,
 		null,
 	);
 	const router = useRouter();
-
-	useEffect(() => {
-		if (movement) {
-			setSelectedCategory(String(movement.category_id ?? ""));
-		}
-	}, [movement]);
 
 	useEffect(() => {
 		if (state?.success) {

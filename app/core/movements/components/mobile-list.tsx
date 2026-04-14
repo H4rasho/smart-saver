@@ -55,10 +55,7 @@ export default function FinancialMovementsList({
 	className,
 	categories = [],
 }: FinancialMovementsListProps) {
-	const [deleteState, deleteAction, _isPending] = useActionState(
-		deleteMovmentAction,
-		null,
-	);
+	const [deleteState, deleteAction] = useActionState(deleteMovmentAction, null);
 	const [editOpen, setEditOpen] = useState(false);
 	const [selectedMovement, setSelectedMovement] =
 		useState<MovementWithCategoryAndMovementType | null>(null);
@@ -254,6 +251,7 @@ export default function FinancialMovementsList({
 				</div>
 			))}
 			<EditMovementDialog
+				key={selectedMovement?.id ?? "new"}
 				open={editOpen}
 				onOpenChange={setEditOpen}
 				movement={selectedMovement}

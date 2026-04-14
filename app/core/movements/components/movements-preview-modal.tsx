@@ -21,7 +21,7 @@ import {
 	PencilLine,
 	Wallet,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	type CreateMovement,
 	MovementType as MovementKind,
@@ -57,12 +57,6 @@ export function MovementsPreviewModal({
 		useState<CreateMovement[]>(movements);
 	const [editingIdx, setEditingIdx] = useState<number | null>(null);
 	const [editDraft, setEditDraft] = useState<CreateMovement | null>(null);
-
-	useEffect(() => {
-		setEditedMovements(movements);
-		setEditingIdx(null);
-		setEditDraft(null);
-	}, [movements]);
 
 	const categoryNamesById = useMemo(() => {
 		return new Map(

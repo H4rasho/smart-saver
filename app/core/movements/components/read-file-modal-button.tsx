@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { Category } from "@/types/income";
 import { FileText, Sparkles, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useActionState } from "react";
 import {
 	extractMovementsFromFileAction,
@@ -35,7 +35,8 @@ export function ReadFileModalButton({
 	userCurrency,
 }: ReadFileModalButtonProps) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [previewOpen, setPreviewOpen] = useState(false);
+	const [dismissedPreviewSignature, setDismissedPreviewSignature] =
+		useState("");
 	const [selectedFileName, setSelectedFileName] = useState<string>("");
 
 	const [state, formAction, isPending] = useActionState(
@@ -43,23 +44,21 @@ export function ReadFileModalButton({
 		{ movements: [], error: null },
 	);
 
-	useEffect(() => {
-		if (state.movements && state.movements.length > 0) {
-			setPreviewOpen(true);
-			setIsOpen(false);
-		}
-	}, [state.movements]);
+	const previewSignature = JSON.stringify(state.movements);
+	const previewOpen =
+		state.movements.length > 0 &&
+		previewSignature !== dismissedPreviewSignature;
 
 	const handleConfirm = async (editedMovements: CreateMovement[]) => {
 		await saveManyMovementsAction(editedMovements);
-		setPreviewOpen(false);
+		setDismissedPreviewSignature(previewSignature);
 		setIsOpen(false);
 		setSelectedFileName("");
 	};
 
 	return (
 		<>
-			<Dialog open={isOpen} onOpenChange={setIsOpen}>
+			<Dialog open={isOpen && !previewOpen} onOpenChange={setIsOpen}>
 				<DialogTrigger asChild>
 					<button
 						type="button"
@@ -122,9 +121,10 @@ export function ReadFileModalButton({
 										type="file"
 										accept=".pdf,.csv,.xls,.xlsx,.doc,.docx,.png,.jpg,.jpeg,.webp,.gif,.heic"
 										required
-										onChange={(event) =>
-											setSelectedFileName(event.target.files?.[0]?.name ?? "")
-										}
+										onChange={(event) => {
+											setDismissedPreviewSignature("");
+											setSelectedFileName(event.target.files?.[0]?.name ?? "");
+										}}
 									/>
 									<p className="text-xs text-muted-foreground">
 										{selectedFileName
@@ -153,12 +153,13 @@ export function ReadFileModalButton({
 			</Dialog>
 
 			<MovementsPreviewModal
+				key={previewSignature}
 				open={previewOpen}
 				movements={state.movements}
 				userCurrency={userCurrency}
 				categories={categories}
 				movementTypes={movementTypes}
-				onCancel={() => setPreviewOpen(false)}
+				onCancel={() => setDismissedPreviewSignature(previewSignature)}
 				onConfirm={handleConfirm}
 			/>
 		</>

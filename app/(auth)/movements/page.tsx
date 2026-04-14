@@ -9,9 +9,91 @@ import {
 	getUserCurrency,
 	getUserId,
 } from "@/app/core/user/actions/user-actions";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 import { ArrowLeftRight, List } from "lucide-react";
 
-export default async function Movements() {
+const DEFAULT_PAGE_SIZE = 10;
+
+type SearchParamValue = string | string[] | undefined;
+
+interface MovementsPageProps {
+	searchParams?: Promise<{
+		page?: SearchParamValue;
+		pageSize?: SearchParamValue;
+	}>;
+}
+
+function parsePositiveInteger(
+	value: SearchParamValue,
+	fallback: number,
+): number {
+	if (typeof value !== "string") {
+		return fallback;
+	}
+
+	const parsedValue = Number.parseInt(value, 10);
+
+	if (!Number.isFinite(parsedValue) || parsedValue < 1) {
+		return fallback;
+	}
+
+	return parsedValue;
+}
+
+type PageItem = number | "ellipsis-start" | "ellipsis-end";
+
+function getPageNumbers(currentPage: number, totalPages: number): PageItem[] {
+	const pages: PageItem[] = [];
+
+	if (totalPages <= 7) {
+		for (let page = 1; page <= totalPages; page++) {
+			pages.push(page);
+		}
+
+		return pages;
+	}
+
+	if (currentPage <= 4) {
+		pages.push(1, 2, 3, 4, 5, "ellipsis-end", totalPages);
+		return pages;
+	}
+
+	if (currentPage >= totalPages - 3) {
+		pages.push(
+			1,
+			"ellipsis-start",
+			totalPages - 4,
+			totalPages - 3,
+			totalPages - 2,
+			totalPages - 1,
+			totalPages,
+		);
+		return pages;
+	}
+
+	pages.push(
+		1,
+		"ellipsis-start",
+		currentPage - 1,
+		currentPage,
+		currentPage + 1,
+		"ellipsis-end",
+		totalPages,
+	);
+
+	return pages;
+}
+
+export default async function Movements({ searchParams }: MovementsPageProps) {
+	const resolvedSearchParams = await searchParams;
 	const userId = await getUserId();
 	if (!userId) return;
 	const [movements, userCurrency, categories] = await Promise.all([
@@ -19,6 +101,26 @@ export default async function Movements() {
 		getUserCurrency(),
 		getUserCategoriesAction(userId),
 	]);
+
+	const pageSize = parsePositiveInteger(
+		resolvedSearchParams?.pageSize,
+		DEFAULT_PAGE_SIZE,
+	);
+	const requestedPage = parsePositiveInteger(resolvedSearchParams?.page, 1);
+	const totalPages = Math.max(1, Math.ceil(movements.length / pageSize));
+	const currentPage = Math.min(requestedPage, totalPages);
+	const startIndex = (currentPage - 1) * pageSize;
+	const endIndex = startIndex + pageSize;
+	const paginatedMovements = movements.slice(startIndex, endIndex);
+	const visibleStart = movements.length === 0 ? 0 : startIndex + 1;
+	const visibleEnd = Math.min(endIndex, movements.length);
+
+	function pageHref(targetPage: number): string {
+		const params = new URLSearchParams();
+		params.set("page", targetPage.toString());
+		params.set("pageSize", pageSize.toString());
+		return `?${params.toString()}`;
+	}
 
 	return (
 		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -61,7 +163,7 @@ export default async function Movements() {
 			{/* Lista de movimientos */}
 			<div className="md:hidden">
 				<FinancialMovementsList
-					movements={movements}
+					movements={paginatedMovements}
 					userCurrency={userCurrency}
 					showActions={true}
 					categories={categories}
@@ -78,9 +180,66 @@ export default async function Movements() {
 						</p>
 					</div>
 				) : (
-					<MovementsTable movements={movements} userCurrency={userCurrency} />
+					<MovementsTable
+						movements={paginatedMovements}
+						userCurrency={userCurrency}
+					/>
 				)}
 			</div>
+
+			{movements.length > 0 && (
+				<div className="mt-6 flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div className="text-sm text-muted-foreground">
+						Mostrando{" "}
+						<span className="font-medium text-foreground">{visibleStart}</span>{" "}
+						- <span className="font-medium text-foreground">{visibleEnd}</span>{" "}
+						de{" "}
+						<span className="font-medium text-foreground">
+							{movements.length.toLocaleString()}
+						</span>{" "}
+						movimientos
+					</div>
+
+					{totalPages > 1 && (
+						<Pagination className="md:justify-end">
+							<PaginationContent>
+								<PaginationItem>
+									<PaginationPrevious
+										aria-disabled={currentPage === 1}
+										href={pageHref(Math.max(1, currentPage - 1))}
+										tabIndex={currentPage === 1 ? -1 : 0}
+									/>
+								</PaginationItem>
+
+								{getPageNumbers(currentPage, totalPages).map((page) =>
+									typeof page === "string" ? (
+										<PaginationItem key={page}>
+											<PaginationEllipsis />
+										</PaginationItem>
+									) : (
+										<PaginationItem key={page}>
+											<PaginationLink
+												href={pageHref(page)}
+												isActive={currentPage === page}
+											>
+												{page}
+											</PaginationLink>
+										</PaginationItem>
+									),
+								)}
+
+								<PaginationItem>
+									<PaginationNext
+										aria-disabled={currentPage === totalPages}
+										href={pageHref(Math.min(totalPages, currentPage + 1))}
+										tabIndex={currentPage === totalPages ? -1 : 0}
+									/>
+								</PaginationItem>
+							</PaginationContent>
+						</Pagination>
+					)}
+				</div>
+			)}
 		</main>
 	);
 }

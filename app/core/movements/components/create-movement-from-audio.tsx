@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Category } from "@/types/income";
 import { Mic, Play, Sparkles, Square, Waves } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { toast } from "sonner";
 import {
@@ -41,7 +41,8 @@ export function CreateMovementFromAudio({
 	userCurrency,
 }: CreateMovementFromAudioProps) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [previewOpen, setPreviewOpen] = useState(false);
+	const [dismissedPreviewSignature, setDismissedPreviewSignature] =
+		useState("");
 	const [isRecording, setIsRecording] = useState(false);
 	const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
 	const [recordingDuration, setRecordingDuration] = useState(0);
@@ -55,20 +56,24 @@ export function CreateMovementFromAudio({
 		{ movements: [], error: null },
 	);
 
-	useEffect(() => {
-		if (state.movements && state.movements.length > 0) {
-			setPreviewOpen(true);
-			setIsOpen(false);
-		}
-	}, [state.movements]);
+	const previewSignature = JSON.stringify(state.movements);
+	const previewOpen =
+		state.movements.length > 0 &&
+		previewSignature !== dismissedPreviewSignature;
 
-	useEffect(() => {
-		if (!isOpen) {
-			stopRecording();
-			setRecordedBlob(null);
-			setRecordingDuration(0);
+	const stopRecording = useCallback(() => {
+		if (mediaRecorderRef.current && isRecording) {
+			mediaRecorderRef.current.stop();
+			setIsRecording(false);
 		}
-	}, [isOpen]);
+
+		if (streamRef.current) {
+			for (const track of streamRef.current.getTracks()) {
+				track.stop();
+			}
+			streamRef.current = null;
+		}
+	}, [isRecording]);
 
 	useEffect(() => {
 		if (isRecording) {
@@ -119,20 +124,6 @@ export function CreateMovementFromAudio({
 		}
 	};
 
-	const stopRecording = () => {
-		if (mediaRecorderRef.current && isRecording) {
-			mediaRecorderRef.current.stop();
-			setIsRecording(false);
-		}
-
-		if (streamRef.current) {
-			for (const track of streamRef.current.getTracks()) {
-				track.stop();
-			}
-			streamRef.current = null;
-		}
-	};
-
 	const playRecording = () => {
 		if (recordedBlob) {
 			const audioUrl = URL.createObjectURL(recordedBlob);
@@ -151,13 +142,26 @@ export function CreateMovementFromAudio({
 
 	const handleConfirm = async (editedMovements: CreateMovement[]) => {
 		await saveManyMovementsAction(editedMovements);
-		setPreviewOpen(false);
+		setDismissedPreviewSignature(previewSignature);
 		setIsOpen(false);
+	};
+
+	const handleDialogOpenChange = (open: boolean) => {
+		if (!open) {
+			stopRecording();
+			setRecordedBlob(null);
+			setRecordingDuration(0);
+		}
+
+		setIsOpen(open);
 	};
 
 	return (
 		<>
-			<Dialog open={isOpen} onOpenChange={setIsOpen}>
+			<Dialog
+				open={isOpen && !previewOpen}
+				onOpenChange={handleDialogOpenChange}
+			>
 				<DialogTrigger asChild>
 					<button
 						type="button"
@@ -316,12 +320,13 @@ export function CreateMovementFromAudio({
 			</Dialog>
 
 			<MovementsPreviewModal
+				key={JSON.stringify(state.movements)}
 				open={previewOpen}
 				movements={state.movements}
 				userCurrency={userCurrency}
 				categories={categories}
 				movementTypes={movementTypes}
-				onCancel={() => setPreviewOpen(false)}
+				onCancel={() => setDismissedPreviewSignature(previewSignature)}
 				onConfirm={handleConfirm}
 			/>
 		</>

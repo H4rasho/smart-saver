@@ -100,8 +100,6 @@ export function AddMovementForm({
 		if (state?.success) {
 			toast.success("Movimiento creado exitosamente");
 			formRef.current?.reset();
-			setSelectedCategory("");
-			setMovementType(DEFAULT_MOVEMENT_TYPE);
 			router.refresh();
 			onSuccess?.();
 		} else if (state?.error) {
@@ -132,7 +130,15 @@ export function AddMovementForm({
 				</Badge>
 			</div>
 
-			<form ref={formRef} className="space-y-5" action={formAction}>
+			<form
+				ref={formRef}
+				className="space-y-5"
+				action={formAction}
+				onReset={() => {
+					setSelectedCategory("");
+					setMovementType(DEFAULT_MOVEMENT_TYPE);
+				}}
+			>
 				<div className="rounded-2xl border bg-muted/30 p-3 sm:p-4">
 					<Tabs
 						value={movementType}
