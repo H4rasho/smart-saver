@@ -2,6 +2,7 @@ import { getUserCategoriesAction } from "@/app/core/categories/actions/categorie
 import {
 	getCurrentUser,
 	getUserCurrency,
+	getUserOpenAIKeyStatus,
 } from "@/app/core/user/actions/user-actions";
 import {
 	Card,
@@ -27,8 +28,11 @@ export default async function Settings() {
 	const user = await getCurrentUser();
 	if (!user) return redirect("/welcome");
 
-	const currency = await getUserCurrency();
-	const categories = await getUserCategoriesAction(user.clerk_id);
+	const [currency, categories, hasOpenAIKey] = await Promise.all([
+		getUserCurrency(),
+		getUserCategoriesAction(user.clerk_id),
+		getUserOpenAIKeyStatus(),
+	]);
 
 	return (
 		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -118,7 +122,7 @@ export default async function Settings() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="pt-6">
-							<OpenAISettings />
+							<OpenAISettings initialHasExistingKey={hasOpenAIKey} />
 						</CardContent>
 					</Card>
 				</TabsContent>
