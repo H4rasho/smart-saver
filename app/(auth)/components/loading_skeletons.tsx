@@ -293,6 +293,14 @@ export function HomeLoadingSkeleton() {
 	);
 }
 
+export function HomeSummaryCardsLoadingSkeleton() {
+	return <DashboardSummaryCardsFixture />;
+}
+
+export function HomeRecentMovementsLoadingSkeleton() {
+	return <MovementsSurfaceFixture compact={true} />;
+}
+
 export function MovementsLoadingSkeleton() {
 	const fixture = (
 		<main className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
@@ -342,6 +350,35 @@ export function MovementsLoadingSkeleton() {
 	);
 }
 
+export function MovementsContentLoadingSkeleton() {
+	return (
+		<>
+			<div className="mb-6 rounded-xl border border-secondary-dark/20 bg-secondary p-4 shadow-sm">
+				<div className="flex items-start justify-between gap-3">
+					<div className="min-w-0 flex-1 space-y-2">
+						<div className="flex items-center gap-2 text-secondary-foreground/70">
+							<List className="h-4 w-4" />
+							<LoadingBlock className="h-4 w-36 rounded-md border-secondary-foreground/10 bg-secondary-foreground/10" />
+						</div>
+					</div>
+					<LoadingBlock className="h-7 w-16 rounded-lg border-secondary-foreground/10 bg-secondary-foreground/10" />
+				</div>
+			</div>
+
+			<MovementsSurfaceFixture />
+
+			<div className="mt-6 flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+				<LoadingBlock className="h-4 w-52 rounded-md" />
+				<div className="flex gap-2 self-end md:self-auto">
+					<LoadingBlock className="h-10 w-10 rounded-lg" />
+					<LoadingBlock className="h-10 w-10 rounded-lg" />
+					<LoadingBlock className="h-10 w-10 rounded-lg" />
+				</div>
+			</div>
+		</>
+	);
+}
+
 export function SettingsLoadingSkeleton() {
 	const fixture = (
 		<main className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-6 lg:px-8">
@@ -367,6 +404,32 @@ export function SettingsLoadingSkeleton() {
 			label="Cargando configuración"
 			fixture={fixture}
 		/>
+	);
+}
+
+export function SettingsTabPanelLoadingSkeleton() {
+	return (
+		<div className="rounded-xl border border-border shadow-sm">
+			<div className="space-y-3 border-b border-border/60 px-6 py-6">
+				<div className="flex items-center gap-2">
+					<Settings className="h-5 w-5 text-primary/70" />
+					<LoadingBlock className="h-5 w-44 rounded-md" />
+				</div>
+				<LoadingBlock className="h-4 w-72 max-w-full rounded-md" />
+			</div>
+			<div className="space-y-4 px-6 pt-6 pb-6">
+				<LoadingBlock className="h-16 w-full rounded-xl" />
+				<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+					{Array.from({ length: 6 }).map((_, index) => (
+						<LoadingBlock
+							key={`settings-tab-panel-button-${index + 1}`}
+							className="h-11 w-full rounded-lg"
+						/>
+					))}
+				</div>
+				<LoadingBlock className="h-11 w-40 rounded-lg" />
+			</div>
+		</div>
 	);
 }
 

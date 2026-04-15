@@ -1,7 +1,8 @@
+import { SettingsTabPanelLoadingSkeleton } from "@/app/(auth)/components/loading_skeletons";
 import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
 import {
-	getCurrentUser,
 	getUserCurrency,
+	getUserId,
 	getUserOpenAIKeyStatus,
 } from "@/app/core/user/actions/user-actions";
 import {
@@ -20,26 +21,94 @@ import {
 	Sparkles,
 } from "lucide-react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { CategoriesSettings } from "./components/categories_settings";
 import { CurrencySettings } from "./components/currency_settings";
 import { OpenAISettings } from "./components/openai_settings";
 
-export default async function Settings() {
-	const user = await getCurrentUser();
-	if (!user) return redirect("/welcome");
-
-	const [currency, categories, hasOpenAIKey] = await Promise.all([
-		getUserCurrency(),
-		getUserCategoriesAction(user.clerk_id),
-		getUserOpenAIKeyStatus(),
-	]);
+async function CurrencySettingsPanel() {
+	const currency = await getUserCurrency();
 
 	return (
-		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+		<Card className="border-border shadow-sm">
+			<CardHeader className="border-b border-secondary-dark/20">
+				<CardTitle className="flex items-center gap-2">
+					<Coins className="h-5 w-5 text-primary" />
+					Configuración de Moneda
+				</CardTitle>
+				<CardDescription className="text-secondary-foreground/80">
+					Selecciona la moneda que utilizarás para registrar tus movimientos
+					financieros
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="pt-6">
+				<div className="mb-4 rounded-lg border border-border bg-muted/50 p-4">
+					<p className="text-sm text-foreground">
+						<span className="font-semibold">Moneda actual:</span>{" "}
+						<span className="font-bold text-muted-foreground">{currency}</span>
+					</p>
+				</div>
+				<CurrencySettings currentCurrency={currency} />
+			</CardContent>
+		</Card>
+	);
+}
+
+async function CategoriesSettingsPanel({ userId }: { userId: string }) {
+	const categories = await getUserCategoriesAction(userId);
+
+	return (
+		<Card className="border-border shadow-sm">
+			<CardHeader className="border-b border-secondary-dark/20">
+				<CardTitle className="flex items-center gap-2">
+					<FolderOpen className="h-5 w-5 text-primary" />
+					Gestión de Categorías
+				</CardTitle>
+				<CardDescription className="text-secondary-foreground/80">
+					Organiza tus movimientos financieros con categorías personalizadas
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="pt-6">
+				<CategoriesSettings categories={categories} />
+			</CardContent>
+		</Card>
+	);
+}
+
+async function OpenAISettingsPanel() {
+	const hasOpenAIKey = await getUserOpenAIKeyStatus();
+
+	return (
+		<Card className="border-border shadow-sm">
+			<CardHeader className="border-b border-secondary-dark/20">
+				<CardTitle className="flex items-center gap-2">
+					<Sparkles className="h-5 w-5 text-primary" />
+					Configuración de OpenAI
+				</CardTitle>
+				<CardDescription className="text-secondary-foreground/80">
+					Configura tu API key para habilitar funcionalidades de IA
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="pt-6">
+				<OpenAISettings initialHasExistingKey={hasOpenAIKey} />
+			</CardContent>
+		</Card>
+	);
+}
+
+export default async function Settings() {
+	const userId = await getUserId();
+
+	if (!userId) {
+		return redirect("/welcome");
+	}
+
+	return (
+		<main className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-6 lg:px-8">
 			<section className="mb-8">
-				<div className="flex items-center gap-3 mb-2">
-					<div className="p-2 bg-primary/10 rounded-lg">
-						<SettingsIcon className="w-6 h-6 text-primary" />
+				<div className="mb-2 flex items-center gap-3">
+					<div className="rounded-lg bg-primary/10 p-2">
+						<SettingsIcon className="h-6 w-6 text-primary" />
 					</div>
 					<h1 className="text-3xl font-bold text-foreground">Configuración</h1>
 				</div>
@@ -51,89 +120,46 @@ export default async function Settings() {
 			<Separator className="mb-8" />
 
 			<Tabs defaultValue="currency" className="space-y-6">
-				<TabsList className="grid w-full grid-cols-3 max-w-2xl">
+				<TabsList className="grid max-w-2xl w-full grid-cols-3">
 					<TabsTrigger value="currency" className="gap-2">
-						<Coins className="w-4 h-4" />
+						<Coins className="h-4 w-4" />
 						Moneda
 					</TabsTrigger>
 					<TabsTrigger value="categories" className="gap-2">
-						<FolderOpen className="w-4 h-4" />
+						<FolderOpen className="h-4 w-4" />
 						Categorías
 					</TabsTrigger>
 					<TabsTrigger value="openai" className="gap-2">
-						<Sparkles className="w-4 h-4" />
+						<Sparkles className="h-4 w-4" />
 						OpenAI
 					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="currency" className="space-y-4">
-					<Card className="border-border shadow-sm">
-						<CardHeader className="border-b border-secondary-dark/20">
-							<CardTitle className="flex items-center gap-2">
-								<Coins className="w-5 h-5 text-primary" />
-								Configuración de Moneda
-							</CardTitle>
-							<CardDescription className="text-secondary-foreground/80">
-								Selecciona la moneda que utilizarás para registrar tus
-								movimientos financieros
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="pt-6">
-							<div className="mb-4 p-4 bg-muted/50 border border-border rounded-lg">
-								<p className="text-sm text-foreground">
-									<span className="font-semibold">Moneda actual:</span>{" "}
-									<span className="text-muted-foreground font-bold">
-										{currency}
-									</span>
-								</p>
-							</div>
-							<CurrencySettings currentCurrency={currency} />
-						</CardContent>
-					</Card>
+					<Suspense fallback={<SettingsTabPanelLoadingSkeleton />}>
+						<CurrencySettingsPanel />
+					</Suspense>
 				</TabsContent>
 
 				<TabsContent value="categories" className="space-y-4">
-					<Card className="border-border shadow-sm">
-						<CardHeader className="border-b border-secondary-dark/20">
-							<CardTitle className="flex items-center gap-2">
-								<FolderOpen className="w-5 h-5 text-primary" />
-								Gestión de Categorías
-							</CardTitle>
-							<CardDescription className="text-secondary-foreground/80">
-								Organiza tus movimientos financieros con categorías
-								personalizadas
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="pt-6">
-							<CategoriesSettings categories={categories} />
-						</CardContent>
-					</Card>
+					<Suspense fallback={<SettingsTabPanelLoadingSkeleton />}>
+						<CategoriesSettingsPanel userId={userId} />
+					</Suspense>
 				</TabsContent>
 
 				<TabsContent value="openai" className="space-y-4">
-					<Card className="border-border shadow-sm">
-						<CardHeader className="border-b border-secondary-dark/20">
-							<CardTitle className="flex items-center gap-2">
-								<Sparkles className="w-5 h-5 text-primary" />
-								Configuración de OpenAI
-							</CardTitle>
-							<CardDescription className="text-secondary-foreground/80">
-								Configura tu API key para habilitar funcionalidades de IA
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="pt-6">
-							<OpenAISettings initialHasExistingKey={hasOpenAIKey} />
-						</CardContent>
-					</Card>
+					<Suspense fallback={<SettingsTabPanelLoadingSkeleton />}>
+						<OpenAISettingsPanel />
+					</Suspense>
 				</TabsContent>
 			</Tabs>
 
-			<div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border">
-				<h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-					<SettingsIcon className="w-4 h-4" />
+			<div className="mt-8 rounded-lg border border-border bg-muted/50 p-4">
+				<h3 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+					<SettingsIcon className="h-4 w-4" />
 					Información
 				</h3>
-				<ul className="text-sm text-muted-foreground space-y-1">
+				<ul className="space-y-1 text-sm text-muted-foreground">
 					<li>
 						• Los cambios en la moneda se aplicarán a todos tus movimientos
 						futuros

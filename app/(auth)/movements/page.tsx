@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import { MovementsContentLoadingSkeleton } from "@/app/(auth)/components/loading_skeletons";
 import { getUserCategoriesAction } from "@/app/core/categories/actions/categories-actions";
 import { getMovmentsAction } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
@@ -19,6 +20,8 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ArrowLeftRight, List } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Suspense, cache } from "react";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -92,15 +95,29 @@ function getPageNumbers(currentPage: number, totalPages: number): PageItem[] {
 	return pages;
 }
 
-export default async function Movements({ searchParams }: MovementsPageProps) {
-	const resolvedSearchParams = await searchParams;
-	const userId = await getUserId();
-	if (!userId) return;
+const getMovementsPageData = cache(async (userId: string) => {
 	const [movements, userCurrency, categories] = await Promise.all([
 		getMovmentsAction(userId),
 		getUserCurrency(),
 		getUserCategoriesAction(userId),
 	]);
+
+	return { movements, userCurrency, categories };
+});
+
+async function MovementsContent({
+	userId,
+	searchParams,
+}: {
+	userId: string;
+	searchParams?: Promise<{
+		page?: SearchParamValue;
+		pageSize?: SearchParamValue;
+	}>;
+}) {
+	const resolvedSearchParams = await searchParams;
+	const { movements, userCurrency, categories } =
+		await getMovementsPageData(userId);
 
 	const pageSize = parsePositiveInteger(
 		resolvedSearchParams?.pageSize,
@@ -123,35 +140,19 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 	}
 
 	return (
-		<main className="flex flex-col min-h-screen max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			{/* Header mejorado */}
-			<div className="mb-8">
-				<div className="flex items-center gap-3 mb-3">
-					<div className="p-2 bg-primary/10 rounded-lg">
-						<ArrowLeftRight className="w-6 h-6 text-primary" />
-					</div>
-					<div>
-						<h1 className="text-2xl font-bold text-foreground">Movimientos</h1>
-						<p className="text-muted-foreground text-sm">
-							Historial completo de transacciones
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Estadísticas rápidas */}
+		<>
 			<div className="mb-6">
-				<div className="bg-secondary p-4 rounded-xl border border-secondary-dark/20 shadow-sm">
-					<div className="flex justify-between items-start">
-						<div className="flex-1 min-w-0 pr-3">
-							<div className="flex items-center gap-2 mb-2">
-								<List className="w-4 h-4 text-secondary-foreground/70 flex-shrink-0" />
-								<h3 className="font-semibold text-secondary-foreground text-sm truncate">
+				<div className="rounded-xl border border-secondary-dark/20 bg-secondary p-4 shadow-sm">
+					<div className="flex items-start justify-between">
+						<div className="min-w-0 flex-1 pr-3">
+							<div className="mb-2 flex items-center gap-2">
+								<List className="h-4 w-4 shrink-0 text-secondary-foreground/70" />
+								<h3 className="truncate text-sm font-semibold text-secondary-foreground">
 									Total de movimientos
 								</h3>
 							</div>
 						</div>
-						<div className="flex items-center gap-2 flex-shrink-0">
+						<div className="flex shrink-0 items-center gap-2">
 							<div className="text-sm font-bold text-secondary-foreground">
 								{movements.length.toLocaleString()}
 							</div>
@@ -160,7 +161,6 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 				</div>
 			</div>
 
-			{/* Lista de movimientos */}
 			<div className="md:hidden">
 				<FinancialMovementsList
 					movements={paginatedMovements}
@@ -171,11 +171,11 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 			</div>
 			<div className="hidden md:block">
 				{movements.length === 0 ? (
-					<div className="text-center py-16">
-						<h3 className="text-lg font-semibold text-foreground mb-2">
+					<div className="py-16 text-center">
+						<h3 className="mb-2 text-lg font-semibold text-foreground">
 							No hay movimientos
 						</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-muted-foreground">
 							Agrega tu primer movimiento para comenzar
 						</p>
 					</div>
@@ -187,7 +187,7 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 				)}
 			</div>
 
-			{movements.length > 0 && (
+			{movements.length > 0 ? (
 				<div className="mt-6 flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
 					<div className="text-sm text-muted-foreground">
 						Mostrando{" "}
@@ -200,7 +200,7 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 						movimientos
 					</div>
 
-					{totalPages > 1 && (
+					{totalPages > 1 ? (
 						<Pagination className="md:justify-end">
 							<PaginationContent>
 								<PaginationItem>
@@ -237,9 +237,39 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 								</PaginationItem>
 							</PaginationContent>
 						</Pagination>
-					)}
+					) : null}
 				</div>
-			)}
+			) : null}
+		</>
+	);
+}
+
+export default async function Movements({ searchParams }: MovementsPageProps) {
+	const userId = await getUserId();
+
+	if (!userId) {
+		return redirect("/welcome");
+	}
+
+	return (
+		<main className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+			<div className="mb-8">
+				<div className="mb-3 flex items-center gap-3">
+					<div className="rounded-lg bg-primary/10 p-2">
+						<ArrowLeftRight className="h-6 w-6 text-primary" />
+					</div>
+					<div>
+						<h1 className="text-2xl font-bold text-foreground">Movimientos</h1>
+						<p className="text-sm text-muted-foreground">
+							Historial completo de transacciones
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<Suspense fallback={<MovementsContentLoadingSkeleton />}>
+				<MovementsContent userId={userId} searchParams={searchParams} />
+			</Suspense>
 		</main>
 	);
 }
