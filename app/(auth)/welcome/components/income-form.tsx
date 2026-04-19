@@ -1,4 +1,5 @@
 import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -47,11 +48,11 @@ export function IncomeForm({
 					onChange={(e) => setSource(e.target.value)}
 					className="text-sm"
 				/>
-				<Input
+				<AmountInput
 					placeholder="Monto"
-					type="number"
+					currency={currency}
 					value={amount}
-					onChange={(e) => setAmount(e.target.value)}
+					onValueChange={setAmount}
 					className="text-sm"
 				/>
 				<Button

@@ -68,7 +68,12 @@ async function AuthenticatedDesktopNavigation() {
 
 	const navigationData = await getAuthenticatedNavigationData(userId);
 
-	return <DesktopNav categories={navigationData.categories} />;
+	return (
+		<DesktopNav
+			categories={navigationData.categories}
+			userCurrency={navigationData.userCurrency}
+		/>
+	);
 }
 
 async function AuthenticatedMobileNavigation() {

@@ -1,4 +1,5 @@
 import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,14 +206,13 @@ export function MovementMobileCard({
 								<p className="text-xs font-medium text-muted-foreground">
 									Monto
 								</p>
-								<Input
-									type="number"
-									value={movement.amount ?? ""}
-									onChange={(event) =>
-										onChange?.("amount", Number(event.target.value))
-									}
+								<AmountInput
+									currency={userCurrency}
+									defaultValue={movement.amount ?? ""}
+									onValueChange={(value) => {
+										onChange?.("amount", value === "" ? 0 : Number(value));
+									}}
 									placeholder="0.00"
-									step="0.01"
 									className="h-11"
 								/>
 							</div>
@@ -325,7 +325,12 @@ export function MovementMobileCard({
 							<X className="size-4" />
 							Cancelar edición
 						</Button>
-						<Button type="button" onClick={onSave} className="h-11 w-full">
+						<Button
+							type="button"
+							onClick={onSave}
+							className="h-11 w-full"
+							disabled={movement.amount <= 0}
+						>
 							<Check className="size-4" />
 							Guardar cambios
 						</Button>

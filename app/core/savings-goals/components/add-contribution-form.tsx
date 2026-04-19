@@ -2,6 +2,7 @@
 
 import { createSavingsGoalContributionAction } from "@/app/core/savings-goals/actions/savings-goals-actions";
 import { getTodayDateOnlyString } from "@/app/core/savings-goals/lib/savings_goals_date";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,9 +12,13 @@ import { toast } from "sonner";
 
 interface AddContributionFormProps {
 	goalId: number;
+	userCurrency: string;
 }
 
-export function AddContributionForm({ goalId }: AddContributionFormProps) {
+export function AddContributionForm({
+	goalId,
+	userCurrency,
+}: AddContributionFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		createSavingsGoalContributionAction,
 		null,
@@ -44,14 +49,11 @@ export function AddContributionForm({ goalId }: AddContributionFormProps) {
 						Monto del abono
 					</Label>
 					<div className="relative">
-						<PiggyBank className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
+						<PiggyBank className="pointer-events-none absolute top-[22px] left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+						<AmountInput
 							id={`contribution-amount-${goalId}`}
 							name="amount"
-							type="number"
-							min="0"
-							step="0.01"
-							inputMode="decimal"
+							currency={userCurrency}
 							required
 							placeholder="0.00"
 							className="h-11 pl-10"

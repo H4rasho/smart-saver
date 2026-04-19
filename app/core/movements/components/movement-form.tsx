@@ -1,6 +1,7 @@
 "use client";
 
 import { createMovmentAction } from "@/app/core/movements/actions/movments-actions";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ import { MovementType } from "../types/movement-type";
 interface AddMovementFormProps {
 	categories: Category[];
 	onSuccess?: () => void;
+	userCurrency: string;
 }
 
 const DEFAULT_MOVEMENT_TYPE = MovementType.EXPENSE;
@@ -69,6 +71,7 @@ function getMovementConfig(movementType: MovementType): {
 export function AddMovementForm({
 	categories,
 	onSuccess,
+	userCurrency,
 }: AddMovementFormProps) {
 	const [movementType, setMovementType] = useState<MovementType>(
 		DEFAULT_MOVEMENT_TYPE,
@@ -195,13 +198,10 @@ export function AddMovementForm({
 
 						<div className="space-y-2">
 							<Label htmlFor="amount">{movementConfig.amountLabel}</Label>
-							<Input
+							<AmountInput
 								id="amount"
 								name="amount"
-								type="number"
-								min="0"
-								step="0.01"
-								inputMode="decimal"
+								currency={userCurrency}
 								required
 								placeholder="0.00"
 								className="h-11"

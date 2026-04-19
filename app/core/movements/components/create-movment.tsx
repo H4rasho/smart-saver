@@ -17,9 +17,10 @@ import { useState } from "react";
 
 interface AddMovementProps {
 	categories: Category[];
+	userCurrency: string;
 }
 
-export function AddMovement({ categories }: AddMovementProps) {
+export function AddMovement({ categories, userCurrency }: AddMovementProps) {
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -63,6 +64,7 @@ export function AddMovement({ categories }: AddMovementProps) {
 						<AddMovementForm
 							categories={categories}
 							onSuccess={() => setOpen(false)}
+							userCurrency={userCurrency}
 						/>
 					</div>
 				</DialogContent>

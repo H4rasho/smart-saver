@@ -20,7 +20,7 @@ export function NavigationMenu({
 			<div className="relative px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
 				{/* Botón central flotante */}
 				<div className="absolute -top-8 left-1/2 -translate-x-1/2 z-20">
-					<AddMovement categories={categories} />
+					<AddMovement categories={categories} userCurrency={userCurrency} />
 				</div>
 
 				<div className="grid grid-cols-5 gap-2">

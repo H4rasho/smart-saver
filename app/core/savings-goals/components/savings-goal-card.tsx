@@ -121,7 +121,7 @@ export function SavingsGoalCard({ goal, userCurrency }: SavingsGoalCardProps) {
 								meta.
 							</p>
 						</div>
-						<AddContributionForm goalId={goal.id} />
+						<AddContributionForm goalId={goal.id} userCurrency={userCurrency} />
 					</div>
 				</div>
 			</CardContent>

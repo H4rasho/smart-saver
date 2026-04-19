@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -146,12 +147,12 @@ export function EditMovementDialog({
 
 								<div className="space-y-2">
 									<Label htmlFor="amount">Monto</Label>
-									<Input
+									<AmountInput
+										key={movement.id}
 										id="amount"
 										name="amount"
-										type="number"
+										currency={userCurrency}
 										defaultValue={movement.amount}
-										step="0.01"
 										required
 										className="h-11"
 									/>

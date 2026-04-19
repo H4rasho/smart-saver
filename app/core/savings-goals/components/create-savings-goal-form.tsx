@@ -1,6 +1,7 @@
 "use client";
 
 import { createSavingsGoalAction } from "@/app/core/savings-goals/actions/savings-goals-actions";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +9,13 @@ import { Target } from "lucide-react";
 import { useActionState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
-export function CreateSavingsGoalForm() {
+interface CreateSavingsGoalFormProps {
+	userCurrency: string;
+}
+
+export function CreateSavingsGoalForm({
+	userCurrency,
+}: CreateSavingsGoalFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		createSavingsGoalAction,
 		null,
@@ -48,13 +55,10 @@ export function CreateSavingsGoalForm() {
 
 				<div className="space-y-2">
 					<Label htmlFor="goal-target-amount">Monto objetivo</Label>
-					<Input
+					<AmountInput
 						id="goal-target-amount"
 						name="targetAmount"
-						type="number"
-						min="0"
-						step="0.01"
-						inputMode="decimal"
+						currency={userCurrency}
 						required
 						placeholder="0.00"
 						className="h-11"

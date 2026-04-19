@@ -5,9 +5,10 @@ import { NavLink } from "./nav-link";
 
 interface DesktopNavProps {
 	categories: Category[];
+	userCurrency: string;
 }
 
-export function DesktopNav({ categories }: DesktopNavProps) {
+export function DesktopNav({ categories, userCurrency }: DesktopNavProps) {
 	return (
 		<aside className="hidden md:flex w-72 shrink-0 border-r border-border/60 bg-muted/20">
 			<div className="sticky top-0 flex min-h-screen w-full flex-col px-4 py-6">
@@ -50,7 +51,7 @@ export function DesktopNav({ categories }: DesktopNavProps) {
 					<p className="mb-4 text-sm text-muted-foreground">
 						Registra ingresos o gastos sin salir de la vista actual.
 					</p>
-					<AddMovement categories={categories} />
+					<AddMovement categories={categories} userCurrency={userCurrency} />
 				</div>
 			</div>
 		</aside>

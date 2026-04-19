@@ -122,7 +122,7 @@ export default async function SavingsGoalsPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<CreateSavingsGoalForm />
+						<CreateSavingsGoalForm userCurrency={userCurrency} />
 					</CardContent>
 				</Card>
 			</section>
