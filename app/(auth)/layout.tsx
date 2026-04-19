@@ -48,7 +48,8 @@ function DesktopNavFallback() {
 function MobileNavFallback() {
 	return (
 		<div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden">
-			<div className="grid grid-cols-4 gap-2">
+			<div className="grid grid-cols-5 gap-2">
+				<ChromeLoadingBlock className="h-14 w-full rounded-2xl" />
 				<ChromeLoadingBlock className="h-14 w-full rounded-2xl" />
 				<ChromeLoadingBlock className="h-14 w-full rounded-2xl" />
 				<ChromeLoadingBlock className="h-14 w-full rounded-2xl" />

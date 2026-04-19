@@ -29,6 +29,13 @@
       "when": 1773528000000,
       "tag": "0003_add_openai_key_to_users",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1776609379164,
+      "tag": "0004_mixed_nightshade",
+      "breakpoints": true
     }
   ]
 }

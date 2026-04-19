@@ -1,17 +1,18 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { History, Home, Settings } from "lucide-react";
+import { History, Home, PiggyBank, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type NavLinkVariant = "mobile" | "desktop";
-type NavLinkIcon = "home" | "history" | "settings";
+type NavLinkIcon = "home" | "history" | "savings-goals" | "settings";
 
 const ICONS: Record<NavLinkIcon, LucideIcon> = {
 	home: Home,
 	history: History,
+	"savings-goals": PiggyBank,
 	settings: Settings,
 };
 

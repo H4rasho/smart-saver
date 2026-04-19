@@ -23,8 +23,7 @@ export function NavigationMenu({
 					<AddMovement categories={categories} />
 				</div>
 
-				{/* Grid de 4 botones */}
-				<div className="grid grid-cols-4 gap-2">
+				<div className="grid grid-cols-5 gap-2">
 					<NavLink href="/home" icon="home" label="Inicio" />
 
 					<InputOptionsButton
@@ -34,6 +33,8 @@ export function NavigationMenu({
 					/>
 
 					<NavLink href="/movements" icon="history" label="Historial" />
+
+					<NavLink href="/savings-goals" icon="savings-goals" label="Metas" />
 
 					<NavLink href="/settings" icon="settings" label="Config" />
 				</div>

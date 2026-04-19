@@ -30,6 +30,12 @@ export function DesktopNav({ categories }: DesktopNavProps) {
 						variant="desktop"
 					/>
 					<NavLink
+						href="/savings-goals"
+						icon="savings-goals"
+						label="Metas de ahorro"
+						variant="desktop"
+					/>
+					<NavLink
 						href="/settings"
 						icon="settings"
 						label="Configuración"
