@@ -3,6 +3,10 @@ import {
 	HomeSummaryCardsLoadingSkeleton,
 } from "@/app/(auth)/components/loading_skeletons";
 import {
+	SUMMARY_STAT_TONES,
+	SummaryStatCard,
+} from "@/app/(auth)/components/summary_stat_card";
+import {
 	getBalanceAction,
 	getMovmentsAction,
 	getTotalsByTypeAction,
@@ -46,75 +50,49 @@ async function HomeSummaryCards() {
 	const formattedExpenses = formatCurrencyAmount(total_expenses, userCurrency, {
 		maximumFractionDigits: 0,
 	});
+	const savingsRatio =
+		total_income > 0 ? `${((balance / total_income) * 100).toFixed(1)}%` : "0%";
+
+	const cards = [
+		{
+			eyebrow: "Panorama",
+			label: "Balance total",
+			value: formattedBalance,
+			detail: "Disponible después de registrar ingresos y gastos.",
+			icon: Wallet,
+			...SUMMARY_STAT_TONES.violet,
+		},
+		{
+			eyebrow: "Entrada",
+			label: "Ingresos",
+			value: formattedIncome,
+			detail: "Lo que sumó a tu flujo durante el período actual.",
+			icon: TrendingUp,
+			...SUMMARY_STAT_TONES.emerald,
+		},
+		{
+			eyebrow: "Salida",
+			label: "Gastos",
+			value: formattedExpenses,
+			detail: "Tus egresos consolidados con una lectura más tranquila.",
+			icon: TrendingDown,
+			...SUMMARY_STAT_TONES.rose,
+		},
+		{
+			eyebrow: "Ritmo",
+			label: "Ratio ahorro",
+			value: savingsRatio,
+			detail: "Qué parte de tus ingresos logra quedarse contigo.",
+			icon: Scale,
+			...SUMMARY_STAT_TONES.sky,
+		},
+	] as const;
 
 	return (
 		<div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-			<div className="rounded-xl border border-secondary-dark/20 bg-gradient-to-br from-secondary-light to-secondary p-6 shadow-sm">
-				<div className="flex items-center justify-between">
-					<div>
-						<p className="text-sm font-medium text-foreground/70">
-							Balance Total
-						</p>
-						<p className="text-2xl font-bold text-foreground">
-							{formattedBalance}
-						</p>
-					</div>
-					<div className="rounded-lg bg-secondary-vibrant p-3">
-						<Wallet className="h-6 w-6 text-white" />
-					</div>
-				</div>
-			</div>
-
-			<div className="rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm dark:border-green-700/40 dark:from-green-900/20 dark:to-green-800/30">
-				<div className="flex items-center justify-between">
-					<div>
-						<p className="text-sm font-medium text-green-700 dark:text-green-300">
-							Ingresos
-						</p>
-						<p className="text-2xl font-bold text-green-800 dark:text-green-200">
-							{formattedIncome}
-						</p>
-					</div>
-					<div className="rounded-lg bg-green-500 p-3">
-						<TrendingUp className="h-6 w-6 text-white" />
-					</div>
-				</div>
-			</div>
-
-			<div className="rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-red-100 p-6 shadow-sm dark:border-red-700/40 dark:from-red-900/20 dark:to-red-800/30">
-				<div className="flex items-center justify-between">
-					<div>
-						<p className="text-sm font-medium text-red-700 dark:text-red-300">
-							Gastos
-						</p>
-						<p className="text-2xl font-bold text-red-800 dark:text-red-200">
-							{formattedExpenses}
-						</p>
-					</div>
-					<div className="rounded-lg bg-red-500 p-3">
-						<TrendingDown className="h-6 w-6 text-white" />
-					</div>
-				</div>
-			</div>
-
-			<div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm dark:border-blue-700/40 dark:from-blue-900/20 dark:to-blue-800/30">
-				<div className="flex items-center justify-between">
-					<div>
-						<p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-							Ratio Ahorro
-						</p>
-						<p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-							{total_income > 0
-								? ((balance / total_income) * 100).toFixed(1)
-								: 0}
-							%
-						</p>
-					</div>
-					<div className="rounded-lg bg-blue-500 p-3">
-						<Scale className="h-6 w-6 text-white" />
-					</div>
-				</div>
-			</div>
+			{cards.map((card) => (
+				<SummaryStatCard key={card.label} {...card} />
+			))}
 		</div>
 	);
 }

@@ -130,16 +130,24 @@ function DashboardSummaryCardsFixture() {
 				return (
 					<div
 						key={card.icon.displayName ?? card.icon.name}
-						className="rounded-xl border border-border/60 bg-gradient-to-br from-card via-card to-secondary/30 p-6 shadow-sm"
+						className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm"
 					>
-						<div className="flex items-center justify-between gap-4">
-							<div className="min-w-0 flex-1 space-y-3">
-								<LoadingBlock className="h-4 w-24 rounded-md" />
-								<LoadingBlock className="h-8 w-32 rounded-lg" />
+						<div className="absolute inset-x-0 top-0 h-px bg-border/80" />
+						<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.04),transparent_48%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent_48%)]" />
+						<div className="relative flex flex-col gap-6">
+							<div className="flex items-start justify-between gap-4">
+								<div className="min-w-0 flex-1 space-y-3">
+									<LoadingBlock className="h-6 w-20 rounded-full" />
+									<div className="space-y-2">
+										<LoadingBlock className="h-4 w-24 rounded-md" />
+										<LoadingBlock className="h-9 w-32 rounded-lg" />
+									</div>
+								</div>
+								<div className={cn("rounded-2xl border p-3", card.tone)}>
+									<Icon className="h-5 w-5" />
+								</div>
 							</div>
-							<div className={cn("rounded-lg p-3", card.tone)}>
-								<Icon className="h-6 w-6" />
-							</div>
+							<LoadingBlock className="h-3 w-36 rounded-md" />
 						</div>
 					</div>
 				);
