@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+
+dotenv.config({
+	path: ".env.production",
+});
+
 const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, ENCRYPTION_KEY, OPENAI_API_KEY } =
 	process.env;
 
