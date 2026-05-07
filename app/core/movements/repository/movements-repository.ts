@@ -9,6 +9,7 @@ import {
 	type Movement,
 	MovementType,
 	type MovementWithCategoryAndMovementType,
+	type MovementsGroupedByCategory,
 } from "@/app/core/movements/types/movement-type";
 import { getUserId } from "@/app/core/user/actions/user-actions";
 import { db } from "@/database/database";
@@ -269,6 +270,62 @@ export async function getAllMovements(
 
 	// Decrypt sensitive data before returning
 	return decryptMovementsWithRelations(normalizedRows);
+}
+
+export async function getMovementsGroupedByCategory(
+	userId: string,
+): Promise<MovementsGroupedByCategory> {
+	const allMovements = await getAllMovements(userId);
+
+	const groupedMovements = allMovements.reduce<MovementsGroupedByCategory>(
+		(accumulator, movement) => {
+			const categoryId = movement.category_id ?? null;
+			const categoryName = movement.category_name ?? "Sin categoría";
+			const categoryKey = categoryId ?? 0;
+			let categoryGroup = accumulator.find(
+				(group) => (group.category_id ?? 0) === categoryKey,
+			);
+
+			if (!categoryGroup) {
+				categoryGroup = {
+					category_id: categoryId,
+					category_name: categoryName,
+					total_amount: 0,
+					total_expenses: 0,
+					total_income: 0,
+					movements_count: 0,
+					movements: [],
+				};
+				accumulator.push(categoryGroup);
+			}
+
+			const movementTypeName = movement.movement_type_name.toUpperCase();
+			const isIncome = movementTypeName === MovementType.INCOME;
+			const isExpense =
+				movementTypeName === MovementType.EXPENSE ||
+				movementTypeName === MovementType.FIXED_EXPENSE;
+
+			categoryGroup.movements.push(movement);
+			categoryGroup.movements_count += 1;
+			categoryGroup.total_amount += movement.amount;
+
+			if (isIncome) {
+				categoryGroup.total_income += movement.amount;
+			}
+
+			if (isExpense) {
+				categoryGroup.total_expenses += movement.amount;
+			}
+
+			return accumulator;
+		},
+		[],
+	);
+
+	return groupedMovements.sort(
+		(firstCategory, secondCategory) =>
+			secondCategory.movements_count - firstCategory.movements_count,
+	);
 }
 
 export async function getTotalsByType(

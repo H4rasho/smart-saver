@@ -34,6 +34,16 @@ export type MovementWithCategoryAndMovementType = Movement & {
 	created_at: string;
 };
 
+export type MovementsGroupedByCategory = Array<{
+	category_id: number | null;
+	category_name: string;
+	total_amount: number;
+	total_expenses: number;
+	total_income: number;
+	movements_count: number;
+	movements: MovementWithCategoryAndMovementType[];
+}>;
+
 export enum MovementType {
 	INCOME = "INCOME",
 	FIXED_EXPENSE = "FIXED_EXPENSE",
