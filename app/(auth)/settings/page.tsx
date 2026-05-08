@@ -20,6 +20,7 @@ import {
 	Settings as SettingsIcon,
 	Sparkles,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CategoriesSettings } from "./components/categories_settings";
@@ -27,6 +28,7 @@ import { CurrencySettings } from "./components/currency_settings";
 import { OpenAISettings } from "./components/openai_settings";
 
 async function CurrencySettingsPanel() {
+	const t = await getTranslations("settings");
 	const currency = await getUserCurrency();
 
 	return (
@@ -34,17 +36,16 @@ async function CurrencySettingsPanel() {
 			<CardHeader className="border-b border-secondary-dark/20">
 				<CardTitle className="flex items-center gap-2">
 					<Coins className="h-5 w-5 text-primary" />
-					Configuración de Moneda
+					{t("currencyTitle")}
 				</CardTitle>
 				<CardDescription className="text-secondary-foreground/80">
-					Selecciona la moneda que utilizarás para registrar tus movimientos
-					financieros
+					{t("currencyDescription")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
 				<div className="mb-4 rounded-lg border border-border bg-muted/50 p-4">
 					<p className="text-sm text-foreground">
-						<span className="font-semibold">Moneda actual:</span>{" "}
+						<span className="font-semibold">{t("currentCurrency")}</span>{" "}
 						<span className="font-bold text-muted-foreground">{currency}</span>
 					</p>
 				</div>
@@ -55,6 +56,7 @@ async function CurrencySettingsPanel() {
 }
 
 async function CategoriesSettingsPanel({ userId }: { userId: string }) {
+	const t = await getTranslations("settings");
 	const categories = await getUserCategoriesAction(userId);
 
 	return (
@@ -62,10 +64,10 @@ async function CategoriesSettingsPanel({ userId }: { userId: string }) {
 			<CardHeader className="border-b border-secondary-dark/20">
 				<CardTitle className="flex items-center gap-2">
 					<FolderOpen className="h-5 w-5 text-primary" />
-					Gestión de Categorías
+					{t("categoriesTitle")}
 				</CardTitle>
 				<CardDescription className="text-secondary-foreground/80">
-					Organiza tus movimientos financieros con categorías personalizadas
+					{t("categoriesDescription")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
@@ -76,6 +78,7 @@ async function CategoriesSettingsPanel({ userId }: { userId: string }) {
 }
 
 async function OpenAISettingsPanel() {
+	const t = await getTranslations("settings");
 	const hasOpenAIKey = await getUserOpenAIKeyStatus();
 
 	return (
@@ -83,10 +86,10 @@ async function OpenAISettingsPanel() {
 			<CardHeader className="border-b border-secondary-dark/20">
 				<CardTitle className="flex items-center gap-2">
 					<Sparkles className="h-5 w-5 text-primary" />
-					Configuración de OpenAI
+					{t("openAiTitle")}
 				</CardTitle>
 				<CardDescription className="text-secondary-foreground/80">
-					Configura tu API key para habilitar funcionalidades de IA
+					{t("openAiDescription")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
@@ -97,6 +100,7 @@ async function OpenAISettingsPanel() {
 }
 
 export default async function Settings() {
+	const t = await getTranslations("settings");
 	const userId = await getUserId();
 
 	if (!userId) {
@@ -110,11 +114,9 @@ export default async function Settings() {
 					<div className="rounded-lg bg-primary/10 p-2">
 						<SettingsIcon className="h-6 w-6 text-primary" />
 					</div>
-					<h1 className="text-3xl font-bold text-foreground">Configuración</h1>
+					<h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
 				</div>
-				<p className="text-muted-foreground">
-					Personaliza tu experiencia y gestiona tus preferencias
-				</p>
+				<p className="text-muted-foreground">{t("description")}</p>
 			</section>
 
 			<Separator className="mb-8" />
@@ -123,15 +125,15 @@ export default async function Settings() {
 				<TabsList className="grid max-w-2xl w-full grid-cols-3">
 					<TabsTrigger value="currency" className="gap-2">
 						<Coins className="h-4 w-4" />
-						Moneda
+						{t("currencyTab")}
 					</TabsTrigger>
 					<TabsTrigger value="categories" className="gap-2">
 						<FolderOpen className="h-4 w-4" />
-						Categorías
+						{t("categoriesTab")}
 					</TabsTrigger>
 					<TabsTrigger value="openai" className="gap-2">
 						<Sparkles className="h-4 w-4" />
-						OpenAI
+						{t("openAiTab")}
 					</TabsTrigger>
 				</TabsList>
 
@@ -157,25 +159,13 @@ export default async function Settings() {
 			<div className="mt-8 rounded-lg border border-border bg-muted/50 p-4">
 				<h3 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
 					<SettingsIcon className="h-4 w-4" />
-					Información
+					{t("infoTitle")}
 				</h3>
 				<ul className="space-y-1 text-sm text-muted-foreground">
-					<li>
-						• Los cambios en la moneda se aplicarán a todos tus movimientos
-						futuros
-					</li>
-					<li>
-						• Las categorías te ayudan a clasificar y organizar mejor tus gastos
-						e ingresos
-					</li>
-					<li>
-						• Puedes eliminar categorías que ya no uses, pero esto no afectará
-						los movimientos existentes
-					</li>
-					<li>
-						• La API key de OpenAI se guarda solo en tu navegador para mayor
-						seguridad
-					</li>
+					<li>• {t("infoCurrency")}</li>
+					<li>• {t("infoCategories")}</li>
+					<li>• {t("infoDeleteCategories")}</li>
+					<li>• {t("infoOpenAi")}</li>
 				</ul>
 			</div>
 		</main>

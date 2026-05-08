@@ -176,4 +176,29 @@ test.describe("Homepage", () => {
 			),
 		).toBeVisible();
 	});
+
+	test("should keep Spanish homepage on the default URL", async ({ page }) => {
+		await page.goto("/");
+		await expect(
+			page.getByRole("heading", {
+				name: "Controla tus gastos como nunca antes",
+				level: 1,
+			}),
+		).toBeVisible();
+		expect(page.url()).toBe("http://localhost:3000/");
+	});
+
+	test("should render English homepage under /en", async ({ page }) => {
+		await page.goto("/en");
+		await expect(
+			page.getByRole("heading", {
+				name: "Control your expenses like never before",
+				level: 1,
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Start Free" }),
+		).toBeVisible();
+		expect(page.url()).toBe("http://localhost:3000/en");
+	});
 });

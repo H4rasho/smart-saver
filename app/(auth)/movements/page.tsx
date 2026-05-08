@@ -20,8 +20,9 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ArrowLeftRight, List } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Suspense, cache } from "react";
+import { type ReactNode, Suspense, cache } from "react";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -115,6 +116,8 @@ async function MovementsContent({
 		pageSize?: SearchParamValue;
 	}>;
 }) {
+	const t = await getTranslations("movements");
+	const locale = await getLocale();
 	const resolvedSearchParams = await searchParams;
 	const { movements, userCurrency, categories } =
 		await getMovementsPageData(userId);
@@ -148,13 +151,13 @@ async function MovementsContent({
 							<div className="mb-2 flex items-center gap-2">
 								<List className="h-4 w-4 shrink-0 text-secondary-foreground/70" />
 								<h3 className="truncate text-sm font-semibold text-secondary-foreground">
-									Total de movimientos
+									{t("totalMovements")}
 								</h3>
 							</div>
 						</div>
 						<div className="flex shrink-0 items-center gap-2">
 							<div className="text-sm font-bold text-secondary-foreground">
-								{movements.length.toLocaleString()}
+								{movements.length.toLocaleString(locale)}
 							</div>
 						</div>
 					</div>
@@ -173,10 +176,10 @@ async function MovementsContent({
 				{movements.length === 0 ? (
 					<div className="py-16 text-center">
 						<h3 className="mb-2 text-lg font-semibold text-foreground">
-							No hay movimientos
+							{t("emptyTitle")}
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Agrega tu primer movimiento para comenzar
+							{t("emptyDescription")}
 						</p>
 					</div>
 				) : (
@@ -190,14 +193,14 @@ async function MovementsContent({
 			{movements.length > 0 ? (
 				<div className="mt-6 flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
 					<div className="text-sm text-muted-foreground">
-						Mostrando{" "}
-						<span className="font-medium text-foreground">{visibleStart}</span>{" "}
-						- <span className="font-medium text-foreground">{visibleEnd}</span>{" "}
-						de{" "}
-						<span className="font-medium text-foreground">
-							{movements.length.toLocaleString()}
-						</span>{" "}
-						movimientos
+						{t.rich("showingRange", {
+							end: visibleEnd.toLocaleString(locale),
+							start: visibleStart.toLocaleString(locale),
+							strong: (chunks: ReactNode) => (
+								<span className="font-medium text-foreground">{chunks}</span>
+							),
+							total: movements.length.toLocaleString(locale),
+						})}
 					</div>
 
 					{totalPages > 1 ? (
@@ -245,6 +248,7 @@ async function MovementsContent({
 }
 
 export default async function Movements({ searchParams }: MovementsPageProps) {
+	const t = await getTranslations("movements");
 	const userId = await getUserId();
 
 	if (!userId) {
@@ -259,10 +263,8 @@ export default async function Movements({ searchParams }: MovementsPageProps) {
 						<ArrowLeftRight className="h-6 w-6 text-primary" />
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold text-foreground">Movimientos</h1>
-						<p className="text-sm text-muted-foreground">
-							Historial completo de transacciones
-						</p>
+						<h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
+						<p className="text-sm text-muted-foreground">{t("description")}</p>
 					</div>
 				</div>
 			</div>

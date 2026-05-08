@@ -23,6 +23,7 @@ import {
 	Tag,
 	Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ export default function FinancialMovementsList({
 	className,
 	categories = [],
 }: FinancialMovementsListProps) {
+	const t = useTranslations("movementsTable");
 	const [deleteState, deleteAction] = useActionState(deleteMovmentAction, null);
 	const [editOpen, setEditOpen] = useState(false);
 	const [selectedMovement, setSelectedMovement] =
@@ -87,26 +89,24 @@ export default function FinancialMovementsList({
 
 	useEffect(() => {
 		if (deleteState?.success) {
-			toast.success("Movimiento eliminado exitosamente");
+			toast.success(t("deleteSuccess"));
 			router.refresh();
 		} else if (deleteState?.error) {
-			toast.error("Error al eliminar movimiento", {
+			toast.error(t("deleteError"), {
 				description: deleteState.error,
 			});
 		}
-	}, [deleteState, router]);
+	}, [deleteState, router, t]);
 
 	if (movements.length === 0) {
 		return (
 			<div className="rounded-2xl border border-dashed bg-muted/20 py-16 text-center">
 				<Inbox className="mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50" />
 				<h3 className="text-lg font-semibold text-foreground mb-2">
-					No hay movimientos
+					{t("emptyTitle")}
 				</h3>
 				<p className="text-muted-foreground text-sm">
-					{maxItems
-						? "No hay movimientos recientes"
-						: "Agrega tu primer movimiento para comenzar"}
+					{maxItems ? t("emptyRecentDescription") : t("emptyDescription")}
 				</p>
 			</div>
 		);
@@ -142,7 +142,7 @@ export default function FinancialMovementsList({
 												className="rounded-full px-2 py-0.5 text-[11px]"
 											>
 												<RefreshCw className="h-3 w-3 text-blue-500" />
-												Recurrente
+												{t("recurring")}
 											</Badge>
 										)}
 										{isFixedExpense(movement.movement_type_name) && (
@@ -150,7 +150,7 @@ export default function FinancialMovementsList({
 												variant="outline"
 												className="rounded-full border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
 											>
-												Fijo
+												{t("fixed")}
 											</Badge>
 										)}
 									</div>
@@ -173,7 +173,7 @@ export default function FinancialMovementsList({
 						<div className="flex items-center gap-2 flex-shrink-0">
 							<div className="rounded-2xl border bg-background px-3 py-2 text-right shadow-xs">
 								<p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-									Total
+									{t("total")}
 								</p>
 								<div
 									className={`mt-1 text-sm font-bold sm:text-base ${getAmountColor(movement.movement_type_name)}`}
@@ -202,7 +202,7 @@ export default function FinancialMovementsList({
 											className="h-8 w-8 p-0 flex-shrink-0 hover:bg-muted rounded-lg"
 										>
 											<MoreVertical className="h-4 w-4" />
-											<span className="sr-only">Abrir menú</span>
+											<span className="sr-only">{t("openMenu")}</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end" className="w-48">
@@ -219,7 +219,7 @@ export default function FinancialMovementsList({
 											className="cursor-pointer py-3"
 										>
 											<Edit className="mr-2 h-4 w-4" />
-											Editar
+											{t("actions.edit")}
 										</DropdownMenuItem>
 
 										{!isFixedExpense(movement.movement_type_name) && (
@@ -228,7 +228,7 @@ export default function FinancialMovementsList({
 												className="cursor-pointer py-3"
 											>
 												<RefreshCw className="mr-2 h-4 w-4" />
-												Convertir a gasto fijo
+												{t("actions.convertToFixed")}
 											</DropdownMenuItem>
 										)}
 
@@ -241,7 +241,7 @@ export default function FinancialMovementsList({
 											className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 py-3"
 										>
 											<Trash2 className="mr-2 h-4 w-4" />
-											Eliminar
+											{t("actions.delete")}
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>

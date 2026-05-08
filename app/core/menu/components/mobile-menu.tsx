@@ -1,6 +1,7 @@
 import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
 import { AddMovement } from "@/app/core/movements/components/create-movment";
 import type { Category } from "@/types/income";
+import { useTranslations } from "next-intl";
 import { InputOptionsButton } from "./input-options-button";
 import { NavLink } from "./nav-link";
 
@@ -15,6 +16,8 @@ export function NavigationMenu({
 	movementTypes,
 	userCurrency,
 }: NavigationMenuProps) {
+	const t = useTranslations("navigation");
+
 	return (
 		<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/80">
 			<div className="relative px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
@@ -24,7 +27,7 @@ export function NavigationMenu({
 				</div>
 
 				<div className="grid grid-cols-5 gap-2">
-					<NavLink href="/home" icon="home" label="Inicio" />
+					<NavLink href="/home" icon="home" label={t("home")} />
 
 					<InputOptionsButton
 						categories={categories}
@@ -32,11 +35,19 @@ export function NavigationMenu({
 						userCurrency={userCurrency}
 					/>
 
-					<NavLink href="/movements" icon="history" label="Historial" />
+					<NavLink href="/movements" icon="history" label={t("history")} />
 
-					<NavLink href="/savings-goals" icon="savings-goals" label="Metas" />
+					<NavLink
+						href="/savings-goals"
+						icon="savings-goals"
+						label={t("savingsGoalsShort")}
+					/>
 
-					<NavLink href="/settings" icon="settings" label="Config" />
+					<NavLink
+						href="/settings"
+						icon="settings"
+						label={t("settingsShort")}
+					/>
 				</div>
 			</div>
 		</nav>

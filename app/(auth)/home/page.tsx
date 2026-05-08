@@ -20,6 +20,7 @@ import {
 } from "@/app/core/user/actions/user-actions";
 import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Scale, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -34,6 +35,7 @@ const getAllMovementsCached = unstable_cache(
 );
 
 async function HomeSummaryCards() {
+	const t = await getTranslations("home.summary");
 	const [{ total_expenses, total_income }, balance, userCurrency] =
 		await Promise.all([
 			getTotalsByTypeAction(),
@@ -55,34 +57,34 @@ async function HomeSummaryCards() {
 
 	const cards = [
 		{
-			eyebrow: "Panorama",
-			label: "Balance total",
+			eyebrow: t("overview"),
+			label: t("totalBalance"),
 			value: formattedBalance,
-			detail: "Disponible después de registrar ingresos y gastos.",
+			detail: t("balanceDetail"),
 			icon: Wallet,
 			...SUMMARY_STAT_TONES.violet,
 		},
 		{
-			eyebrow: "Entrada",
-			label: "Ingresos",
+			eyebrow: t("incomeEyebrow"),
+			label: t("income"),
 			value: formattedIncome,
-			detail: "Lo que sumó a tu flujo durante el período actual.",
+			detail: t("incomeDetail"),
 			icon: TrendingUp,
 			...SUMMARY_STAT_TONES.emerald,
 		},
 		{
-			eyebrow: "Salida",
-			label: "Gastos",
+			eyebrow: t("expenseEyebrow"),
+			label: t("expenses"),
 			value: formattedExpenses,
-			detail: "Tus egresos consolidados con una lectura más tranquila.",
+			detail: t("expensesDetail"),
 			icon: TrendingDown,
 			...SUMMARY_STAT_TONES.rose,
 		},
 		{
-			eyebrow: "Ritmo",
-			label: "Ratio ahorro",
+			eyebrow: t("rhythm"),
+			label: t("savingsRatio"),
 			value: savingsRatio,
-			detail: "Qué parte de tus ingresos logra quedarse contigo.",
+			detail: t("savingsRatioDetail"),
 			icon: Scale,
 			...SUMMARY_STAT_TONES.sky,
 		},
@@ -98,6 +100,7 @@ async function HomeSummaryCards() {
 }
 
 async function RecentMovementsSection({ userId }: { userId: string }) {
+	const t = await getTranslations("home");
 	const [movements, userCurrency] = await Promise.all([
 		getAllMovementsCached(userId),
 		getUserCurrency(),
@@ -118,10 +121,10 @@ async function RecentMovementsSection({ userId }: { userId: string }) {
 				{movements.length === 0 ? (
 					<div className="py-12 text-center">
 						<h3 className="mb-2 text-lg font-semibold text-foreground">
-							No hay movimientos
+							{t("noMovements")}
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Agrega tu primer movimiento para comenzar
+							{t("addFirstMovement")}
 						</p>
 					</div>
 				) : (
@@ -136,6 +139,7 @@ async function RecentMovementsSection({ userId }: { userId: string }) {
 }
 
 export default async function Home() {
+	const t = await getTranslations("home");
 	const userId = await getUserId();
 
 	if (!userId) {
@@ -146,10 +150,10 @@ export default async function Home() {
 		<main className="mx-auto flex min-h-screen max-w-6xl flex-col py-10">
 			<section>
 				<div className="mb-6">
-					<h2 className="mb-2 text-2xl font-bold text-foreground">Dashboard</h2>
-					<p className="text-muted-foreground">
-						Tu resumen financiero personal
-					</p>
+					<h2 className="mb-2 text-2xl font-bold text-foreground">
+						{t("title")}
+					</h2>
+					<p className="text-muted-foreground">{t("description")}</p>
 				</div>
 
 				<Suspense fallback={<HomeSummaryCardsLoadingSkeleton />}>
@@ -160,10 +164,10 @@ export default async function Home() {
 			<section className="mt-6">
 				<div className="mb-4">
 					<h3 className="mb-2 text-xl font-semibold text-foreground">
-						Movimientos Recientes
+						{t("recentMovements")}
 					</h3>
 					<p className="text-sm text-muted-foreground">
-						Gestiona tus transacciones
+						{t("recentMovementsDescription")}
 					</p>
 				</div>
 

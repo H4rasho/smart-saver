@@ -1,10 +1,9 @@
 "use client";
 
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { History, Home, PiggyBank, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 type NavLinkVariant = "mobile" | "desktop";
 type NavLinkIcon = "home" | "history" | "savings-goals" | "settings";

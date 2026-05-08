@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from "@/components/language_switcher";
 import { SignInCtaButton } from "@/components/sign_in_cta_button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,12 +11,53 @@ import {
 	Wallet,
 	Zap,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 const { APP_NAME } = CONFIG;
 const CURRENT_YEAR = new Date().getFullYear();
 
-export default function LandingPage() {
+export default async function LandingPage() {
+	const t = await getTranslations("landing");
+	const features = [
+		{
+			key: "automaticTracking",
+			icon: TrendingDown,
+			iconClassName: "text-blue-400",
+			backgroundClassName: "from-blue-400/20 to-sky-400/20",
+		},
+		{
+			key: "smartAnalysis",
+			icon: PieChart,
+			iconClassName: "text-purple-400",
+			backgroundClassName: "from-purple-400/20 to-pink-400/20",
+		},
+		{
+			key: "security",
+			icon: Shield,
+			iconClassName: "text-blue-400",
+			backgroundClassName: "from-blue-400/20 to-indigo-400/20",
+		},
+		{
+			key: "mobileFirst",
+			icon: Smartphone,
+			iconClassName: "text-orange-400",
+			backgroundClassName: "from-orange-400/20 to-red-400/20",
+		},
+		{
+			key: "smartBudgets",
+			icon: Wallet,
+			iconClassName: "text-blue-400",
+			backgroundClassName: "from-blue-400/20 to-sky-400/20",
+		},
+		{
+			key: "notifications",
+			icon: Zap,
+			iconClassName: "text-yellow-400",
+			backgroundClassName: "from-yellow-400/20 to-orange-400/20",
+		},
+	] as const;
+
 	return (
 		<div className="min-h-screen bg-black text-white">
 			{/* Header */}
@@ -27,11 +69,14 @@ export default function LandingPage() {
 						</div>
 						<span className="text-xl font-bold">{APP_NAME}</span>
 					</div>
-					<SignInCtaButton
-						label="Iniciar Sesión"
-						variant="outline"
-						className="border-gray-700 hover:bg-gray-800 bg-transparent"
-					/>
+					<div className="flex items-center gap-3">
+						<LanguageSwitcher className="border-gray-700 bg-gray-900/70 text-white" />
+						<SignInCtaButton
+							label={t("signIn")}
+							variant="outline"
+							className="border-gray-700 hover:bg-gray-800 bg-transparent"
+						/>
+					</div>
 				</div>
 			</header>
 
@@ -42,31 +87,30 @@ export default function LandingPage() {
 					className="mb-6 bg-gray-800 text-gray-300 border-gray-700"
 				>
 					<Zap className="w-3 h-3 mr-1" />
-					Nueva versión disponible
+					{t("badge")}
 				</Badge>
 
 				<h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-					Controla tus gastos
+					{t("heroTitleFirst")}
 					<br />
 					<span className="bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">
-						como nunca antes
+						{t("heroTitleSecond")}
 					</span>
 				</h1>
 
 				<p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-					La app más intuitiva para gestionar tus finanzas personales. Rastrea
-					gastos, establece presupuestos y alcanza tus metas financieras.
+					{t("heroDescription")}
 				</p>
 
 				<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 					<SignInCtaButton
-						label="Comenzar Gratis"
+						label={t("startFree")}
 						size="lg"
 						showArrow
 						className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-black font-semibold px-8"
 					/>
 					<SignInCtaButton
-						label="Ver Demo"
+						label={t("viewDemo")}
 						variant="outline"
 						size="lg"
 						className="border-gray-700 hover:bg-gray-800 bg-transparent"
@@ -78,95 +122,38 @@ export default function LandingPage() {
 			<section className="container mx-auto px-4 py-16">
 				<div className="text-center mb-12">
 					<h2 className="text-3xl md:text-4xl font-bold mb-4">
-						Todo lo que necesitas en una app
+						{t("featuresTitle")}
 					</h2>
 					<p className="text-gray-400 text-lg max-w-2xl mx-auto">
-						Herramientas poderosas diseñadas para simplificar tu vida financiera
+						{t("featuresDescription")}
 					</p>
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-blue-400/20 to-sky-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<TrendingDown className="w-6 h-6 text-blue-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">
-								Seguimiento Automático
-							</h3>
-							<p className="text-gray-400">
-								Conecta tus cuentas bancarias y tarjetas para un seguimiento
-								automático de gastos
-							</p>
-						</CardContent>
-					</Card>
+					{features.map((feature) => {
+						const Icon = feature.icon;
 
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<PieChart className="w-6 h-6 text-purple-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">
-								Análisis Inteligente
-							</h3>
-							<p className="text-gray-400">
-								Visualiza tus patrones de gasto con gráficos interactivos y
-								reportes detallados
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<Shield className="w-6 h-6 text-blue-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">Seguridad Total</h3>
-							<p className="text-gray-400">
-								Encriptación de nivel bancario para mantener tus datos
-								financieros seguros
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-orange-400/20 to-red-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<Smartphone className="w-6 h-6 text-orange-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">Mobile First</h3>
-							<p className="text-gray-400">
-								Diseñada para móviles con sincronización en tiempo real en todos
-								tus dispositivos
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-blue-400/20 to-sky-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<Wallet className="w-6 h-6 text-blue-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">Presupuestos Smart</h3>
-							<p className="text-gray-400">
-								Crea presupuestos inteligentes que se adaptan a tus hábitos de
-								gasto
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group">
-						<CardContent className="p-6">
-							<div className="w-12 h-12 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-								<Zap className="w-6 h-6 text-yellow-400" />
-							</div>
-							<h3 className="text-xl font-semibold mb-2">Notificaciones</h3>
-							<p className="text-gray-400">
-								Alertas personalizadas para mantenerte al día con tus metas
-								financieras
-							</p>
-						</CardContent>
-					</Card>
+						return (
+							<Card
+								key={feature.key}
+								className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors group"
+							>
+								<CardContent className="p-6">
+									<div
+										className={`w-12 h-12 bg-gradient-to-br ${feature.backgroundClassName} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+									>
+										<Icon className={`w-6 h-6 ${feature.iconClassName}`} />
+									</div>
+									<h3 className="text-xl font-semibold mb-2">
+										{t(`features.${feature.key}.title`)}
+									</h3>
+									<p className="text-gray-400">
+										{t(`features.${feature.key}.description`)}
+									</p>
+								</CardContent>
+							</Card>
+						);
+					})}
 				</div>
 			</section>
 
@@ -175,30 +162,26 @@ export default function LandingPage() {
 				<Card className="bg-gray-900 border-gray-700 shadow-2xl">
 					<CardContent className="p-8 md:p-12 text-center">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-							¿Listo para tomar control de tus finanzas?
+							{t("ctaTitle")}
 						</h2>
 						<p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-							Únete a miles de usuarios que ya están ahorrando más y gastando
-							mejor con {APP_NAME}
+							{t("ctaDescription", { appName: APP_NAME })}
 						</p>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<SignInCtaButton
-								label="Crear Cuenta Gratis"
+								label={t("createAccount")}
 								size="lg"
 								showArrow
 								className="bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600 text-white font-semibold px-8 shadow-lg"
 							/>
 							<SignInCtaButton
-								label="¿Ya tienes cuenta? Inicia Sesión"
+								label={t("existingAccount")}
 								variant="outline"
 								size="lg"
 								className="border-gray-500 hover:bg-gray-800 bg-transparent text-gray-200 hover:text-white"
 							/>
 						</div>
-						<p className="text-sm text-gray-400 mt-4">
-							Sin tarjeta de crédito • Gratis por 30 días • Cancela cuando
-							quieras
-						</p>
+						<p className="text-sm text-gray-400 mt-4">{t("trustIndicators")}</p>
 					</CardContent>
 				</Card>
 			</section>
@@ -215,18 +198,18 @@ export default function LandingPage() {
 						</div>
 						<div className="flex gap-6 text-sm text-gray-400">
 							<Link href="#" className="hover:text-white transition-colors">
-								Privacidad
+								{t("privacy")}
 							</Link>
 							<Link href="#" className="hover:text-white transition-colors">
-								Términos
+								{t("terms")}
 							</Link>
 							<Link href="#" className="hover:text-white transition-colors">
-								Soporte
+								{t("support")}
 							</Link>
 						</div>
 					</div>
 					<div className="text-center text-sm text-gray-500 mt-4 pt-4 border-t border-gray-800">
-						© {CURRENT_YEAR} {APP_NAME}. Todos los derechos reservados.
+						{t("copyright", { year: CURRENT_YEAR, appName: APP_NAME })}
 					</div>
 				</div>
 			</footer>

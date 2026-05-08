@@ -1,49 +1,76 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import createMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
+import { routing } from "./i18n/routing";
 
-// Proteger todas las rutas dentro de (auth)
-const protectedRoutes = createRouteMatcher([
-	"/dashboard(.*)",
-	"/home(.*)",
-	"/movements(.*)",
-	"/profile(.*)",
-	"/welcome(.*)",
-]);
+const handleI18nRouting = createMiddleware(routing);
 
-const legacyDashboardRoutes = createRouteMatcher(["/dashboard(.*)"]);
+const PROTECTED_ROUTES = [
+	"/dashboard",
+	"/home",
+	"/movements",
+	"/profile",
+	"/settings",
+	"/savings-goals",
+	"/welcome",
+];
 
-// Rutas que deberían redirigir a /home si el usuario ya está autenticado
-const redirectIfAuthenticatedRoutes = createRouteMatcher(["/"]);
+function getPathnameWithoutLocale(pathname: string): string {
+	const segments = pathname.split("/");
+	const maybeLocale = segments[1];
+
+	if (
+		routing.locales.includes(maybeLocale as (typeof routing.locales)[number])
+	) {
+		const pathnameWithoutLocale = `/${segments.slice(2).join("/")}`;
+		return pathnameWithoutLocale === "/"
+			? "/"
+			: pathnameWithoutLocale.replace(/\/$/, "");
+	}
+
+	return pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+}
+
+function getLocalePrefix(pathname: string): string {
+	const maybeLocale = pathname.split("/")[1];
+
+	return maybeLocale === "en" ? "/en" : "";
+}
+
+function isProtectedPath(pathname: string): boolean {
+	const pathnameWithoutLocale = getPathnameWithoutLocale(pathname);
+
+	return PROTECTED_ROUTES.some(
+		(route) =>
+			pathnameWithoutLocale === route ||
+			pathnameWithoutLocale.startsWith(`${route}/`),
+	);
+}
 
 export default clerkMiddleware(async (auth, req) => {
 	const { userId } = await auth();
 	const url = req.nextUrl.clone();
+	const pathnameWithoutLocale = getPathnameWithoutLocale(req.nextUrl.pathname);
+	const localePrefix = getLocalePrefix(req.nextUrl.pathname);
 
-	if (legacyDashboardRoutes(req)) {
-		url.pathname = "/home";
+	if (pathnameWithoutLocale === "/dashboard") {
+		url.pathname = `${localePrefix}/home`;
 		return NextResponse.redirect(url);
 	}
 
-	// Si la ruta está protegida, verificar autenticación
-	if (protectedRoutes(req)) {
-		// Si no está autenticado, Clerk manejará la redirección al login
+	if (isProtectedPath(req.nextUrl.pathname)) {
 		await auth.protect();
 	}
 
-	// Si el usuario está autenticado y está intentando acceder a rutas que deberían redirigir
-	if (userId && redirectIfAuthenticatedRoutes(req)) {
-		url.pathname = "/home";
+	if (userId && pathnameWithoutLocale === "/") {
+		url.pathname = `${localePrefix}/home`;
 		return NextResponse.redirect(url);
 	}
 
-	return NextResponse.next();
+	return handleI18nRouting(req);
 });
 
 export const config = {
-	matcher: [
-		// Skip Next.js internals and all static files, unless found in search params
-		"/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-		// Always run for API routes
-		"/(api|trpc)(.*)",
-	],
+	matcher:
+		"/((?!api|trpc|mcp|_next|_vercel|.*\\..*|.*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
 };

@@ -12,16 +12,34 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { getLocale, getTranslations } from "next-intl/server";
 
 interface MovementsTableProps {
 	movements: MovementWithCategoryAndMovementType[];
 	userCurrency: string;
 }
 
-export function MovementsTable({
+function getMovementTypeTranslationKey(
+	typeName: string,
+): "income" | "fixedExpense" | "expense" {
+	if (typeName.toUpperCase() === MovementType.INCOME) {
+		return "income";
+	}
+
+	if (typeName.toUpperCase() === MovementType.FIXED_EXPENSE) {
+		return "fixedExpense";
+	}
+
+	return "expense";
+}
+
+export async function MovementsTable({
 	movements,
 	userCurrency,
 }: MovementsTableProps) {
+	const t = await getTranslations("movementsTable");
+	const locale = await getLocale();
+
 	const formatAmount = (amount: number) => {
 		return formatCurrencyAmount(amount, userCurrency, { absolute: true });
 	};
@@ -32,14 +50,14 @@ export function MovementsTable({
 				<div className="flex items-center justify-between">
 					<div>
 						<h2 className="text-lg font-semibold text-foreground">
-							Historial de movimientos
+							{t("title")}
 						</h2>
-						<p className="text-sm text-muted-foreground">
-							Vista detallada para escritorio
-						</p>
+						<p className="text-sm text-muted-foreground">{t("description")}</p>
 					</div>
 					<div className="text-sm text-muted-foreground">
-						{movements.length.toLocaleString()} registros
+						{t("recordCount", {
+							count: movements.length.toLocaleString(locale),
+						})}
 					</div>
 				</div>
 			</div>
@@ -47,19 +65,19 @@ export function MovementsTable({
 				<TableHeader>
 					<TableRow className="bg-secondary/30 hover:bg-secondary/30">
 						<TableHead className="uppercase tracking-[0.12em] text-[11px] text-muted-foreground">
-							Movimiento
+							{t("columns.movement")}
 						</TableHead>
 						<TableHead className="uppercase tracking-[0.12em] text-[11px] text-muted-foreground">
-							Categoria
+							{t("columns.category")}
 						</TableHead>
 						<TableHead className="uppercase tracking-[0.12em] text-[11px] text-muted-foreground">
-							Fecha
+							{t("columns.date")}
 						</TableHead>
 						<TableHead className="uppercase tracking-[0.12em] text-[11px] text-muted-foreground">
-							Tipo
+							{t("columns.type")}
 						</TableHead>
 						<TableHead className="text-right uppercase tracking-[0.12em] text-[11px] text-muted-foreground">
-							Monto
+							{t("columns.amount")}
 						</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -68,6 +86,9 @@ export function MovementsTable({
 						const typeName = movement.movement_type_name.toUpperCase();
 						const isIncome = typeName === MovementType.INCOME;
 						const isFixedExpense = typeName === MovementType.FIXED_EXPENSE;
+						const movementTypeLabel = t(
+							`types.${getMovementTypeTranslationKey(typeName)}`,
+						);
 
 						return (
 							<TableRow key={movement.id} className="hover:bg-secondary/20">
@@ -76,7 +97,7 @@ export function MovementsTable({
 										<span className="text-foreground">{movement.name}</span>
 										{movement.is_recurring && (
 											<span className="text-xs text-muted-foreground">
-												Recurrente
+												{t("recurring")}
 											</span>
 										)}
 									</div>
@@ -90,7 +111,9 @@ export function MovementsTable({
 											{movement.category_name}
 										</Badge>
 									) : (
-										<span className="text-muted-foreground">Sin categoria</span>
+										<span className="text-muted-foreground">
+											{t("withoutCategory")}
+										</span>
 									)}
 								</TableCell>
 								<TableCell className="text-muted-foreground">
@@ -107,7 +130,7 @@ export function MovementsTable({
 													: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300"
 										}
 									>
-										{movement.movement_type_name}
+										{movementTypeLabel}
 									</Badge>
 								</TableCell>
 								<TableCell

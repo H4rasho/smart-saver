@@ -1,0 +1,185 @@
+{
+	"metadata": {
+		"title": "SmartSaver - Intelligent Personal Finance Management",
+		"description": "Manage your personal finances securely with AES-256-GCM encryption. Track expenses, income, and categories with artificial intelligence.",
+		"twitterDescription": "Manage your personal finances securely with AES-256-GCM encryption."
+	},
+	"landing": {
+		"signIn": "Sign In",
+		"badge": "New version available",
+		"heroTitleFirst": "Control your expenses",
+		"heroTitleSecond": "like never before",
+		"heroDescription": "The most intuitive app to manage your personal finances. Track expenses, set budgets, and reach your financial goals.",
+		"startFree": "Start Free",
+		"viewDemo": "View Demo",
+		"featuresTitle": "Everything you need in one app",
+		"featuresDescription": "Powerful tools designed to simplify your financial life",
+		"features": {
+			"automaticTracking": {
+				"title": "Automatic Tracking",
+				"description": "Connect your bank accounts and cards for automatic expense tracking"
+			},
+			"smartAnalysis": {
+				"title": "Smart Analysis",
+				"description": "Visualize your spending patterns with interactive charts and detailed reports"
+			},
+			"security": {
+				"title": "Total Security",
+				"description": "Bank-grade encryption to keep your financial data safe"
+			},
+			"mobileFirst": {
+				"title": "Mobile First",
+				"description": "Designed for mobile with real-time sync across all your devices"
+			},
+			"smartBudgets": {
+				"title": "Smart Budgets",
+				"description": "Create intelligent budgets that adapt to your spending habits"
+			},
+			"notifications": {
+				"title": "Notifications",
+				"description": "Personalized alerts to keep you on track with your financial goals"
+			}
+		},
+		"ctaTitle": "Ready to take control of your finances?",
+		"ctaDescription": "Join thousands of users who are already saving more and spending better with {appName}",
+		"createAccount": "Create Free Account",
+		"existingAccount": "Already have an account? Sign In",
+		"trustIndicators": "No credit card • Free for 30 days • Cancel anytime",
+		"privacy": "Privacy",
+		"terms": "Terms",
+		"support": "Support",
+		"copyright": "© {year} {appName}. All rights reserved."
+	},
+	"navigation": {
+		"title": "Navigation",
+		"description": "Quickly access your main views.",
+		"home": "Home",
+		"history": "History",
+		"savingsGoals": "Savings goals",
+		"savingsGoalsShort": "Goals",
+		"settings": "Settings",
+		"settingsShort": "Settings",
+		"newMovementTitle": "Add a new movement",
+		"newMovementDescription": "Record income or expenses without leaving the current view."
+	},
+	"languageSwitcher": {
+		"label": "Language",
+		"spanish": "Español",
+		"english": "English",
+		"switchToSpanish": "Switch language to Spanish",
+		"switchToEnglish": "Switch language to English"
+	},
+	"settings": {
+		"title": "Settings",
+		"description": "Customize your experience and manage your preferences",
+		"currencyTitle": "Currency Settings",
+		"currencyDescription": "Select the currency you will use to record your financial movements",
+		"currentCurrency": "Current currency:",
+		"categoriesTitle": "Category Management",
+		"categoriesDescription": "Organize your financial movements with custom categories",
+		"openAiTitle": "OpenAI Settings",
+		"openAiDescription": "Configure your API key to enable AI features",
+		"currencyTab": "Currency",
+		"categoriesTab": "Categories",
+		"openAiTab": "OpenAI",
+		"infoTitle": "Information",
+		"infoCurrency": "Currency changes will apply to all your future movements",
+		"infoCategories": "Categories help you classify and better organize your expenses and income",
+		"infoDeleteCategories": "You can delete categories you no longer use, but this will not affect existing movements",
+		"infoOpenAi": "The OpenAI API key is stored only in your browser for greater security"
+	},
+	"home": {
+		"title": "Dashboard",
+		"description": "Your personal financial summary",
+		"recentMovements": "Recent Movements",
+		"recentMovementsDescription": "Manage your transactions",
+		"noMovements": "No movements yet",
+		"addFirstMovement": "Add your first movement to get started",
+		"summary": {
+			"overview": "Overview",
+			"totalBalance": "Total balance",
+			"balanceDetail": "Available after recording income and expenses.",
+			"incomeEyebrow": "Income",
+			"income": "Income",
+			"incomeDetail": "What was added to your cash flow during the current period.",
+			"expenseEyebrow": "Expense",
+			"expenses": "Expenses",
+			"expensesDetail": "Your consolidated outflows with a calmer read.",
+			"rhythm": "Rhythm",
+			"savingsRatio": "Savings ratio",
+			"savingsRatioDetail": "How much of your income manages to stay with you."
+		}
+	},
+	"movements": {
+		"title": "Movements",
+		"description": "Complete transaction history",
+		"totalMovements": "Total movements",
+		"emptyTitle": "No movements yet",
+		"emptyDescription": "Add your first movement to get started",
+		"showingRange": "Showing <strong>{start}</strong> - <strong>{end}</strong> of <strong>{total}</strong> movements",
+		"table": {
+			"title": "Movement history",
+			"description": "Detailed desktop view",
+			"recordCount": "{count} records",
+			"emptyTitle": "No movements yet",
+			"emptyDescription": "Add your first movement to get started",
+			"emptyRecentDescription": "No recent movements yet",
+			"recurring": "Recurring",
+			"fixed": "Fixed",
+			"total": "Total",
+			"openMenu": "Open menu",
+			"withoutCategory": "No category",
+			"deleteSuccess": "Movement deleted successfully",
+			"deleteError": "Error deleting movement",
+			"columns": {
+				"movement": "Movement",
+				"category": "Category",
+				"date": "Date",
+				"type": "Type",
+				"amount": "Amount"
+			},
+			"types": {
+				"income": "Income",
+				"fixedExpense": "Fixed expense",
+				"expense": "Expense"
+			},
+			"actions": {
+				"edit": "Edit",
+				"convertToFixed": "Convert to fixed expense",
+				"delete": "Delete"
+			}
+		}
+	},
+	"movementsTable": {
+		"title": "Movement history",
+		"description": "Detailed desktop view",
+		"recordCount": "{count} records",
+		"emptyTitle": "No movements yet",
+		"emptyDescription": "Add your first movement to get started",
+		"emptyRecentDescription": "No recent movements yet",
+		"recurring": "Recurring",
+		"fixed": "Fixed",
+		"total": "Total",
+		"openMenu": "Open menu",
+		"withoutCategory": "No category",
+		"deleteSuccess": "Movement deleted successfully",
+		"deleteError": "Error deleting movement",
+		"columns": {
+			"movement": "Movement",
+			"category": "Category",
+			"date": "Date",
+			"type": "Type",
+			"amount": "Amount"
+		},
+		"types": {
+			"income": "Income",
+			"fixedExpense": "Fixed expense",
+			"expense": "Expense"
+		},
+		"actions": {
+			"edit": "Edit",
+			"convertToFixed": "Convert to fixed expense",
+			"delete": "Delete"
+		}
+	}
+}

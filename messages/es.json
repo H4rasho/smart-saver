@@ -1,0 +1,185 @@
+{
+	"metadata": {
+		"title": "SmartSaver - Gestión Inteligente de Finanzas Personales",
+		"description": "Administra tus finanzas personales de forma segura con encriptación AES-256-GCM. Controla gastos, ingresos y categorías con inteligencia artificial.",
+		"twitterDescription": "Administra tus finanzas personales de forma segura con encriptación AES-256-GCM."
+	},
+	"landing": {
+		"signIn": "Iniciar Sesión",
+		"badge": "Nueva versión disponible",
+		"heroTitleFirst": "Controla tus gastos",
+		"heroTitleSecond": "como nunca antes",
+		"heroDescription": "La app más intuitiva para gestionar tus finanzas personales. Rastrea gastos, establece presupuestos y alcanza tus metas financieras.",
+		"startFree": "Comenzar Gratis",
+		"viewDemo": "Ver Demo",
+		"featuresTitle": "Todo lo que necesitas en una app",
+		"featuresDescription": "Herramientas poderosas diseñadas para simplificar tu vida financiera",
+		"features": {
+			"automaticTracking": {
+				"title": "Seguimiento Automático",
+				"description": "Conecta tus cuentas bancarias y tarjetas para un seguimiento automático de gastos"
+			},
+			"smartAnalysis": {
+				"title": "Análisis Inteligente",
+				"description": "Visualiza tus patrones de gasto con gráficos interactivos y reportes detallados"
+			},
+			"security": {
+				"title": "Seguridad Total",
+				"description": "Encriptación de nivel bancario para mantener tus datos financieros seguros"
+			},
+			"mobileFirst": {
+				"title": "Mobile First",
+				"description": "Diseñada para móviles con sincronización en tiempo real en todos tus dispositivos"
+			},
+			"smartBudgets": {
+				"title": "Presupuestos Smart",
+				"description": "Crea presupuestos inteligentes que se adaptan a tus hábitos de gasto"
+			},
+			"notifications": {
+				"title": "Notificaciones",
+				"description": "Alertas personalizadas para mantenerte al día con tus metas financieras"
+			}
+		},
+		"ctaTitle": "¿Listo para tomar control de tus finanzas?",
+		"ctaDescription": "Únete a miles de usuarios que ya están ahorrando más y gastando mejor con {appName}",
+		"createAccount": "Crear Cuenta Gratis",
+		"existingAccount": "¿Ya tienes cuenta? Inicia Sesión",
+		"trustIndicators": "Sin tarjeta de crédito • Gratis por 30 días • Cancela cuando quieras",
+		"privacy": "Privacidad",
+		"terms": "Términos",
+		"support": "Soporte",
+		"copyright": "© {year} {appName}. Todos los derechos reservados."
+	},
+	"navigation": {
+		"title": "Navegación",
+		"description": "Accede rápido a tus vistas principales.",
+		"home": "Inicio",
+		"history": "Historial",
+		"savingsGoals": "Metas de ahorro",
+		"savingsGoalsShort": "Metas",
+		"settings": "Configuración",
+		"settingsShort": "Config",
+		"newMovementTitle": "Carga un nuevo movimiento",
+		"newMovementDescription": "Registra ingresos o gastos sin salir de la vista actual."
+	},
+	"languageSwitcher": {
+		"label": "Idioma",
+		"spanish": "Español",
+		"english": "English",
+		"switchToSpanish": "Cambiar idioma a español",
+		"switchToEnglish": "Cambiar idioma a inglés"
+	},
+	"settings": {
+		"title": "Configuración",
+		"description": "Personaliza tu experiencia y gestiona tus preferencias",
+		"currencyTitle": "Configuración de Moneda",
+		"currencyDescription": "Selecciona la moneda que utilizarás para registrar tus movimientos financieros",
+		"currentCurrency": "Moneda actual:",
+		"categoriesTitle": "Gestión de Categorías",
+		"categoriesDescription": "Organiza tus movimientos financieros con categorías personalizadas",
+		"openAiTitle": "Configuración de OpenAI",
+		"openAiDescription": "Configura tu API key para habilitar funcionalidades de IA",
+		"currencyTab": "Moneda",
+		"categoriesTab": "Categorías",
+		"openAiTab": "OpenAI",
+		"infoTitle": "Información",
+		"infoCurrency": "Los cambios en la moneda se aplicarán a todos tus movimientos futuros",
+		"infoCategories": "Las categorías te ayudan a clasificar y organizar mejor tus gastos e ingresos",
+		"infoDeleteCategories": "Puedes eliminar categorías que ya no uses, pero esto no afectará los movimientos existentes",
+		"infoOpenAi": "La API key de OpenAI se guarda solo en tu navegador para mayor seguridad"
+	},
+	"home": {
+		"title": "Dashboard",
+		"description": "Tu resumen financiero personal",
+		"recentMovements": "Movimientos Recientes",
+		"recentMovementsDescription": "Gestiona tus transacciones",
+		"noMovements": "No hay movimientos",
+		"addFirstMovement": "Agrega tu primer movimiento para comenzar",
+		"summary": {
+			"overview": "Panorama",
+			"totalBalance": "Balance total",
+			"balanceDetail": "Disponible después de registrar ingresos y gastos.",
+			"incomeEyebrow": "Entrada",
+			"income": "Ingresos",
+			"incomeDetail": "Lo que sumó a tu flujo durante el período actual.",
+			"expenseEyebrow": "Salida",
+			"expenses": "Gastos",
+			"expensesDetail": "Tus egresos consolidados con una lectura más tranquila.",
+			"rhythm": "Ritmo",
+			"savingsRatio": "Ratio ahorro",
+			"savingsRatioDetail": "Qué parte de tus ingresos logra quedarse contigo."
+		}
+	},
+	"movements": {
+		"title": "Movimientos",
+		"description": "Historial completo de transacciones",
+		"totalMovements": "Total de movimientos",
+		"emptyTitle": "No hay movimientos",
+		"emptyDescription": "Agrega tu primer movimiento para comenzar",
+		"showingRange": "Mostrando <strong>{start}</strong> - <strong>{end}</strong> de <strong>{total}</strong> movimientos",
+		"table": {
+			"title": "Historial de movimientos",
+			"description": "Vista detallada para escritorio",
+			"recordCount": "{count} registros",
+			"emptyTitle": "No hay movimientos",
+			"emptyDescription": "Agrega tu primer movimiento para comenzar",
+			"emptyRecentDescription": "No hay movimientos recientes",
+			"recurring": "Recurrente",
+			"fixed": "Fijo",
+			"total": "Total",
+			"openMenu": "Abrir menú",
+			"withoutCategory": "Sin categoría",
+			"deleteSuccess": "Movimiento eliminado exitosamente",
+			"deleteError": "Error al eliminar movimiento",
+			"columns": {
+				"movement": "Movimiento",
+				"category": "Categoría",
+				"date": "Fecha",
+				"type": "Tipo",
+				"amount": "Monto"
+			},
+			"types": {
+				"income": "Ingreso",
+				"fixedExpense": "Gasto fijo",
+				"expense": "Gasto"
+			},
+			"actions": {
+				"edit": "Editar",
+				"convertToFixed": "Convertir a gasto fijo",
+				"delete": "Eliminar"
+			}
+		}
+	},
+	"movementsTable": {
+		"title": "Historial de movimientos",
+		"description": "Vista detallada para escritorio",
+		"recordCount": "{count} registros",
+		"emptyTitle": "No hay movimientos",
+		"emptyDescription": "Agrega tu primer movimiento para comenzar",
+		"emptyRecentDescription": "No hay movimientos recientes",
+		"recurring": "Recurrente",
+		"fixed": "Fijo",
+		"total": "Total",
+		"openMenu": "Abrir menú",
+		"withoutCategory": "Sin categoría",
+		"deleteSuccess": "Movimiento eliminado exitosamente",
+		"deleteError": "Error al eliminar movimiento",
+		"columns": {
+			"movement": "Movimiento",
+			"category": "Categoría",
+			"date": "Fecha",
+			"type": "Tipo",
+			"amount": "Monto"
+		},
+		"types": {
+			"income": "Ingreso",
+			"fixedExpense": "Gasto fijo",
+			"expense": "Gasto"
+		},
+		"actions": {
+			"edit": "Editar",
+			"convertToFixed": "Convertir a gasto fijo",
+			"delete": "Eliminar"
+		}
+	}
+}
