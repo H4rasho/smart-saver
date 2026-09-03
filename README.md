@@ -1,94 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SmartSaver
 
-## 🔐 Security Features
+SmartSaver is a personal finance application organized as a pnpm monorepo.
 
-This application includes **AES-256-GCM encryption** for sensitive financial data:
-- Movement names/descriptions are encrypted at rest
-- Transaction amounts are encrypted at rest
-- Automatic encryption/decryption in the data layer
+## Applications
 
-See [lib/ENCRYPTION_README.md](lib/ENCRYPTION_README.md) for complete encryption documentation.
+- `apps/web`: Next.js application on `http://localhost:3000`
+- `apps/api`: Bun API on `http://localhost:3001`
 
-### Quick Setup
+The API currently exposes `GET /health`. Existing Next.js API, MCP, OAuth,
+authentication, localization, and database behavior remains in `apps/web`.
 
-1. Generate an encryption key:
-```bash
-node scripts/generate_encryption_key.js
-```
+## Requirements
 
-2. Add to your `.env` file:
-```bash
-ENCRYPTION_KEY=your-generated-key-here
-```
-
-3. (Optional) If you have existing data, run the migration:
-```bash
-npx tsx scripts/migrate_encrypt_data.ts
-```
+- Node.js 22
+- pnpm 10
+- Bun 1.3
 
 ## Getting Started
 
-First, run the development server:
+Install all workspace dependencies from the repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Put the existing web environment variables in `apps/web/.env.local` for local
+development or `apps/web/.env.production` for production operations.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start both applications:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## 🗄️ Database Migrations
-
-### Development
 ```bash
-# Generate migrations after schema changes
-pnpm db:generate
+pnpm dev
+```
 
-# View database
+Start only one application when needed:
+
+```bash
+pnpm dev:web
+pnpm dev:api
+```
+
+## Verification
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test:api
+pnpm test
+pnpm build
+```
+
+## Security
+
+Sensitive financial data is encrypted at rest with AES-256-GCM. Generate an
+encryption key with:
+
+```bash
+node apps/web/scripts/generate_encryption_key.js
+```
+
+See [the encryption guide](apps/web/lib/ENCRYPTION_README.md) for details.
+
+## Database
+
+Database commands remain available from the repository root and delegate to
+`apps/web`:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+pnpm db:migrate:prod
 pnpm db:studio
 ```
 
-### Production Deployment
-
-**Opción 1: Automático con Build**
-
-En Vercel, configura el Build Command como:
-```bash
-pnpm db:migrate:prod && pnpm build
-```
-
-**Opción 2: Manual**
-```bash
-# Set environment variables
-export TURSO_DATABASE_URL="your_production_url"
-export TURSO_AUTH_TOKEN="your_auth_token"
-
-# Run migrations
-pnpm db:migrate:prod
-```
-
-📖 Ver [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) para guía completa de despliegue.
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [the deployment guide](docs/DEPLOYMENT.md) for production instructions.

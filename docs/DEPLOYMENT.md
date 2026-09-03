@@ -1,5 +1,9 @@
 # Guía de Despliegue a Producción
 
+La aplicación está organizada como un monorepo pnpm. Los comandos de esta guía
+se ejecutan desde la raíz y delegan en `apps/web`. La API Bun independiente se
+encuentra en `apps/api` y no participa en las migraciones de base de datos.
+
 ## Migraciones de Base de Datos con Drizzle
 
 ### Scripts Disponibles
@@ -18,7 +22,7 @@ Cuando hagas cambios en tus modelos de base de datos:
 # Genera las migraciones
 pnpm db:generate
 
-# Revisa las migraciones generadas en database/migrations/
+# Revisa las migraciones generadas en apps/web/database/migrations/
 # Asegúrate de que sean correctas antes de continuar
 ```
 
@@ -28,8 +32,9 @@ pnpm db:generate
 
 En tu configuración de Vercel:
 
-1. Ve a tu proyecto → Settings → General → Build & Development Settings
-2. En "Build Command", cambia de `next build` a:
+1. Mantén la raíz del repositorio como directorio raíz del proyecto
+2. Ve a tu proyecto → Settings → General → Build & Development Settings
+3. En "Build Command", cambia de `next build` a:
    ```bash
    pnpm db:migrate:prod && pnpm build
    ```
@@ -130,7 +135,7 @@ pnpm install
 
 Si necesitas revertir una migración:
 
-1. Elimina la migración problemática de `database/migrations/`
+1. Elimina la migración problemática de `apps/web/database/migrations/`
 2. Ejecuta `pnpm db:generate` para regenerar las migraciones
 3. Despliega nuevamente
 
@@ -150,7 +155,7 @@ Si necesitas revertir una migración:
 pnpm db:generate
 
 # 3. Revisa y commitea las migraciones
-git add database/migrations/
+git add apps/web/database/migrations/
 git commit -m "feat: add new database migration"
 
 # 4. Push a tu repositorio
@@ -172,4 +177,3 @@ Para monitorear tu base de datos Turso:
 ```bash
 pnpm db:studio
 ```
-

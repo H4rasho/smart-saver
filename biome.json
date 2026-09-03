@@ -8,13 +8,13 @@
 	"files": {
 		"ignoreUnknown": false,
 		"ignore": [
-			".next",
-			"node_modules",
-			"dist",
-			"build",
-			"out",
-			".turbo",
-			".vercel",
+			"**/.next",
+			"**/node_modules",
+			"**/dist",
+			"**/build",
+			"**/out",
+			"**/.turbo",
+			"**/.vercel",
 			".git",
 			".cache"
 		],

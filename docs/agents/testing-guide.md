@@ -1,8 +1,9 @@
 # Testing Guide
 
-SmartSaver uses Playwright for end-to-end tests.
+SmartSaver uses Playwright for web end-to-end tests and Bun's test runner for
+the API.
 
-- Put end-to-end tests under `e2e/`.
+- Put end-to-end tests under `apps/web/e2e/`.
 - Group related scenarios with `test.describe()`.
 - Use `test.beforeEach()` for shared navigation or setup.
 - Prefer role, label, and visible-text locators over implementation-specific selectors.
@@ -26,3 +27,7 @@ test.describe("Movements", () => {
 ```
 
 See [Development commands](development-commands.md#tests) for commands that run the suite or a focused subset.
+
+Put API tests under `apps/api/test/`. Test HTTP contracts through exported
+request handlers and cover successful responses, unsupported methods, and
+unsupported paths.

@@ -10,7 +10,7 @@
 - Use `type` for simple aliases and `interface` for object shapes.
 - Use `import type` for type-only imports.
 
-The executable formatting and linting rules are defined in [`biome.json`](../../biome.json).
+The executable formatting rules for all workspaces are defined in [`biome.json`](../../biome.json). The web ESLint configuration is under `apps/web/eslint.config.mjs`.
 
 ## Naming
 

@@ -34,8 +34,7 @@ export async function generateMetadata({
 
 	return {
 		title: {
-			default: t("title"),
-			template: "%s | SmartSaver",
+			absolute: t("title"),
 		},
 		description: t("description"),
 		keywords: [

@@ -47,8 +47,8 @@ export async function updateUserCurrency(
 
 ## Database
 
-- Access Drizzle through repositories under `app/core/<feature>/repository/`.
-- Define tables under `app/core/<feature>/model/` and related domain types under `app/core/<feature>/types/`.
+- Access Drizzle through repositories under `apps/web/app/core/<feature>/repository/`.
+- Define tables under `apps/web/app/core/<feature>/model/` and related domain types under `apps/web/app/core/<feature>/types/`.
 - Prefer Drizzle query builders over raw SQL.
 - Use raw SQL only when the query builder cannot express the required operation clearly.
 

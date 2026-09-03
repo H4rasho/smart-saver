@@ -5,10 +5,17 @@ Use `pnpm` as the package manager.
 ## Application
 
 ```bash
+# Start the web and API applications
 pnpm dev
+
+# Start one application
+pnpm dev:web
+pnpm dev:api
+
 pnpm build
 pnpm start
 pnpm lint
+pnpm typecheck
 ```
 
 ## Tests
@@ -17,21 +24,27 @@ pnpm lint
 # Run all Playwright tests
 pnpm test
 
+# Run the Bun API tests
+pnpm test:api
+
 # Run one test file
-pnpm playwright test e2e/homepage.spec.ts
+pnpm --filter @smart-saver/web exec playwright test e2e/homepage.spec.ts
 
 # Run tests matching a title
-pnpm playwright test --grep "homepage"
+pnpm --filter @smart-saver/web exec playwright test --grep "homepage"
 
 # Run tests in headed mode
-pnpm playwright test --headed
+pnpm --filter @smart-saver/web exec playwright test --headed
 
 # Run tests in one browser project
-pnpm playwright test --project=chromium
+pnpm --filter @smart-saver/web exec playwright test --project=chromium
 
 # Open Playwright UI mode
-pnpm playwright test --ui
+pnpm --filter @smart-saver/web exec playwright test --ui
 ```
+
+The web application runs on `http://localhost:3000`. The API runs on
+`http://localhost:3001` and exposes `GET /health`.
 
 ## Database
 
