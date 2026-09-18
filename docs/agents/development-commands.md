@@ -46,6 +46,20 @@ pnpm --filter @smart-saver/web exec playwright test --ui
 The web application runs on `http://localhost:3000`. The API runs on
 `http://localhost:3001` and exposes `GET /health`.
 
+## API Configuration
+
+`POST /users` requires these environment variables:
+
+```bash
+CLERK_SECRET_KEY=
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
+```
+
+Define them in `apps/api/.env` for local API development.
+
+`GET /health` does not require database or Clerk configuration.
+
 ## Database
 
 ```bash

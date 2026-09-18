@@ -4,7 +4,7 @@ import { handleRequest } from "../src/server";
 
 describe("GET /health", () => {
 	test("returns the health status", async () => {
-		const response = handleRequest(
+		const response = await handleRequest(
 			new Request("http://localhost:3001/health", { method: "GET" }),
 		);
 
@@ -17,7 +17,7 @@ describe("GET /health", () => {
 		["POST", "/health"],
 		["GET", "/unsupported"],
 	])("returns 404 for %s %s", async (method, pathname) => {
-		const response = handleRequest(
+		const response = await handleRequest(
 			new Request(`http://localhost:3001${pathname}`, { method }),
 		);
 
