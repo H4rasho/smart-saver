@@ -26,6 +26,7 @@
 .codegraph/
 
 # Local agent tooling state
+/opencode.json
 /.atl/.skill-registry.cache.json
 /.atl/skill-registry.md
 /.gentle-ai-default-agent.json
