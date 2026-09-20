@@ -57,6 +57,13 @@ TURSO_DATABASE_URL=
 TURSO_AUTH_TOKEN=
 ```
 
+The iOS Shortcuts endpoint additionally requires:
+
+```bash
+SMARTSAVER_SHORTCUT_API_KEY=
+SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=
+```
+
 Define them in `apps/api/.env` for local API development.
 The web welcome flow uses the server-side `API_URL` setting for registration,
 defaulting to `http://localhost:3001`.
@@ -71,6 +78,12 @@ and movement lists call the API through the server-side `API_URL`; import,
 edit, delete, and totals still use the web database path.
 
 `GET /health` does not require database or Clerk configuration.
+
+`POST /movements/shortcut` uses the `X-SmartSaver-Shortcut-Key` header and the
+server-side `SMARTSAVER_SHORTCUT_API_KEY` value. The server always assigns the
+configured `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` as the movement owner and
+ignores any owner/user ID in the request body. Do not put `CLERK_SECRET_KEY` in
+an iOS Shortcut. See [the movement API reference](../api/movements.md).
 
 ## Database
 

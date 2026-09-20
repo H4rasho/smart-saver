@@ -11,12 +11,18 @@ import {
 import { Movements } from "../../src/movement/application/movements";
 import { DrizzleMovementRepository } from "../../src/movement/infrastructure/persistence/drizzle_movement_repository";
 import { createMovementRoute } from "../../src/movement/presentation/http/movement_route";
+import {
+	SHORTCUT_API_KEY_HEADER,
+	createShortcutMovementRoute,
+} from "../../src/movement/presentation/http/shortcut_movement_route";
 import type { IdentityProvider } from "../../src/user/application/identity_provider";
 
 const KEY = "0123456789abcdef".repeat(4);
+const SHORTCUT_API_KEY = "shortcut-test-key";
+const SHORTCUT_OWNER_ID = "user-a";
 process.env.ENCRYPTION_KEY = KEY;
 
-async function createHarness() {
+async function createHarness(shortcutOwnerId = SHORTCUT_OWNER_ID) {
 	const client = createClient({ url: ":memory:" });
 	await client.execute(
 		"CREATE TABLE movements (id INTEGER PRIMARY KEY, clerk_id TEXT, category_id INTEGER, movement_type_id INTEGER, name TEXT, amount REAL, is_recurring INTEGER, recurrence_period TEXT, recurrence_start TEXT, recurrence_end TEXT, transaction_date TEXT, created_at TEXT)",
@@ -44,6 +50,11 @@ async function createHarness() {
 		identityProvider,
 		movements: new Movements(new DrizzleMovementRepository(drizzle(client))),
 	});
+	const shortcutRoute = createShortcutMovementRoute({
+		apiKey: SHORTCUT_API_KEY,
+		ownerUserId: shortcutOwnerId,
+		movements: new Movements(new DrizzleMovementRepository(drizzle(client))),
+	});
 	const request = (method: "GET" | "POST", token?: string, body?: object) =>
 		route(
 			new Request("http://localhost:3001/movements", {
@@ -57,7 +68,20 @@ async function createHarness() {
 				body: body ? JSON.stringify(body) : undefined,
 			}),
 		);
-	return { client, request };
+	const shortcutRequest = (body?: object, apiKey?: string) =>
+		shortcutRoute(
+			new Request("http://localhost:3001/movements/shortcut", {
+				method: "POST",
+				headers: apiKey
+					? {
+							[SHORTCUT_API_KEY_HEADER]: apiKey,
+							"Content-Type": "application/json",
+						}
+					: undefined,
+				body: body ? JSON.stringify(body) : undefined,
+			}),
+		);
+	return { client, request, shortcutRequest };
 }
 
 const validMovement = {
@@ -73,6 +97,64 @@ describe("/movements HTTP contract", () => {
 		const { request } = await createHarness();
 		expect((await request("GET")).status).toBe(401);
 		expect((await request("POST", "invalid", validMovement)).status).toBe(401);
+	});
+
+	test("requires the dedicated shortcut API key", async () => {
+		const { shortcutRequest } = await createHarness();
+		expect((await shortcutRequest(validMovement)).status).toBe(401);
+		expect((await shortcutRequest(validMovement, "invalid-key")).status).toBe(
+			401,
+		);
+	});
+
+	test("creates shortcut movements for the configured owner only", async () => {
+		const { client, shortcutRequest } = await createHarness();
+		const response = await shortcutRequest(
+			{
+				...validMovement,
+				userId: "user-b",
+				clerk_id: "user-b",
+			},
+			SHORTCUT_API_KEY,
+		);
+
+		expect(response.status).toBe(201);
+		expect((await response.json()).clerk_id).toBe(SHORTCUT_OWNER_ID);
+		const [row] = (await client.execute("SELECT clerk_id FROM movements")).rows;
+		expect(row?.clerk_id).toBe(SHORTCUT_OWNER_ID);
+	});
+
+	test("does not create a shortcut movement without an owner configuration", async () => {
+		const { client, shortcutRequest } = await createHarness("");
+		const response = await shortcutRequest(validMovement, SHORTCUT_API_KEY);
+
+		expect(response.status).toBe(503);
+		expect(
+			(await client.execute("SELECT id FROM movements")).rows,
+		).toHaveLength(0);
+	});
+
+	test("reuses movement validation and owner-scoped reference checks", async () => {
+		const { client, shortcutRequest } = await createHarness();
+		expect(
+			(
+				await shortcutRequest(
+					{ ...validMovement, transaction_date: "2026-02-30" },
+					SHORTCUT_API_KEY,
+				)
+			).status,
+		).toBe(422);
+		expect(
+			(
+				await shortcutRequest(
+					{ ...validMovement, category_id: 2 },
+					SHORTCUT_API_KEY,
+				)
+			).status,
+		).toBe(422);
+		expect(
+			(await client.execute("SELECT id FROM movements")).rows,
+		).toHaveLength(0);
 	});
 
 	test("creates encrypted data and lists only the authenticated owner's rows", async () => {

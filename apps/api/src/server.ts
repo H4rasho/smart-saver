@@ -1,6 +1,7 @@
 import { Movements } from "./movement/application/movements";
 import { DrizzleMovementRepository } from "./movement/infrastructure/persistence/drizzle_movement_repository";
 import { createMovementRoute } from "./movement/presentation/http/movement_route";
+import { createShortcutMovementRoute } from "./movement/presentation/http/shortcut_movement_route";
 import { getEnvironment } from "./shared/config/environment";
 import { createDatabase } from "./shared/database/database";
 import { RegisterUser } from "./user/application/register_user";
@@ -12,6 +13,9 @@ const HEALTH_RESPONSE_BODY = '{"status":"ok"}';
 
 let registerUserRoute: ((request: Request) => Promise<Response>) | undefined;
 let movementRoute: ((request: Request) => Promise<Response>) | undefined;
+let shortcutMovementRoute:
+	| ((request: Request) => Promise<Response>)
+	| undefined;
 
 function getMovementRoute(): (request: Request) => Promise<Response> {
 	if (!movementRoute) {
@@ -29,6 +33,25 @@ function getMovementRoute(): (request: Request) => Promise<Response> {
 		});
 	}
 	return movementRoute;
+}
+
+function getShortcutMovementRoute(): (request: Request) => Promise<Response> {
+	if (!shortcutMovementRoute) {
+		const environment = getEnvironment();
+		shortcutMovementRoute = createShortcutMovementRoute({
+			apiKey: environment.shortcutApiKey ?? "",
+			ownerUserId: environment.shortcutOwnerUserId ?? "",
+			movements: new Movements(
+				new DrizzleMovementRepository(
+					createDatabase(
+						environment.databaseUrl,
+						environment.databaseAuthToken,
+					),
+				),
+			),
+		});
+	}
+	return shortcutMovementRoute;
 }
 
 function getRegisterUserRoute(): (request: Request) => Promise<Response> {
@@ -61,6 +84,9 @@ export async function handleRequest(request: Request): Promise<Response> {
 
 	if (request.method === "POST" && url.pathname === "/users") {
 		return getRegisterUserRoute()(request);
+	}
+	if (request.method === "POST" && url.pathname === "/movements/shortcut") {
+		return getShortcutMovementRoute()(request);
 	}
 	if (
 		(request.method === "GET" || request.method === "POST") &&

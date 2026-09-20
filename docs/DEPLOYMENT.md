@@ -120,7 +120,11 @@ API_URL=https://your-api-service.example.com
 User registration sends an authenticated request from the web server to the
 Bun API. Deploy `apps/api` as a reachable service and set `API_URL` to its base
 URL. Configure `CLERK_SECRET_KEY`, `TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN`
-on that service.
+on that service. If iOS Shortcuts are enabled, also configure
+`SMARTSAVER_SHORTCUT_API_KEY` and
+`SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` on the API service. The shortcut API
+key is a dedicated SmartSaver credential; never expose `CLERK_SECRET_KEY` to a
+shortcut.
 
 ### Troubleshooting
 
