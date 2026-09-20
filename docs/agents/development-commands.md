@@ -48,7 +48,8 @@ The web application runs on `http://localhost:3000`. The API runs on
 
 ## API Configuration
 
-`POST /users` requires these environment variables:
+`POST /users` registers the authenticated Clerk user with a `currency`. It
+requires these environment variables:
 
 ```bash
 CLERK_SECRET_KEY=
@@ -57,6 +58,8 @@ TURSO_AUTH_TOKEN=
 ```
 
 Define them in `apps/api/.env` for local API development.
+The web welcome flow uses the server-side `API_URL` setting for registration,
+defaulting to `http://localhost:3001`.
 
 `GET /health` does not require database or Clerk configuration.
 

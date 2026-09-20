@@ -7,8 +7,11 @@ SmartSaver is a personal finance application organized as a pnpm monorepo.
 - `apps/web`: Next.js application on `http://localhost:3000`
 - `apps/api`: Bun API on `http://localhost:3001`
 
-The API currently exposes `GET /health`. Existing Next.js API, MCP, OAuth,
-authentication, localization, and database behavior remains in `apps/web`.
+The API exposes `GET /health` and authenticated `POST /users` for user
+registration. The welcome flow calls the API to register the user, then saves
+categories and starter movements through Next.js. Other Next.js API, MCP,
+OAuth, authentication, localization, and database behavior remains in
+`apps/web`.
 
 ## Requirements
 
@@ -26,6 +29,9 @@ pnpm install
 
 Put the existing web environment variables in `apps/web/.env.local` for local
 development or `apps/web/.env.production` for production operations.
+Set `API_URL` in the web environment when the API is not at
+`http://localhost:3001`. The API needs `CLERK_SECRET_KEY`,
+`TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN` in `apps/api/.env`.
 
 Start both applications:
 

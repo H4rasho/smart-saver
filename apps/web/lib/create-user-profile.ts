@@ -1,48 +1,52 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
+
 import { categories } from "@/app/core/categories/model/categories-model";
 import { MovementTypeDict } from "@/app/core/movements/const/movement-type-dict";
 import { movements } from "@/app/core/movements/model/movement-model";
-import { users } from "@/app/core/user/model/user-model";
 import { db } from "@/database/database";
+
 import type { UserCreateProfile } from "@/types/income";
-import { currentUser } from "@clerk/nextjs/server";
-import { and, eq } from "drizzle-orm";
 
 export const createUserProfile = async (profile: UserCreateProfile) => {
-	const user = await currentUser();
-	if (!user) {
+	const { getToken, userId } = await auth();
+	if (!userId) {
 		throw new Error("User not found");
 	}
-	const email = user.emailAddresses[0].emailAddress;
-	const name = user.firstName;
-	const clerk_id = user.id;
-
-	// 1. Verificar si el usuario ya existe
-	const existingUser = await db
-		.select()
-		.from(users)
-		.where(eq(users.clerk_id, clerk_id));
-	if (existingUser.length > 0) {
-		throw new Error("User already exists");
+	const clerkId = userId;
+	const token = await getToken();
+	if (!token) {
+		throw new Error("User session token not found");
 	}
 
-	// 2. Insertar usuario
-	await db.insert(users).values({
-		name: name ?? email,
-		email,
-		currency: profile.selectedCurrency,
-		clerk_id,
+	// 1. Registrar el usuario mediante la API
+	const apiUrl = (process.env.API_URL ?? "http://localhost:3001").replace(
+		/\/$/,
+		"",
+	);
+	const response = await fetch(`${apiUrl}/users`, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ currency: profile.selectedCurrency }),
+		cache: "no-store",
 	});
+	if (!response.ok) {
+		throw new Error(`User registration failed with status ${response.status}`);
+	}
 
-	// 3. Verificar si existen categorías duplicadas para este usuario
+	// 2. Verificar si existen categorías duplicadas para este usuario
 	for (const categoryName of profile.categories) {
 		const existingCategory = await db
 			.select()
 			.from(categories)
 			.where(
 				and(
-					eq(categories.clerk_id, clerk_id),
+					eq(categories.clerk_id, clerkId),
 					eq(categories.name, categoryName),
 				),
 			);
@@ -53,18 +57,18 @@ export const createUserProfile = async (profile: UserCreateProfile) => {
 		}
 	}
 
-	// 4. Insertar categorías
+	// 3. Insertar categorías
 	await db.insert(categories).values(
 		profile.categories.map((categoryName) => ({
 			name: categoryName,
-			clerk_id,
+			clerk_id: clerkId,
 		})),
 	);
 
-	// 5. Insertar movimientos (ingresos y gastos fijos)
+	// 4. Insertar movimientos (ingresos y gastos fijos)
 	const now = new Date().toISOString();
 	const incomeMovements = profile.incomeSources.map((income) => ({
-		clerk_id,
+		clerk_id: clerkId,
 		movement_type_id: MovementTypeDict.INCOME,
 		name: income.source,
 		amount: Number(income.amount),
@@ -76,7 +80,7 @@ export const createUserProfile = async (profile: UserCreateProfile) => {
 		category_id: null,
 	}));
 	const fixedExpenseMovements = profile.fixedExpenses.map((expense) => ({
-		clerk_id,
+		clerk_id: clerkId,
 		movement_type_id: MovementTypeDict.FIXED_EXPENSE,
 		name: expense,
 		amount: 0,

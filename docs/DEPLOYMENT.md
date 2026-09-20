@@ -114,7 +114,13 @@ Asegúrate de tener configuradas estas variables en tu entorno de producción:
 TURSO_DATABASE_URL=libsql://your-database.turso.io
 TURSO_AUTH_TOKEN=your-auth-token
 ENCRYPTION_KEY=your-encryption-key
+API_URL=https://your-api-service.example.com
 ```
+
+User registration sends an authenticated request from the web server to the
+Bun API. Deploy `apps/api` as a reachable service and set `API_URL` to its base
+URL. Configure `CLERK_SECRET_KEY`, `TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN`
+on that service.
 
 ### Troubleshooting
 
