@@ -13,7 +13,6 @@ import {
 } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
 import { MovementsTable } from "@/app/core/movements/components/movements-table";
-import { MOVEMENTS_CACHE_TAG } from "@/app/core/movements/const/movement-cache";
 import {
 	getUserCurrency,
 	getUserId,
@@ -21,18 +20,8 @@ import {
 import { formatCurrencyAmount } from "@/app/core/user/lib/user-lib";
 import { Scale, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-
-const getAllMovementsCached = unstable_cache(
-	async (userId: string) => getMovmentsAction(userId),
-	["movements-list"],
-	{
-		tags: [MOVEMENTS_CACHE_TAG],
-		revalidate: 60,
-	},
-);
 
 async function HomeSummaryCards() {
 	const t = await getTranslations("home.summary");
@@ -102,7 +91,7 @@ async function HomeSummaryCards() {
 async function RecentMovementsSection({ userId }: { userId: string }) {
 	const t = await getTranslations("home");
 	const [movements, userCurrency] = await Promise.all([
-		getAllMovementsCached(userId),
+		getMovmentsAction(userId),
 		getUserCurrency(),
 	]);
 

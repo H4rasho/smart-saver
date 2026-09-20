@@ -15,14 +15,11 @@ import {
 	MOVEMENT_REVALIDATE_PATHS,
 } from "../const/movement-cache";
 import { MovementTypeDict } from "../const/movement-type-dict";
-import {
-	createMovementForUser,
-	validateMovementData,
-} from "../functions/movement-function";
+import { validateMovementData } from "../functions/movement-function";
+import { createMovementViaApi, listMovementsViaApi } from "../lib/movement-api";
 import {
 	createManyMovements,
 	deleteMovement,
-	getAllMovements,
 	getBalance,
 	getTotalsByType,
 	updateMovement,
@@ -194,7 +191,13 @@ export async function createMovmentAction(
 		};
 
 		validateMovementData(movementData);
-		await createMovementForUser(movementData, userId.toString());
+		await createMovementViaApi({
+			name: movementData.name,
+			amount: movementData.amount,
+			category_id: movementData.category_id,
+			movement_type_id: movementData.movement_type_id,
+			transaction_date: transactionDate,
+		});
 
 		revalidateMovementViews();
 		return { success: true };
@@ -211,7 +214,11 @@ export async function getMovmentsAction(
 	userId: string,
 ): Promise<MovementWithCategoryAndMovementType[]> {
 	try {
-		const movements = await getAllMovements(userId);
+		const authenticatedUserId = await getUserId();
+		if (!authenticatedUserId || authenticatedUserId !== userId) {
+			throw new Error("User not authorized");
+		}
+		const movements = await listMovementsViaApi();
 		if (!movements.length) return [];
 		return movements.map((movements) => ({
 			...movements,

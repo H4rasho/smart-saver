@@ -34,6 +34,13 @@ apps/web/app/core/<feature>/
 
 Do not create empty layers. Place shared UI primitives in `components/ui/`; keep feature-specific components with their feature.
 
+The Bun API groups each migrated vertical slice under `apps/api/src/<feature>/`.
+Movement input validation and repository ports live in `domain/`, orchestration
+in `application/`, Drizzle and encryption compatibility in `infrastructure/`,
+and authenticated HTTP handling in `presentation/http/`. The Next.js movement
+form and list use a server-side API client while the remaining movement flows
+stay in the web application until migrated separately.
+
 ## Common Changes
 
 ### Add a UI component

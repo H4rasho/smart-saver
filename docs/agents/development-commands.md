@@ -61,6 +61,15 @@ Define them in `apps/api/.env` for local API development.
 The web welcome flow uses the server-side `API_URL` setting for registration,
 defaulting to `http://localhost:3001`.
 
+`GET /movements` lists the authenticated user's movements. `POST /movements`
+creates one non-recurring movement and accepts `name`, `amount`, `category_id`
+(nullable), `movement_type_id`, and `transaction_date` (`YYYY-MM-DD`). Both
+routes require a Clerk bearer token and ignore client-supplied owner IDs. The
+API must use the same 64-hex-character `ENCRYPTION_KEY` as the web app to read
+existing encrypted movements; set it in `apps/api/.env`. The web create form
+and movement lists call the API through the server-side `API_URL`; import,
+edit, delete, and totals still use the web database path.
+
 `GET /health` does not require database or Clerk configuration.
 
 ## Database
