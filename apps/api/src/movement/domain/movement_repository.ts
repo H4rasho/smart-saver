@@ -1,4 +1,4 @@
-import type { Movement } from "./movement";
+import type { Movement } from "./movement.js";
 
 export interface MovementRepository {
 	listForUser(userId: string): Promise<Movement[]>;

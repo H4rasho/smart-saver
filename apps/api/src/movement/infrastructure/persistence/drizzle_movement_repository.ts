@@ -1,10 +1,13 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
-import { Movement } from "../../domain/movement";
-import type { MovementRepository } from "../../domain/movement_repository";
-import { decryptMovementField, encryptMovementField } from "./movement_crypto";
-import { categories, movementTypes, movements } from "./movement_schema";
+import { Movement } from "../../domain/movement.js";
+import type { MovementRepository } from "../../domain/movement_repository.js";
+import {
+	decryptMovementField,
+	encryptMovementField,
+} from "./movement_crypto.js";
+import { categories, movementTypes, movements } from "./movement_schema.js";
 
 export class DrizzleMovementRepository implements MovementRepository {
 	constructor(private readonly database: LibSQLDatabase) {}

@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-import { createApiServer } from "./http_server";
-import { handleRequest } from "./server";
+import { createApiServer } from "./http_server.js";
+import { handleRequest } from "./server.js";
 
 const port = Number(process.env.PORT ?? 3001);
 

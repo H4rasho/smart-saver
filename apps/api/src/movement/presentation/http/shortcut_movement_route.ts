@@ -3,8 +3,8 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import {
 	InvalidMovementReferenceError,
 	type Movements,
-} from "../../application/movements";
-import { validateNewMovement } from "../../domain/movement";
+} from "../../application/movements.js";
+import { validateNewMovement } from "../../domain/movement.js";
 
 export const SHORTCUT_API_KEY_HEADER = "X-SmartSaver-Shortcut-Key";
 

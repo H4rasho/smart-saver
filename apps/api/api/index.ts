@@ -1,4 +1,4 @@
-import { handleRequest } from "../src/server";
+import { handleRequest } from "../src/server.js";
 
 const REWRITE_PATH_PARAMETER = "__smartsaver_path";
 const ROUTE_PATHS = new Set([

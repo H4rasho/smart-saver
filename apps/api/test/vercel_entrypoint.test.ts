@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 
 import { describe, expect, test } from "vitest";
 
@@ -25,6 +25,25 @@ describe("Vercel API entrypoint", () => {
 				destination: `/api/index?__smartsaver_path=${route}`,
 			})),
 		);
+	});
+
+	test("uses explicit extensions for every API ESM relative import", async () => {
+		const sourceRoot = new URL("../src/", import.meta.url);
+		const sourceFiles = (await readdir(sourceRoot, { recursive: true })).filter(
+			(path) => path.endsWith(".ts"),
+		);
+		const extensionlessImport =
+			/(?:from|import\(\s*)["'](\.{1,2}\/[^"']+)["']/g;
+		const offenders: string[] = [];
+
+		for (const sourceFile of sourceFiles) {
+			const source = await readFile(new URL(sourceFile, sourceRoot), "utf8");
+			for (const match of source.matchAll(extensionlessImport)) {
+				offenders.push(`${sourceFile}: ${match[1]}`);
+			}
+		}
+
+		expect(offenders).toEqual([]);
 	});
 
 	test("routes rewritten health requests without forwarding the internal parameter", async () => {

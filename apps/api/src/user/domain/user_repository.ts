@@ -1,6 +1,6 @@
-import type { User } from "./user";
-import type { UserEmail } from "./value_objects/user_email";
-import type { UserId } from "./value_objects/user_id";
+import type { User } from "./user.js";
+import type { UserEmail } from "./value_objects/user_email.js";
+import type { UserId } from "./value_objects/user_id.js";
 
 export interface UserRepository {
 	findById(userId: UserId): Promise<User | null>;

@@ -1,13 +1,13 @@
-import { Movements } from "./movement/application/movements";
-import { DrizzleMovementRepository } from "./movement/infrastructure/persistence/drizzle_movement_repository";
-import { createMovementRoute } from "./movement/presentation/http/movement_route";
-import { createShortcutMovementRoute } from "./movement/presentation/http/shortcut_movement_route";
-import { getEnvironment } from "./shared/config/environment";
-import { createDatabase } from "./shared/database/database";
-import { RegisterUser } from "./user/application/register_user";
-import { ClerkIdentityProvider } from "./user/infrastructure/auth/clerk_identity_provider";
-import { DrizzleUserRepository } from "./user/infrastructure/persistence/drizzle_user_repository";
-import { createRegisterUserRoute } from "./user/presentation/http/register_user_route";
+import { Movements } from "./movement/application/movements.js";
+import { DrizzleMovementRepository } from "./movement/infrastructure/persistence/drizzle_movement_repository.js";
+import { createMovementRoute } from "./movement/presentation/http/movement_route.js";
+import { createShortcutMovementRoute } from "./movement/presentation/http/shortcut_movement_route.js";
+import { getEnvironment } from "./shared/config/environment.js";
+import { createDatabase } from "./shared/database/database.js";
+import { RegisterUser } from "./user/application/register_user.js";
+import { ClerkIdentityProvider } from "./user/infrastructure/auth/clerk_identity_provider.js";
+import { DrizzleUserRepository } from "./user/infrastructure/persistence/drizzle_user_repository.js";
+import { createRegisterUserRoute } from "./user/presentation/http/register_user_route.js";
 
 const HEALTH_RESPONSE_BODY = '{"status":"ok"}';
 

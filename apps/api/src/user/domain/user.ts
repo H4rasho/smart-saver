@@ -1,7 +1,7 @@
-import { UserCurrency } from "./value_objects/user_currency";
-import { UserEmail } from "./value_objects/user_email";
-import { UserId } from "./value_objects/user_id";
-import { UserName } from "./value_objects/user_name";
+import { UserCurrency } from "./value_objects/user_currency.js";
+import { UserEmail } from "./value_objects/user_email.js";
+import { UserId } from "./value_objects/user_id.js";
+import { UserName } from "./value_objects/user_name.js";
 
 export type UserPrimitives = {
 	id: string;

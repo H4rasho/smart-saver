@@ -1,12 +1,12 @@
 import type {
 	AuthenticatedUser,
 	IdentityProvider,
-} from "../../../user/application/identity_provider";
+} from "../../../user/application/identity_provider.js";
 import {
 	InvalidMovementReferenceError,
 	type Movements,
-} from "../../application/movements";
-import { validateNewMovement } from "../../domain/movement";
+} from "../../application/movements.js";
+import { validateNewMovement } from "../../domain/movement.js";
 
 interface Dependencies {
 	identityProvider: IdentityProvider;
