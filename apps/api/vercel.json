@@ -1,6 +1,14 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"bunVersion": "1.x",
+	"functions": {
+		"api/index.ts": {
+			"includeFiles": "node_modules/@clerk/backend/package.json"
+		},
+		"api/diagnostic_import.ts": {
+			"includeFiles": "node_modules/@clerk/backend/package.json"
+		}
+	},
 	"rewrites": [
 		{ "source": "/health", "destination": "/api/index?__smartsaver_path=/health" },
 		{ "source": "/users", "destination": "/api/index?__smartsaver_path=/users" },
