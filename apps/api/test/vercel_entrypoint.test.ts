@@ -12,8 +12,12 @@ describe("Vercel API entrypoint", () => {
 			bunVersion?: string;
 			rewrites: Array<{ source: string; destination: string }>;
 		};
+		const packageManifest = JSON.parse(
+			await readFile(new URL("../package.json", import.meta.url), "utf8"),
+		) as { type?: string };
 		const routes = ["/health", "/users", "/movements", "/movements/shortcut"];
 		expect(config.bunVersion).toBeUndefined();
+		expect(packageManifest.type).toBe("module");
 
 		expect(config.rewrites).toEqual(
 			routes.map((route) => ({
