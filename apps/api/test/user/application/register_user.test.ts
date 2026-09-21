@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 
 import { RegisterUser } from "../../../src/user/application/register_user";
 import { UserAlreadyRegisteredError } from "../../../src/user/application/user_already_registered_error";

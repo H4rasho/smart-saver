@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import { describe, expect, test } from "vitest";
 
 import {
 	decrypt,

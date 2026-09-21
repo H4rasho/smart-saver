@@ -75,5 +75,5 @@ export class User {
 - Do not extend a generic `AggregateRoot`, `Entity`, or `ValueObject` base class.
 - Do not introduce domain events until the application has a concrete use case
   that requires them.
-- Keep domain code independent from Bun, Clerk, Drizzle, Zod, and HTTP.
+- Keep domain code independent from Node.js, Clerk, Drizzle, Zod, and HTTP.
 - Name TypeScript files with `snake_case`.

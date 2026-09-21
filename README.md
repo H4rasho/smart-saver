@@ -5,7 +5,7 @@ SmartSaver is a personal finance application organized as a pnpm monorepo.
 ## Applications
 
 - `apps/web`: Next.js application on `http://localhost:3000`
-- `apps/api`: Bun API on `http://localhost:3001`
+- `apps/api`: Node.js API on `http://localhost:3001`
 
 The API exposes `GET /health` and authenticated `POST /users` for user
 registration. The welcome flow calls the API to register the user, then saves
@@ -17,7 +17,6 @@ OAuth, authentication, localization, and database behavior remains in
 
 - Node.js 22
 - pnpm 10
-- Bun 1.3
 
 ## Getting Started
 

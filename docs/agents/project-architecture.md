@@ -1,14 +1,14 @@
 # Project Architecture
 
 SmartSaver is a pnpm monorepo. The Next.js application is under `apps/web`, and
-the Bun API is under `apps/api`. Organize web business logic by feature under
+the Node.js API is under `apps/api`. Organize web business logic by feature under
 `apps/web/app/core/`.
 
 ```text
 apps/
 ├── api/
-│   ├── src/               # Bun server
-│   └── test/              # Bun tests
+│   ├── src/               # Node.js server
+│   └── test/              # Vitest tests
 └── web/
     ├── app/               # Next.js routes and feature logic
     ├── components/ui/     # Shared shadcn/ui primitives
@@ -34,7 +34,7 @@ apps/web/app/core/<feature>/
 
 Do not create empty layers. Place shared UI primitives in `components/ui/`; keep feature-specific components with their feature.
 
-The Bun API groups each migrated vertical slice under `apps/api/src/<feature>/`.
+The Node.js API groups each migrated vertical slice under `apps/api/src/<feature>/`.
 Movement input validation and repository ports live in `domain/`, orchestration
 in `application/`, Drizzle and encryption compatibility in `infrastructure/`,
 and authenticated HTTP handling in `presentation/http/`. The Next.js movement

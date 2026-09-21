@@ -1,13 +1,19 @@
-import { describe, expect, test } from "bun:test";
+import { readFile } from "node:fs/promises";
+
+import { describe, expect, test } from "vitest";
 
 import vercelEntrypoint, { restoreRouteRequest } from "../api/index";
 
 describe("Vercel API entrypoint", () => {
 	test("rewrites only the supported root routes", async () => {
 		const config = JSON.parse(
-			await Bun.file(new URL("../vercel.json", import.meta.url)).text(),
-		) as { rewrites: Array<{ source: string; destination: string }> };
+			await readFile(new URL("../vercel.json", import.meta.url), "utf8"),
+		) as {
+			bunVersion?: string;
+			rewrites: Array<{ source: string; destination: string }>;
+		};
 		const routes = ["/health", "/users", "/movements", "/movements/shortcut"];
+		expect(config.bunVersion).toBeUndefined();
 
 		expect(config.rewrites).toEqual(
 			routes.map((route) => ({

@@ -1,8 +1,12 @@
+import "dotenv/config";
+
+import { createApiServer } from "./http_server";
 import { handleRequest } from "./server";
 
-const server = Bun.serve({
-	port: 3001,
-	fetch: handleRequest,
-});
+const port = Number(process.env.PORT ?? 3001);
 
-console.log(`API listening on ${server.url}`);
+const server = createApiServer(handleRequest);
+
+server.listen(port, () => {
+	console.log(`API listening on http://localhost:${port}`);
+});

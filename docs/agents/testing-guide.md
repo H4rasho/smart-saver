@@ -1,6 +1,6 @@
 # Testing Guide
 
-SmartSaver uses Playwright for web end-to-end tests and Bun's test runner for
+SmartSaver uses Playwright for web end-to-end tests and Vitest for
 the API.
 
 - Put end-to-end tests under `apps/web/e2e/`.
