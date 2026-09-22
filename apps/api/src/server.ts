@@ -1,4 +1,6 @@
+import { CreateShortcutMovement } from "./movement/application/create_shortcut_movement.js";
 import { Movements } from "./movement/application/movements.js";
+import { OpenAIMovementTextParser } from "./movement/infrastructure/ai/openai_movement_text_parser.js";
 import { DrizzleMovementRepository } from "./movement/infrastructure/persistence/drizzle_movement_repository.js";
 import { createMovementRoute } from "./movement/presentation/http/movement_route.js";
 import { createShortcutMovementRoute } from "./movement/presentation/http/shortcut_movement_route.js";
@@ -38,17 +40,21 @@ function getMovementRoute(): (request: Request) => Promise<Response> {
 function getShortcutMovementRoute(): (request: Request) => Promise<Response> {
 	if (!shortcutMovementRoute) {
 		const environment = getEnvironment();
+		const repository = new DrizzleMovementRepository(
+			createDatabase(environment.databaseUrl, environment.databaseAuthToken),
+		);
 		shortcutMovementRoute = createShortcutMovementRoute({
 			apiKey: environment.shortcutApiKey ?? "",
 			ownerUserId: environment.shortcutOwnerUserId ?? "",
-			movements: new Movements(
-				new DrizzleMovementRepository(
-					createDatabase(
-						environment.databaseUrl,
-						environment.databaseAuthToken,
-					),
+			createShortcutMovement: new CreateShortcutMovement({
+				movements: new Movements(repository),
+				parser: new OpenAIMovementTextParser(
+					environment.openaiApiKey ?? "",
+					environment.shortcutOpenaiModel,
 				),
-			),
+				repository,
+				timeZone: environment.shortcutTimeZone,
+			}),
 		});
 	}
 	return shortcutMovementRoute;

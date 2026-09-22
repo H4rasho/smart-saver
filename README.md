@@ -32,8 +32,10 @@ Set `API_URL` in the web environment when the API is not at
 `http://localhost:3001`. The API needs `CLERK_SECRET_KEY`,
 `TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN` in `apps/api/.env`. To enable the
 iOS Shortcuts movement endpoint, also configure `SMARTSAVER_SHORTCUT_API_KEY`
-and `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID`; use a generated, revocable value
-for the API key and never place `CLERK_SECRET_KEY` in a shortcut.
+and `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID`, plus server-side `OPENAI_API_KEY`
+and `SMARTSAVER_SHORTCUT_TIME_ZONE` (defaults to `America/Santiago`). Use a
+generated, revocable value for the Shortcut API key and never place
+`CLERK_SECRET_KEY` or `OPENAI_API_KEY` in a shortcut.
 
 The API movement contract is documented in
 [docs/api/movements.md](docs/api/movements.md).

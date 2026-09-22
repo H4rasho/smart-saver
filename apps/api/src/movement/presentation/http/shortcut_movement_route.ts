@@ -1,17 +1,18 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 import {
-	InvalidMovementReferenceError,
-	type Movements,
-} from "../../application/movements.js";
-import { validateNewMovement } from "../../domain/movement.js";
+	type CreateShortcutMovement,
+	ShortcutMovementInterpretationError,
+} from "../../application/create_shortcut_movement.js";
+import { MovementTextProviderError } from "../../application/movement_text_parser.js";
+import { InvalidMovementReferenceError } from "../../application/movements.js";
 
 export const SHORTCUT_API_KEY_HEADER = "X-SmartSaver-Shortcut-Key";
 
 interface Dependencies {
 	apiKey: string;
 	ownerUserId: string;
-	movements: Movements;
+	createShortcutMovement: CreateShortcutMovement;
 }
 
 function hasValidApiKey(
@@ -31,7 +32,7 @@ function hasValidApiKey(
 export function createShortcutMovementRoute({
 	apiKey,
 	ownerUserId,
-	movements,
+	createShortcutMovement,
 }: Dependencies): (request: Request) => Promise<Response> {
 	return async (request: Request): Promise<Response> => {
 		if (request.method !== "POST") {
@@ -54,22 +55,38 @@ export function createShortcutMovementRoute({
 		} catch {
 			body = null;
 		}
-		const movement = validateNewMovement(body);
-		if (!movement) {
+		const text =
+			typeof body === "object" &&
+			body !== null &&
+			typeof (body as Record<string, unknown>).text === "string"
+				? (body as Record<string, string>).text.trim()
+				: "";
+		if (text.length === 0 || text.length > 2_000) {
 			return Response.json(
-				{ message: "Invalid movement data" },
+				{ message: "Invalid shortcut text" },
 				{ status: 422 },
 			);
 		}
 
 		try {
 			return Response.json(
-				(await movements.create(ownerUserId, movement)).toPrimitives(),
+				(
+					await createShortcutMovement.execute(ownerUserId, text)
+				).toPrimitives(),
 				{ status: 201 },
 			);
 		} catch (error) {
-			if (error instanceof InvalidMovementReferenceError) {
+			if (
+				error instanceof InvalidMovementReferenceError ||
+				error instanceof ShortcutMovementInterpretationError
+			) {
 				return Response.json({ message: error.message }, { status: 422 });
+			}
+			if (error instanceof MovementTextProviderError) {
+				return Response.json(
+					{ message: "Movement interpretation is temporarily unavailable" },
+					{ status: 503 },
+				);
 			}
 			throw error;
 		}
