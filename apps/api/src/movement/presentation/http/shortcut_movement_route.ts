@@ -55,6 +55,7 @@ export function createShortcutMovementRoute({
 		} catch {
 			body = null;
 		}
+		console.info("Shortcut movement request body", body);
 		const text =
 			typeof body === "object" &&
 			body !== null &&
