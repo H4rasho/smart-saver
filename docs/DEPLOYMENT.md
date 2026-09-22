@@ -125,7 +125,7 @@ on that service. If iOS Shortcuts are enabled, also configure
 `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` on the API service. Also set the
 server-side `OPENAI_API_KEY` and `SMARTSAVER_SHORTCUT_TIME_ZONE` (defaults to
 `America/Santiago`). `SMARTSAVER_SHORTCUT_OPENAI_MODEL` optionally overrides
-the default `gpt-5.4` model. The Shortcut API key is a dedicated SmartSaver
+the default `gpt-5.6-luna` model. The Shortcut API key is a dedicated SmartSaver
 credential; never expose `CLERK_SECRET_KEY` or `OPENAI_API_KEY` to a shortcut.
 
 For the separate API Vercel project, set Root Directory to `apps/api` and use

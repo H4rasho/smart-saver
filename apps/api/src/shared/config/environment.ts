@@ -49,6 +49,6 @@ export function getEnvironment(): Environment {
 		),
 		openaiApiKey: getOptionalVariable("OPENAI_API_KEY"),
 		shortcutOpenaiModel:
-			getOptionalVariable("SMARTSAVER_SHORTCUT_OPENAI_MODEL") ?? "gpt-5.4",
+			getOptionalVariable("SMARTSAVER_SHORTCUT_OPENAI_MODEL") ?? "gpt-5.6-luna",
 	};
 }

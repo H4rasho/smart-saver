@@ -64,8 +64,8 @@ SMARTSAVER_SHORTCUT_API_KEY=
 SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=
 SMARTSAVER_SHORTCUT_TIME_ZONE=America/Santiago
 OPENAI_API_KEY=
-# Optional; defaults to gpt-5.4
-SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.4
+# Optional; defaults to gpt-5.6-luna
+SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.6-luna
 ```
 
 Define them in `apps/api/.env` for local API development.
