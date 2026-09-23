@@ -20,6 +20,7 @@ const parsedMovementSchema = z.object({
 
 export interface MovementTextGenerationRequest {
 	model: string;
+	reasoningEffort: "high";
 	strictJsonSchema: true;
 	schema: typeof parsedMovementSchema;
 	schemaName: string;
@@ -55,14 +56,17 @@ export class OpenAIMovementTextParser implements MovementTextParser {
 		try {
 			return await this.generate({
 				model: this.model,
+				reasoningEffort: "high",
 				strictJsonSchema: true,
 				schema: parsedMovementSchema,
 				schemaName: "shortcut_movement",
 				schemaDescription:
 					"A single financial movement extracted from Shortcut text.",
-				system: `Extract exactly one financial movement from the user's text.
-Use only a category and movement type from the supplied lists, copying its name exactly.
-Resolve relative dates against local date ${input.localDate} in ${input.timeZone} and return YYYY-MM-DD.
+				system: `Extract exactly one financial movement from the user's text. The text may be a short bank or card notification in Chilean Spanish.
+Interpret Chilean currency formatting carefully: a period is commonly a thousands separator, so CLP "$15.720" means 15720, not 15.72. Remove currency symbols and grouping separators; return amount as a positive number. Do not infer a decimal fraction unless the text clearly uses one.
+Classify the actual transaction direction: purchases, charges, and debits are expenses; received payments, deposits, and credits are income. A card purchase remains an expense even when the notification mentions a credit card. Do not treat warnings or unrelated text as transactions.
+Use only a category and movement type from the supplied lists, copying its name exactly. Select the movement type that matches the transaction direction. If no supplied movement type fits, use status "unknown" rather than inventing one.
+Extract the transaction date and time from the notification when present. Interpret numeric dates as day-month-year when the text is Chilean, and interpret times in the supplied local time zone. Return only the calendar date as YYYY-MM-DD. Resolve relative dates against local date ${input.localDate} in ${input.timeZone}.
 Use status "ambiguous" when more than one plausible movement or value exists.
 Use status "unknown" when any required value cannot be established.
 For non-ready results, set every field that cannot be established to null.
@@ -82,7 +86,10 @@ Allowed movement types: ${JSON.stringify(input.movementTypes)}`,
 		const { output } = await generateText({
 			model: this.openai(request.model),
 			providerOptions: {
-				openai: { strictJsonSchema: request.strictJsonSchema },
+				openai: {
+					strictJsonSchema: request.strictJsonSchema,
+					reasoningEffort: request.reasoningEffort,
+				},
 			},
 			output: Output.object({
 				schema: request.schema,

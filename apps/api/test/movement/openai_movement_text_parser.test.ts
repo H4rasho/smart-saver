@@ -39,11 +39,21 @@ describe("OpenAIMovementTextParser", () => {
 		expect(generator).toHaveBeenCalledOnce();
 		expect(capturedRequest).toMatchObject({
 			model: "test-model",
+			reasoningEffort: "high",
 			strictJsonSchema: true,
 			schemaName: "shortcut_movement",
 		});
 		expect(capturedRequest?.system).toContain(
 			"local date 2026-09-21 in America/Santiago",
+		);
+		expect(capturedRequest?.system).toContain(
+			'CLP "$15.720" means 15720, not 15.72',
+		);
+		expect(capturedRequest?.system).toContain(
+			"A card purchase remains an expense",
+		);
+		expect(capturedRequest?.system).toContain(
+			"Interpret numeric dates as day-month-year",
 		);
 		expect(capturedRequest?.prompt).toContain('Allowed categories: ["Food"]');
 		expect(capturedRequest?.schema.safeParse(generated).success).toBeTruthy();
