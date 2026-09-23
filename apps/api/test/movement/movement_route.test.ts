@@ -142,6 +142,7 @@ describe("/movements HTTP contract", () => {
 	});
 
 	test("creates shortcut movements for the configured owner only", async () => {
+		const log = vi.spyOn(console, "info").mockImplementation(() => {});
 		const parser = {
 			parse: vi.fn(async () => parsedMovement),
 		} satisfies MovementTextParser;
@@ -151,7 +152,7 @@ describe("/movements HTTP contract", () => {
 		});
 		const response = await shortcutRequest(
 			{
-				text: "I spent 120.5 on groceries yesterday",
+				text: "Sensitive card notice 998877",
 				userId: "user-b",
 				clerk_id: "user-b",
 			},
@@ -163,12 +164,14 @@ describe("/movements HTTP contract", () => {
 		const [row] = (await client.execute("SELECT clerk_id FROM movements")).rows;
 		expect(row?.clerk_id).toBe(SHORTCUT_OWNER_ID);
 		expect(parser.parse).toHaveBeenCalledWith({
-			text: "I spent 120.5 on groceries yesterday",
+			text: "Sensitive card notice 998877",
 			localDate: "2026-09-21",
 			timeZone: "America/Santiago",
 			categories: ["Mine"],
 			movementTypes: ["EXPENSE"],
 		});
+		expect(JSON.stringify(log.mock.calls)).not.toContain("Sensitive card notice");
+		log.mockRestore();
 	});
 
 	test("does not create a shortcut movement without an owner configuration", async () => {

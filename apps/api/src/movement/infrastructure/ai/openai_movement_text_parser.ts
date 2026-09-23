@@ -83,23 +83,80 @@ Allowed movement types: ${JSON.stringify(input.movementTypes)}`,
 	private async generateWithOpenAI(
 		request: MovementTextGenerationRequest,
 	): Promise<ParsedMovementText> {
-		const { output } = await generateText({
-			model: this.openai(request.model),
-			providerOptions: {
-				openai: {
-					strictJsonSchema: request.strictJsonSchema,
-					reasoningEffort: request.reasoningEffort,
-				},
-			},
-			output: Output.object({
-				schema: request.schema,
-				name: request.schemaName,
-				description: request.schemaDescription,
-			}),
-			maxRetries: 1,
-			system: request.system,
-			prompt: request.prompt,
+		const startedAt = Date.now();
+		console.info("OpenAI movement parsing started", {
+			event: "openai_movement_parse_started",
+			model: request.model,
+			reasoningEffort: request.reasoningEffort,
 		});
-		return output;
+		try {
+			const result = await generateText({
+				model: this.openai(request.model),
+				providerOptions: {
+					openai: {
+						strictJsonSchema: request.strictJsonSchema,
+						reasoningEffort: request.reasoningEffort,
+					},
+				},
+				output: Output.object({
+					schema: request.schema,
+					name: request.schemaName,
+					description: request.schemaDescription,
+				}),
+				maxRetries: 1,
+				system: request.system,
+				prompt: request.prompt,
+			});
+			console.info("OpenAI movement parsing succeeded", {
+				event: "openai_movement_parse_succeeded",
+				model: request.model,
+				durationMs: Date.now() - startedAt,
+				finishReason: result.finishReason,
+				usage: {
+					inputTokens: result.usage.inputTokens,
+					outputTokens: result.usage.outputTokens,
+					totalTokens: result.usage.totalTokens,
+				},
+			});
+			return result.output;
+		} catch (error) {
+			const metadata = getSafeProviderErrorMetadata(error);
+			console.error("OpenAI movement parsing failed", {
+				event: "openai_movement_parse_failed",
+				model: request.model,
+				durationMs: Date.now() - startedAt,
+				...metadata,
+			});
+			throw error;
+		}
 	}
+}
+
+function getSafeProviderErrorMetadata(error: unknown): {
+	errorClass: string;
+	statusCode?: number;
+	requestId?: string;
+} {
+	if (typeof error !== "object" || error === null) {
+		return { errorClass: "UnknownError" };
+	}
+	const candidate = error as Record<string, unknown>;
+	const errorClass =
+		typeof candidate.name === "string" &&
+		/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(candidate.name)
+			? candidate.name
+			: "ProviderError";
+	const statusCode =
+		typeof candidate.statusCode === "number" &&
+			Number.isInteger(candidate.statusCode) &&
+			candidate.statusCode >= 100 &&
+			candidate.statusCode <= 599
+			? candidate.statusCode
+			: undefined;
+	const requestId =
+		typeof candidate.request_id === "string" &&
+			/^[A-Za-z0-9_-]{1,128}$/.test(candidate.request_id)
+			? candidate.request_id
+			: undefined;
+	return { errorClass, statusCode, requestId };
 }
