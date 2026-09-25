@@ -185,6 +185,9 @@ test.describe("Homepage", () => {
 				level: 1,
 			}),
 		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Cambiar idioma a inglés" }),
+		).toBeVisible();
 		expect(page.url()).toBe("http://localhost:3000/");
 	});
 

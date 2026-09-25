@@ -103,7 +103,7 @@ export function ReadFileModalButton({
 								<div className="space-y-1">
 									<h3 className="font-semibold">Archivos compatibles</h3>
 									<p className="text-sm leading-6 text-muted-foreground">
-										Sube un PDF, imagen, Excel, CSV o documento con fechas,
+										Sube un PDF, imagen, CSV, TXT o JSON con fechas,
 										descripciones y montos visibles. Luego podrás revisar cada
 										movimiento detectado.
 									</p>
@@ -119,7 +119,7 @@ export function ReadFileModalButton({
 										name="file"
 										id="file"
 										type="file"
-										accept=".pdf,.csv,.xls,.xlsx,.doc,.docx,.png,.jpg,.jpeg,.webp,.gif,.heic"
+										accept=".pdf,.csv,.txt,.json,.png,.jpg,.jpeg,.webp"
 										required
 										onChange={(event) => {
 											setDismissedPreviewSignature("");
@@ -129,7 +129,7 @@ export function ReadFileModalButton({
 									<p className="text-xs text-muted-foreground">
 										{selectedFileName
 											? `Archivo listo: ${selectedFileName}`
-											: "PDF, imagen, Excel, CSV o documento de tu banco."}
+											: "PDF, imagen, CSV, TXT o JSON (máximo 10 MB)."}
 									</p>
 								</div>
 

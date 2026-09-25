@@ -2,7 +2,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { getLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import { BoneyardRegistry } from "./bones/registry";
 import "./globals.css";
@@ -80,6 +81,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const locale = await getLocale();
+	const messages = await getMessages();
 
 	return (
 		<ClerkProvider>
@@ -94,7 +96,9 @@ export default async function RootLayout({
 						disableTransitionOnChange
 					>
 						<BoneyardRegistry />
-						{children}
+						<NextIntlClientProvider locale={locale} messages={messages}>
+							{children}
+						</NextIntlClientProvider>
 						<Toaster />
 					</ThemeProvider>
 				</body>
