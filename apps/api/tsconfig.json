@@ -6,7 +6,7 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"noEmit": true,
-		"types": ["bun"]
+		"types": ["node", "vitest/globals"]
 	},
 	"include": ["src/**/*.ts", "test/**/*.ts"]
 }

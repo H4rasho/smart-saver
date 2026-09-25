@@ -1,10 +1,16 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
-import { Movement } from "../../domain/movement";
-import type { MovementRepository } from "../../domain/movement_repository";
-import { decryptMovementField, encryptMovementField } from "./movement_crypto";
-import { categories, movementTypes, movements } from "./movement_schema";
+import { Movement } from "../../domain/movement.js";
+import type {
+	MovementReference,
+	MovementRepository,
+} from "../../domain/movement_repository.js";
+import {
+	decryptMovementField,
+	encryptMovementField,
+} from "./movement_crypto.js";
+import { categories, movementTypes, movements } from "./movement_schema.js";
 
 export class DrizzleMovementRepository implements MovementRepository {
 	constructor(private readonly database: LibSQLDatabase) {}
@@ -82,6 +88,21 @@ export class DrizzleMovementRepository implements MovementRepository {
 				and(eq(categories.id, categoryId), eq(categories.clerkId, userId)),
 			);
 		return Boolean(category);
+	}
+
+	async listCategoriesForUser(userId: string): Promise<MovementReference[]> {
+		return this.database
+			.select({ id: categories.id, name: categories.name })
+			.from(categories)
+			.where(eq(categories.clerkId, userId))
+			.orderBy(asc(categories.name), asc(categories.id));
+	}
+
+	async listMovementTypes(): Promise<MovementReference[]> {
+		return this.database
+			.select({ id: movementTypes.id, name: movementTypes.name })
+			.from(movementTypes)
+			.orderBy(asc(movementTypes.name), asc(movementTypes.id));
 	}
 
 	async movementTypeExists(typeId: number): Promise<boolean> {

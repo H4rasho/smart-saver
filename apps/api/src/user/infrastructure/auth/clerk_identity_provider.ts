@@ -3,7 +3,7 @@ import { createClerkClient, verifyToken } from "@clerk/backend";
 import type {
 	AuthenticatedUser,
 	IdentityProvider,
-} from "../../application/identity_provider";
+} from "../../application/identity_provider.js";
 
 export class ClerkIdentityProvider implements IdentityProvider {
 	private readonly clerkClient;

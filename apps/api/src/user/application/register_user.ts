@@ -1,8 +1,8 @@
-import { User } from "../domain/user";
-import type { UserRepository } from "../domain/user_repository";
-import { UserEmail } from "../domain/value_objects/user_email";
-import { UserId } from "../domain/value_objects/user_id";
-import { UserAlreadyRegisteredError } from "./user_already_registered_error";
+import { User } from "../domain/user.js";
+import type { UserRepository } from "../domain/user_repository.js";
+import { UserEmail } from "../domain/value_objects/user_email.js";
+import { UserId } from "../domain/value_objects/user_id.js";
+import { UserAlreadyRegisteredError } from "./user_already_registered_error.js";
 
 export interface RegisterUserInput {
 	id: string;

@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
-import type { User } from "../../domain/user";
-import type { UserRepository } from "../../domain/user_repository";
-import type { UserEmail } from "../../domain/value_objects/user_email";
-import type { UserId } from "../../domain/value_objects/user_id";
-import { toDomainUser } from "./user_mapper";
-import { users } from "./user_schema";
+import type { User } from "../../domain/user.js";
+import type { UserRepository } from "../../domain/user_repository.js";
+import type { UserEmail } from "../../domain/value_objects/user_email.js";
+import type { UserId } from "../../domain/value_objects/user_id.js";
+import { toDomainUser } from "./user_mapper.js";
+import { users } from "./user_schema.js";
 
 export class DrizzleUserRepository implements UserRepository {
 	constructor(private readonly database: LibSQLDatabase) {}

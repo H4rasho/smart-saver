@@ -1,4 +1,9 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"bunVersion": "1.x"
+	"rewrites": [
+		{ "source": "/health", "destination": "/api/index?__smartsaver_path=/health" },
+		{ "source": "/users", "destination": "/api/index?__smartsaver_path=/users" },
+		{ "source": "/movements", "destination": "/api/index?__smartsaver_path=/movements" },
+		{ "source": "/movements/shortcut", "destination": "/api/index?__smartsaver_path=/movements/shortcut" }
+	]
 }

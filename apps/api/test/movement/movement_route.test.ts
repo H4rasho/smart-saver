@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import { describe, expect, test, vi } from "vitest";
 
 import {
 	decrypt,
@@ -8,6 +8,12 @@ import {
 	encrypt,
 	encryptNumber,
 } from "../../../web/lib/encryption";
+import { CreateShortcutMovement } from "../../src/movement/application/create_shortcut_movement";
+import {
+	type MovementTextParser,
+	MovementTextProviderError,
+	type ParsedMovementText,
+} from "../../src/movement/application/movement_text_parser";
 import { Movements } from "../../src/movement/application/movements";
 import { DrizzleMovementRepository } from "../../src/movement/infrastructure/persistence/drizzle_movement_repository";
 import { createMovementRoute } from "../../src/movement/presentation/http/movement_route";
@@ -22,7 +28,23 @@ const SHORTCUT_API_KEY = "shortcut-test-key";
 const SHORTCUT_OWNER_ID = "user-a";
 process.env.ENCRYPTION_KEY = KEY;
 
-async function createHarness(shortcutOwnerId = SHORTCUT_OWNER_ID) {
+const parsedMovement: ParsedMovementText = {
+	status: "ready",
+	name: "Groceries",
+	amount: 120.5,
+	categoryName: "Mine",
+	movementTypeName: "EXPENSE",
+	transactionDate: "2026-09-20",
+};
+
+interface HarnessOptions {
+	shortcutOwnerId?: string;
+	parser?: MovementTextParser;
+	timeZone?: string;
+	now?: () => Date;
+}
+
+async function createHarness(options: HarnessOptions = {}) {
 	const client = createClient({ url: ":memory:" });
 	await client.execute(
 		"CREATE TABLE movements (id INTEGER PRIMARY KEY, clerk_id TEXT, category_id INTEGER, movement_type_id INTEGER, name TEXT, amount REAL, is_recurring INTEGER, recurrence_period TEXT, recurrence_start TEXT, recurrence_end TEXT, transaction_date TEXT, created_at TEXT)",
@@ -50,10 +72,22 @@ async function createHarness(shortcutOwnerId = SHORTCUT_OWNER_ID) {
 		identityProvider,
 		movements: new Movements(new DrizzleMovementRepository(drizzle(client))),
 	});
+	const repository = new DrizzleMovementRepository(drizzle(client));
+	const parser =
+		options.parser ??
+		({
+			parse: vi.fn(async () => parsedMovement),
+		} satisfies MovementTextParser);
 	const shortcutRoute = createShortcutMovementRoute({
 		apiKey: SHORTCUT_API_KEY,
-		ownerUserId: shortcutOwnerId,
-		movements: new Movements(new DrizzleMovementRepository(drizzle(client))),
+		ownerUserId: options.shortcutOwnerId ?? SHORTCUT_OWNER_ID,
+		createShortcutMovement: new CreateShortcutMovement({
+			movements: new Movements(repository),
+			parser,
+			repository,
+			timeZone: options.timeZone ?? "America/Santiago",
+			now: options.now,
+		}),
 	});
 	const request = (method: "GET" | "POST", token?: string, body?: object) =>
 		route(
@@ -81,7 +115,7 @@ async function createHarness(shortcutOwnerId = SHORTCUT_OWNER_ID) {
 				body: body ? JSON.stringify(body) : undefined,
 			}),
 		);
-	return { client, request, shortcutRequest };
+	return { client, parser, request, shortcutRequest };
 }
 
 const validMovement = {
@@ -101,17 +135,24 @@ describe("/movements HTTP contract", () => {
 
 	test("requires the dedicated shortcut API key", async () => {
 		const { shortcutRequest } = await createHarness();
-		expect((await shortcutRequest(validMovement)).status).toBe(401);
-		expect((await shortcutRequest(validMovement, "invalid-key")).status).toBe(
-			401,
-		);
+		expect((await shortcutRequest({ text: "Lunch" })).status).toBe(401);
+		expect(
+			(await shortcutRequest({ text: "Lunch" }, "invalid-key")).status,
+		).toBe(401);
 	});
 
 	test("creates shortcut movements for the configured owner only", async () => {
-		const { client, shortcutRequest } = await createHarness();
+		const log = vi.spyOn(console, "info").mockImplementation(() => {});
+		const parser = {
+			parse: vi.fn(async () => parsedMovement),
+		} satisfies MovementTextParser;
+		const { client, shortcutRequest } = await createHarness({
+			parser,
+			now: () => new Date("2026-09-22T02:30:00.000Z"),
+		});
 		const response = await shortcutRequest(
 			{
-				...validMovement,
+				text: "Sensitive card notice 998877",
 				userId: "user-b",
 				clerk_id: "user-b",
 			},
@@ -122,11 +163,22 @@ describe("/movements HTTP contract", () => {
 		expect((await response.json()).clerk_id).toBe(SHORTCUT_OWNER_ID);
 		const [row] = (await client.execute("SELECT clerk_id FROM movements")).rows;
 		expect(row?.clerk_id).toBe(SHORTCUT_OWNER_ID);
+		expect(parser.parse).toHaveBeenCalledWith({
+			text: "Sensitive card notice 998877",
+			localDate: "2026-09-21",
+			timeZone: "America/Santiago",
+			categories: ["Mine"],
+			movementTypes: ["EXPENSE"],
+		});
+		expect(JSON.stringify(log.mock.calls)).not.toContain("Sensitive card notice");
+		log.mockRestore();
 	});
 
 	test("does not create a shortcut movement without an owner configuration", async () => {
-		const { client, shortcutRequest } = await createHarness("");
-		const response = await shortcutRequest(validMovement, SHORTCUT_API_KEY);
+		const { client, shortcutRequest } = await createHarness({
+			shortcutOwnerId: "",
+		});
+		const response = await shortcutRequest({ text: "Lunch" }, SHORTCUT_API_KEY);
 
 		expect(response.status).toBe(503);
 		expect(
@@ -134,24 +186,88 @@ describe("/movements HTTP contract", () => {
 		).toHaveLength(0);
 	});
 
-	test("reuses movement validation and owner-scoped reference checks", async () => {
-		const { client, shortcutRequest } = await createHarness();
+	test("reuses movement validation before persistence", async () => {
+		const parser: MovementTextParser = {
+			async parse() {
+				return { ...parsedMovement, transactionDate: "2026-02-30" };
+			},
+		};
+		const { client, shortcutRequest } = await createHarness({ parser });
 		expect(
-			(
-				await shortcutRequest(
-					{ ...validMovement, transaction_date: "2026-02-30" },
-					SHORTCUT_API_KEY,
-				)
-			).status,
+			(await shortcutRequest({ text: "Lunch" }, SHORTCUT_API_KEY)).status,
 		).toBe(422);
 		expect(
-			(
-				await shortcutRequest(
-					{ ...validMovement, category_id: 2 },
-					SHORTCUT_API_KEY,
-				)
-			).status,
+			(await client.execute("SELECT id FROM movements")).rows,
+		).toHaveLength(0);
+	});
+
+	test("rejects unknown owner-scoped references before persistence", async () => {
+		const parser: MovementTextParser = {
+			async parse() {
+				return { ...parsedMovement, categoryName: "Other" };
+			},
+		};
+		const { client, shortcutRequest } = await createHarness({ parser });
+		expect(
+			(await shortcutRequest({ text: "Lunch" }, SHORTCUT_API_KEY)).status,
 		).toBe(422);
+		expect(
+			(await client.execute("SELECT id FROM movements")).rows,
+		).toHaveLength(0);
+	});
+
+	test("rejects ambiguous, unknown, malformed, and provider-failed parses", async () => {
+		for (const parser of [
+			{
+				async parse() {
+					return { ...parsedMovement, status: "ambiguous" as const };
+				},
+			},
+			{
+				async parse() {
+					return { ...parsedMovement, status: "unknown" as const };
+				},
+			},
+			{
+				async parse() {
+					return { ...parsedMovement, amount: null };
+				},
+			},
+		] satisfies MovementTextParser[]) {
+			const { client, shortcutRequest } = await createHarness({ parser });
+			expect(
+				(await shortcutRequest({ text: "Lunch" }, SHORTCUT_API_KEY)).status,
+			).toBe(422);
+			expect(
+				(await client.execute("SELECT id FROM movements")).rows,
+			).toHaveLength(0);
+		}
+
+		const providerParser: MovementTextParser = {
+			async parse() {
+				throw new MovementTextProviderError();
+			},
+		};
+		const { client, shortcutRequest } = await createHarness({
+			parser: providerParser,
+		});
+		expect(
+			(await shortcutRequest({ text: "Lunch" }, SHORTCUT_API_KEY)).status,
+		).toBe(503);
+		expect(
+			(await client.execute("SELECT id FROM movements")).rows,
+		).toHaveLength(0);
+	});
+
+	test("rejects empty or legacy structured shortcut payloads", async () => {
+		const { client, parser, shortcutRequest } = await createHarness();
+		expect(
+			(await shortcutRequest({ text: "  " }, SHORTCUT_API_KEY)).status,
+		).toBe(422);
+		expect(
+			(await shortcutRequest(validMovement, SHORTCUT_API_KEY)).status,
+		).toBe(422);
+		expect(parser.parse).not.toHaveBeenCalled();
 		expect(
 			(await client.execute("SELECT id FROM movements")).rows,
 		).toHaveLength(0);

@@ -1,9 +1,9 @@
 import type {
 	AuthenticatedUser,
 	IdentityProvider,
-} from "../../application/identity_provider";
-import type { RegisterUser } from "../../application/register_user";
-import { UserAlreadyRegisteredError } from "../../application/user_already_registered_error";
+} from "../../application/identity_provider.js";
+import type { RegisterUser } from "../../application/register_user.js";
+import { UserAlreadyRegisteredError } from "../../application/user_already_registered_error.js";
 
 interface RegisterUserRouteDependencies {
 	identityProvider: IdentityProvider;

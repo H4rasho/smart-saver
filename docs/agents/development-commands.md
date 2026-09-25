@@ -24,7 +24,7 @@ pnpm typecheck
 # Run all Playwright tests
 pnpm test
 
-# Run the Bun API tests
+# Run the Node.js API tests
 pnpm test:api
 
 # Run one test file
@@ -62,6 +62,10 @@ The iOS Shortcuts endpoint additionally requires:
 ```bash
 SMARTSAVER_SHORTCUT_API_KEY=
 SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=
+SMARTSAVER_SHORTCUT_TIME_ZONE=America/Santiago
+OPENAI_API_KEY=
+# Optional; defaults to gpt-5.6-luna
+SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.6-luna
 ```
 
 Define them in `apps/api/.env` for local API development.
@@ -82,8 +86,12 @@ edit, delete, and totals still use the web database path.
 `POST /movements/shortcut` uses the `X-SmartSaver-Shortcut-Key` header and the
 server-side `SMARTSAVER_SHORTCUT_API_KEY` value. The server always assigns the
 configured `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` as the movement owner and
-ignores any owner/user ID in the request body. Do not put `CLERK_SECRET_KEY` in
-an iOS Shortcut. See [the movement API reference](../api/movements.md).
+accepts `{ "text": "..." }`. The API uses server-side OpenAI structured output,
+then resolves category and movement type names against the configured owner's
+database references before reusing normal movement validation and persistence.
+Relative dates use `SMARTSAVER_SHORTCUT_TIME_ZONE`. Do not put
+`CLERK_SECRET_KEY` or `OPENAI_API_KEY` in an iOS Shortcut. See
+[the movement API reference](../api/movements.md).
 
 ## Database
 

@@ -1,10 +1,10 @@
-import { CategoryId } from "./value_objects/category_id";
-import { MovementAmount } from "./value_objects/movement_amount";
-import { MovementDate } from "./value_objects/movement_date";
-import { MovementId } from "./value_objects/movement_id";
-import { MovementName } from "./value_objects/movement_name";
-import { MovementOwnerId } from "./value_objects/movement_owner_id";
-import { MovementTypeId } from "./value_objects/movement_type_id";
+import { CategoryId } from "./value_objects/category_id.js";
+import { MovementAmount } from "./value_objects/movement_amount.js";
+import { MovementDate } from "./value_objects/movement_date.js";
+import { MovementId } from "./value_objects/movement_id.js";
+import { MovementName } from "./value_objects/movement_name.js";
+import { MovementOwnerId } from "./value_objects/movement_owner_id.js";
+import { MovementTypeId } from "./value_objects/movement_type_id.js";
 
 export interface MovementPrimitives {
 	id: number | null;

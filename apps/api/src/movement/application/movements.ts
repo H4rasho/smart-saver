@@ -1,5 +1,5 @@
-import { Movement, type NewMovement } from "../domain/movement";
-import type { MovementRepository } from "../domain/movement_repository";
+import { Movement, type NewMovement } from "../domain/movement.js";
+import type { MovementRepository } from "../domain/movement_repository.js";
 
 export class InvalidMovementReferenceError extends Error {}
 
