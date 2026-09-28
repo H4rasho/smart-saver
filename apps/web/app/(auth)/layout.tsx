@@ -108,7 +108,7 @@ export default function Layout({
 				<Suspense fallback={<DesktopNavFallback />}>
 					<AuthenticatedDesktopNavigation />
 				</Suspense>
-				<main className="flex-1 px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-4 md:px-8 md:pb-8 md:pt-6">
+				<main className="flex-1 px-4 pb-[calc(11rem+env(safe-area-inset-bottom))] pt-4 md:px-8 md:pb-8 md:pt-6">
 					{children}
 				</main>
 			</div>

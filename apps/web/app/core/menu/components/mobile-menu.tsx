@@ -21,8 +21,8 @@ export function NavigationMenu({
 	return (
 		<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/80">
 			<div className="relative px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
-				{/* Botón central flotante */}
-				<div className="absolute -top-8 left-1/2 -translate-x-1/2 z-20">
+				{/* Keep the floating action above the navigation links. */}
+				<div className="absolute -top-16 left-1/2 z-20 -translate-x-1/2">
 					<AddMovement categories={categories} userCurrency={userCurrency} />
 				</div>
 
