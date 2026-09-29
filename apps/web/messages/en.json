@@ -59,6 +59,11 @@
 		"savingsGoalsShort": "Goals",
 		"settings": "Settings",
 		"settingsShort": "Settings",
+		"add": "Add",
+		"addOptions": "Options to add movements",
+		"addMovement": "New movement",
+		"importFile": "Import file",
+		"recordAudio": "Record audio",
 		"newMovementTitle": "Add a new movement",
 		"newMovementDescription": "Record income or expenses without leaving the current view."
 	},

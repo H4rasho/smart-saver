@@ -16,6 +16,7 @@ import type { Category } from "@/types/income";
 import { FileText, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
 import { useActionState } from "react";
+import type { ReactNode } from "react";
 import {
 	extractMovementsFromFileAction,
 	saveManyMovementsAction,
@@ -27,12 +28,14 @@ interface ReadFileModalButtonProps {
 	categories: Category[];
 	movementTypes: MovementType[];
 	userCurrency: string;
+	trigger?: ReactNode;
 }
 
 export function ReadFileModalButton({
 	categories,
 	movementTypes,
 	userCurrency,
+	trigger,
 }: ReadFileModalButtonProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [dismissedPreviewSignature, setDismissedPreviewSignature] =
@@ -60,16 +63,18 @@ export function ReadFileModalButton({
 		<>
 			<Dialog open={isOpen && !previewOpen} onOpenChange={setIsOpen}>
 				<DialogTrigger asChild>
-					<button
-						type="button"
-						aria-label="Leer archivo"
-						className="flex flex-col items-center justify-center"
-					>
-						<FileText
-							size={20}
-							className="text-foreground/70 transition-colors hover:text-primary"
-						/>
-					</button>
+					{trigger ?? (
+						<button
+							type="button"
+							aria-label="Leer archivo"
+							className="flex flex-col items-center justify-center"
+						>
+							<FileText
+								size={20}
+								className="text-foreground/70 transition-colors hover:text-primary"
+							/>
+						</button>
+					)}
 				</DialogTrigger>
 
 				<DialogContent className="top-auto bottom-0 left-0 right-0 flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-[1.75rem] rounded-b-none border-x-0 border-b-0 p-0 sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:right-auto sm:max-w-xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border">
@@ -103,7 +108,7 @@ export function ReadFileModalButton({
 								<div className="space-y-1">
 									<h3 className="font-semibold">Archivos compatibles</h3>
 									<p className="text-sm leading-6 text-muted-foreground">
-										Sube un PDF, imagen, Excel, CSV o documento con fechas,
+										Sube un PDF, imagen, CSV, TXT o JSON con fechas,
 										descripciones y montos visibles. Luego podrás revisar cada
 										movimiento detectado.
 									</p>
@@ -119,7 +124,7 @@ export function ReadFileModalButton({
 										name="file"
 										id="file"
 										type="file"
-										accept=".pdf,.csv,.xls,.xlsx,.doc,.docx,.png,.jpg,.jpeg,.webp,.gif,.heic"
+										accept=".pdf,.csv,.txt,.json,.png,.jpg,.jpeg,.webp"
 										required
 										onChange={(event) => {
 											setDismissedPreviewSignature("");
@@ -129,7 +134,7 @@ export function ReadFileModalButton({
 									<p className="text-xs text-muted-foreground">
 										{selectedFileName
 											? `Archivo listo: ${selectedFileName}`
-											: "PDF, imagen, Excel, CSV o documento de tu banco."}
+											: "PDF, imagen, CSV, TXT o JSON (máximo 10 MB)."}
 									</p>
 								</div>
 

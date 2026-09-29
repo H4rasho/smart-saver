@@ -2,10 +2,12 @@
 
 import type { MovementType } from "@/app/core/movement-types.ts/types/movement-type-types";
 import { CreateMovementFromAudio } from "@/app/core/movements/components/create-movement-from-audio";
+import { AddMovement } from "@/app/core/movements/components/create-movment";
 import { ReadFileModalButton } from "@/app/core/movements/components/read-file-modal-button";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/income";
-import { Upload } from "lucide-react";
+import { FileText, Mic, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface InputOptionsButtonProps {
@@ -20,61 +22,69 @@ export function InputOptionsButton({
 	userCurrency,
 }: InputOptionsButtonProps) {
 	const [showOptions, setShowOptions] = useState(false);
+	const t = useTranslations("navigation");
+	const optionClassName =
+		"flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
 	return (
 		<div className="relative">
 			<button
 				type="button"
-				onClick={() => setShowOptions(!showOptions)}
-				className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-secondary/50 transition-all duration-200 group w-full"
-				aria-label="Opciones de entrada"
+				onClick={() => setShowOptions((open) => !open)}
+				className="group flex w-full flex-col items-center justify-center rounded-xl p-1 text-primary transition-colors hover:bg-primary/10"
+				aria-label={t("addOptions")}
+				aria-expanded={showOptions}
+				aria-controls="mobile-input-options"
 			>
-				<Upload
-					size={20}
-					className="text-foreground/70 group-hover:text-primary transition-colors duration-200"
-				/>
-				<span className="text-xs text-foreground/60 group-hover:text-primary font-medium mt-1">
-					Importar
+				<span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
+					<Plus className="size-5" />
 				</span>
+				<span className="mt-1 text-xs font-medium">{t("add")}</span>
 			</button>
 
-			{/* Modal flotante con opciones */}
-			{showOptions && (
-				<div
-					className={cn(
-						"z-[60] rounded-2xl border border-border bg-card p-2 shadow-lg",
-						"fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 right-4",
-						"sm:absolute sm:bottom-full sm:left-1/2 sm:right-auto sm:mb-2 sm:w-max sm:min-w-44 sm:-translate-x-1/2",
-					)}
-				>
-					<div className="space-y-2">
-						<div className="flex flex-col items-center rounded-xl p-2 text-center hover:bg-secondary/30">
-							<ReadFileModalButton
-								categories={categories}
-								movementTypes={movementTypes}
-								userCurrency={userCurrency}
-							/>
-							<span className="text-xs text-foreground/60 font-medium mt-1">
-								Archivo
-							</span>
-						</div>
-						<div className="border-t border-border pt-2">
-							<div className="flex flex-col items-center rounded-xl p-2 text-center hover:bg-secondary/30">
-								<CreateMovementFromAudio
-									categories={categories}
-									movementTypes={movementTypes}
-									userCurrency={userCurrency}
-								/>
-								<span className="text-xs text-foreground/60 font-medium mt-1">
-									Audio
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
+			<fieldset
+				id="mobile-input-options"
+				aria-label={t("addOptions")}
+				onClickCapture={() => setShowOptions(false)}
+				className={cn(
+					"fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 right-4 z-[60] rounded-2xl border border-border bg-card p-2 shadow-lg",
+					!showOptions && "hidden",
+				)}
+			>
+				<AddMovement
+					categories={categories}
+					userCurrency={userCurrency}
+					trigger={
+						<button type="button" className={optionClassName}>
+							<Plus className="size-5 text-primary" />
+							{t("addMovement")}
+						</button>
+					}
+				/>
+				<ReadFileModalButton
+					categories={categories}
+					movementTypes={movementTypes}
+					userCurrency={userCurrency}
+					trigger={
+						<button type="button" className={optionClassName}>
+							<FileText className="size-5 text-primary" />
+							{t("importFile")}
+						</button>
+					}
+				/>
+				<CreateMovementFromAudio
+					categories={categories}
+					movementTypes={movementTypes}
+					userCurrency={userCurrency}
+					trigger={
+						<button type="button" className={optionClassName}>
+							<Mic className="size-5 text-primary" />
+							{t("recordAudio")}
+						</button>
+					}
+				/>
+			</fieldset>
 
-			{/* Overlay para cerrar al hacer click fuera */}
 			{showOptions && (
 				<div
 					className="fixed inset-0 z-[55]"

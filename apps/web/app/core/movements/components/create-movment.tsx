@@ -14,28 +14,36 @@ import {
 import type { Category } from "@/types/income";
 import { Plus, Sparkles } from "lucide-react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 
 interface AddMovementProps {
 	categories: Category[];
 	userCurrency: string;
+	trigger?: ReactNode;
 }
 
-export function AddMovement({ categories, userCurrency }: AddMovementProps) {
+export function AddMovement({
+	categories,
+	userCurrency,
+	trigger,
+}: AddMovementProps) {
 	const [open, setOpen] = useState(false);
 
 	return (
 		<>
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogTrigger asChild>
-					<Button
-						variant="default"
-						className="relative h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
-						type="button"
-						aria-label="Agregar Gasto"
-					>
-						<span className="absolute inset-0 rounded-full border border-white/20" />
-						<Plus size={24} className="size-6" />
-					</Button>
+					{trigger ?? (
+						<Button
+							variant="default"
+							className="relative h-14 w-14 rounded-full p-0 shadow-lg shadow-primary/25 transition-transform hover:scale-[1.03]"
+							type="button"
+							aria-label="Agregar Gasto"
+						>
+							<span className="absolute inset-0 rounded-full border border-white/20" />
+							<Plus size={24} className="size-6" />
+						</Button>
+					)}
 				</DialogTrigger>
 				<DialogContent className="top-auto bottom-0 left-0 right-0 flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-[1.75rem] rounded-b-none border-x-0 border-b-0 p-0 sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:right-auto sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border">
 					<DialogHeader className="space-y-4 border-b bg-gradient-to-b from-primary/[0.08] via-background to-background px-5 pt-6 pb-5 text-left sm:px-6">

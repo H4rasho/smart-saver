@@ -51,13 +51,17 @@ describe("OpenAIMovementTextParser", () => {
 			model: "test-model",
 			reasoningEffort: "high",
 		});
-		expect(info).toHaveBeenNthCalledWith(2, "OpenAI movement parsing succeeded", {
-			event: "openai_movement_parse_succeeded",
-			model: "test-model",
-			durationMs: expect.any(Number),
-			finishReason: "stop",
-			usage: { inputTokens: 12, outputTokens: 8, totalTokens: 20 },
-		});
+		expect(info).toHaveBeenNthCalledWith(
+			2,
+			"OpenAI movement parsing succeeded",
+			{
+				event: "openai_movement_parse_succeeded",
+				model: "test-model",
+				durationMs: expect.any(Number),
+				finishReason: "stop",
+				usage: { inputTokens: 12, outputTokens: 8, totalTokens: 20 },
+			},
+		);
 		expect(JSON.stringify(info.mock.calls)).not.toContain(secretText);
 		expect(error).not.toHaveBeenCalled();
 		info.mockRestore();
@@ -76,20 +80,22 @@ describe("OpenAIMovementTextParser", () => {
 		);
 		const parser = new OpenAIMovementTextParser("test-api-key", "test-model");
 
-		await expect(parser.parse({ ...input, text: secretText })).rejects.toMatchObject({
+		await expect(
+			parser.parse({ ...input, text: secretText }),
+		).rejects.toMatchObject({
 			name: "MovementTextProviderError",
 		});
 		expect(logError).toHaveBeenCalledWith("OpenAI movement parsing failed", {
 			event: "openai_movement_parse_failed",
 			model: "test-model",
 			durationMs: expect.any(Number),
-		errorClass: "Error",
-		statusCode: 429,
-		requestId: "req_safe-123",
+			errorClass: "Error",
+			statusCode: 429,
+			requestId: "req_safe-123",
 		});
-		expect(JSON.stringify([...info.mock.calls, ...logError.mock.calls])).not.toContain(
-			secretText,
-		);
+		expect(
+			JSON.stringify([...info.mock.calls, ...logError.mock.calls]),
+		).not.toContain(secretText);
 		expect(JSON.stringify(logError.mock.calls)).not.toContain("test-api-key");
 		info.mockRestore();
 		logError.mockRestore();

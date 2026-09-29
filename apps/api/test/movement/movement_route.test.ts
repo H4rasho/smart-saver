@@ -170,7 +170,9 @@ describe("/movements HTTP contract", () => {
 			categories: ["Mine"],
 			movementTypes: ["EXPENSE"],
 		});
-		expect(JSON.stringify(log.mock.calls)).not.toContain("Sensitive card notice");
+		expect(JSON.stringify(log.mock.calls)).not.toContain(
+			"Sensitive card notice",
+		);
 		log.mockRestore();
 	});
 

@@ -148,14 +148,14 @@ function getSafeProviderErrorMetadata(error: unknown): {
 			: "ProviderError";
 	const statusCode =
 		typeof candidate.statusCode === "number" &&
-			Number.isInteger(candidate.statusCode) &&
-			candidate.statusCode >= 100 &&
-			candidate.statusCode <= 599
+		Number.isInteger(candidate.statusCode) &&
+		candidate.statusCode >= 100 &&
+		candidate.statusCode <= 599
 			? candidate.statusCode
 			: undefined;
 	const requestId =
 		typeof candidate.request_id === "string" &&
-			/^[A-Za-z0-9_-]{1,128}$/.test(candidate.request_id)
+		/^[A-Za-z0-9_-]{1,128}$/.test(candidate.request_id)
 			? candidate.request_id
 			: undefined;
 	return { errorClass, statusCode, requestId };
