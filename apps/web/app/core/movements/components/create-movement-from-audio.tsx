@@ -15,6 +15,7 @@ import type { Category } from "@/types/income";
 import { Mic, Play, Sparkles, Square, Waves } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import {
 	extractMovementsFromAudioAction,
@@ -27,6 +28,7 @@ interface CreateMovementFromAudioProps {
 	categories: Category[];
 	movementTypes: MovementType[];
 	userCurrency: string;
+	trigger?: ReactNode;
 }
 
 function formatDuration(seconds: number): string {
@@ -39,6 +41,7 @@ export function CreateMovementFromAudio({
 	categories,
 	movementTypes,
 	userCurrency,
+	trigger,
 }: CreateMovementFromAudioProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [dismissedPreviewSignature, setDismissedPreviewSignature] =
@@ -163,16 +166,18 @@ export function CreateMovementFromAudio({
 				onOpenChange={handleDialogOpenChange}
 			>
 				<DialogTrigger asChild>
-					<button
-						type="button"
-						aria-label="Grabar audio"
-						className="flex flex-col items-center justify-center"
-					>
-						<Mic
-							size={20}
-							className="text-foreground/70 transition-colors hover:text-primary"
-						/>
-					</button>
+					{trigger ?? (
+						<button
+							type="button"
+							aria-label="Grabar audio"
+							className="flex flex-col items-center justify-center"
+						>
+							<Mic
+								size={20}
+								className="text-foreground/70 transition-colors hover:text-primary"
+							/>
+						</button>
+					)}
 				</DialogTrigger>
 				<DialogContent className="top-auto bottom-0 left-0 right-0 flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-[1.75rem] rounded-b-none border-x-0 border-b-0 p-0 sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:right-auto sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border">
 					<DialogHeader className="border-b bg-gradient-to-b from-primary/[0.08] via-background to-background px-5 pt-6 pb-5 text-left sm:px-6">

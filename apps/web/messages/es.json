@@ -59,6 +59,11 @@
 		"savingsGoalsShort": "Metas",
 		"settings": "Configuración",
 		"settingsShort": "Config",
+		"add": "Agregar",
+		"addOptions": "Opciones para agregar movimientos",
+		"addMovement": "Nuevo movimiento",
+		"importFile": "Importar archivo",
+		"recordAudio": "Grabar audio",
 		"newMovementTitle": "Carga un nuevo movimiento",
 		"newMovementDescription": "Registra ingresos o gastos sin salir de la vista actual."
 	},
