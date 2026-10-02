@@ -17,9 +17,10 @@ import { FileText, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
 import { useActionState } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 import {
 	extractMovementsFromFileAction,
-	saveManyMovementsAction,
+	saveImportedMovementsAction,
 } from "../actions/movments-actions";
 import type { CreateMovement } from "../types/movement-type";
 import { MovementsPreviewModal } from "./movements-preview-modal";
@@ -44,19 +45,33 @@ export function ReadFileModalButton({
 
 	const [state, formAction, isPending] = useActionState(
 		extractMovementsFromFileAction,
-		{ movements: [], error: null },
+		{ movements: [], matches: [], error: null },
 	);
 
-	const previewSignature = JSON.stringify(state.movements);
+	const previewSignature = JSON.stringify([state.movements, state.matches]);
 	const previewOpen =
 		state.movements.length > 0 &&
 		previewSignature !== dismissedPreviewSignature;
 
-	const handleConfirm = async (editedMovements: CreateMovement[]) => {
-		await saveManyMovementsAction(editedMovements);
+	const handleConfirm = async (
+		editedMovements: CreateMovement[],
+		reviewedMatchIds: Array<number | null>,
+		selectedIndices: number[],
+	): Promise<{ success: boolean; error?: string }> => {
+		const result = await saveImportedMovementsAction(
+			editedMovements,
+			reviewedMatchIds,
+			selectedIndices,
+		);
+		if (!result.success) return result;
+		const omitted = editedMovements.length - selectedIndices.length;
+		toast.success(
+			`${selectedIndices.length} importado${selectedIndices.length === 1 ? "" : "s"}, ${omitted} omitido${omitted === 1 ? "" : "s"}`,
+		);
 		setDismissedPreviewSignature(previewSignature);
 		setIsOpen(false);
 		setSelectedFileName("");
+		return result;
 	};
 
 	return (
@@ -161,6 +176,7 @@ export function ReadFileModalButton({
 				key={previewSignature}
 				open={previewOpen}
 				movements={state.movements}
+				matches={state.matches}
 				userCurrency={userCurrency}
 				categories={categories}
 				movementTypes={movementTypes}

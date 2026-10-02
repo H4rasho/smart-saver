@@ -24,6 +24,9 @@ pnpm typecheck
 # Run all Playwright tests
 pnpm test
 
+# Run focused web unit tests
+pnpm test:unit
+
 # Run the Node.js API tests
 pnpm test:api
 
