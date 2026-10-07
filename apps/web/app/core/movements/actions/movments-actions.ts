@@ -16,6 +16,7 @@ import {
 } from "../const/movement-cache";
 import { MovementTypeDict } from "../const/movement-type-dict";
 import { validateMovementData } from "../functions/movement-function";
+import { findImportCatchAllCategoryId } from "../lib/import-category-fallback";
 import {
 	type ImportDuplicateMatch,
 	matchImportedMovements,
@@ -39,7 +40,7 @@ import { CreateMovementSchema } from "../types/movement-type";
 const { OPENAI_API_KEY } = CONFIG;
 
 const FILE_EXTRACTION_MODEL =
-	process.env.FILE_EXTRACTION_OPENAI_MODEL ?? "gpt-5.6-luna";
+	process.env.FILE_EXTRACTION_OPENAI_MODEL ?? "gpt-6-luna";
 const MAX_IMPORT_FILE_BYTES = 10 * 1024 * 1024;
 const ExtractedMovementSchema = CreateMovementSchema.omit({
 	created_at: true,
@@ -140,7 +141,7 @@ Allowed user categories (name and ID): ${categoriesDescription || "none"}.
 Today is ${today} (YYYY-MM-DD).
 Rules:
 - Return one movement per transaction, including both income and expenses. Use movement_type_id 1 for income and 3 for expense. Card purchases and debits are expenses, even if the statement says "credit card"; deposits and received payments are income.
-- Use a category_id only when an allowed category clearly fits; otherwise use null. Never invent category IDs.
+- First choose the most specific allowed category clearly supported by the transaction. If no specific category fits, use an allowed catch-all category such as Others, Otros, Otras, Miscellaneous, Varios, General, or an equivalent name, using its supplied ID. Do not use an expense-only catch-all for income or an income-only catch-all for expenses. Use null only when neither a specific nor a suitable catch-all category is available. Never invent category IDs.
 - Exclude balances, totals, fees already represented as separate rows, headers, duplicates and non-transaction text. Include a fee only if it is its own transaction.
 - Amount is a positive number, with no currency symbols. In Chilean formatting, 15.720 means 15720, not 15.72; 15.720,50 means 15720.50. Do not confuse a balance with an amount.
 - transaction_date must be YYYY-MM-DD. Interpret Chilean numeric dates as day/month/year. If no transaction date is present, use ${today}; do not use the statement issue date as a transaction date.
@@ -186,13 +187,19 @@ async function extractMovementsWithAI(
 	categoriesDescription: string,
 	openAiKey: string,
 	allowedCategoryIds: Set<number>,
+	userCategories: Array<{ id: number; name: string }>,
 ): Promise<CreateNotRecurringMovement[]> {
 	const contentParts = await buildFileContentParts(file, categoriesDescription);
 	const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 	const result = await generateText({
 		model: scopedOpenAI(FILE_EXTRACTION_MODEL),
 		providerOptions: {
-			openai: { strictJsonSchema: true, reasoningEffort: "high" },
+			openai: {
+				strictJsonSchema: true,
+				reasoningEffort: "medium",
+				// This AI SDK version does not yet identify GPT-6 as a reasoning model.
+				forceReasoning: FILE_EXTRACTION_MODEL === "gpt-6-luna" || undefined,
+			},
 		},
 		output: Output.object({
 			schema: z.object({ movements: ExtractedMovementSchema.array() }),
@@ -238,7 +245,13 @@ async function extractMovementsWithAI(
 				"El archivo contiene una fecha no válida",
 			);
 		}
-		return { ...movement, created_at: createdAt };
+		return {
+			...movement,
+			category_id:
+				movement.category_id ??
+				findImportCatchAllCategoryId(userCategories, movement.movement_type_id),
+			created_at: createdAt,
+		};
 	});
 }
 
@@ -364,6 +377,7 @@ export async function addMovmentsFromFileAction(
 		categoriesDescription,
 		openAiKey,
 		new Set(userCategories.map((category) => category.id)),
+		userCategories,
 	);
 	await createManyMovements(movements);
 	revalidateMovementViews();
@@ -404,6 +418,7 @@ export async function extractMovementsFromFileAction(
 			categoriesDescription,
 			openAiKey,
 			new Set(userCategories.map((category) => category.id)),
+			userCategories,
 		);
 		if (movementsRaw.length === 0) {
 			return {
