@@ -76,13 +76,16 @@ The web welcome flow uses the server-side `API_URL` setting for registration,
 defaulting to `http://localhost:3001`.
 
 The web file-import action uses the user's OpenAI key when present, otherwise
-`OPENAI_API_KEY` from the web environment. It defaults to `gpt-5.6-luna`, like
-the API Shortcut parser; optionally set `FILE_EXTRACTION_OPENAI_MODEL` in the
-web environment to override it. The web and API deployments do not share
+`OPENAI_API_KEY` from the web environment. It defaults to `gpt-6-luna` with
+`medium` reasoning effort; optionally set `FILE_EXTRACTION_OPENAI_MODEL` in the
+web environment to override the model. The Shortcut parser remains on its own
+`gpt-5.6-luna` default. The web and API deployments do not share
 environment variables automatically. File import supports PDF, CSV, TXT, JSON,
 PNG, JPG, and WebP files up to 10 MB. Office files need preprocessing and are
 not accepted as raw model inputs. The Next.js Server Action body limit is set to
-11 MB to allow a 10 MB file with multipart overhead.
+11 MB to allow a 10 MB file with multipart overhead. Unknown transactions use
+the user's available catch-all category (such as Others or Otros) when one
+exists; otherwise they remain uncategorized.
 
 `GET /movements` lists the authenticated user's movements. `POST /movements`
 creates one non-recurring movement and accepts `name`, `amount`, `category_id`
