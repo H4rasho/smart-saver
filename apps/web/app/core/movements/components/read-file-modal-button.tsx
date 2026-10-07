@@ -22,6 +22,8 @@ import {
 	extractMovementsFromFileAction,
 	saveImportedMovementsAction,
 } from "../actions/movments-actions";
+import type { FileImportPreview } from "../actions/movments-actions";
+import { isImportPreviewOpen } from "../lib/import-preview-state";
 import type { CreateMovement } from "../types/movement-type";
 import { MovementsPreviewModal } from "./movements-preview-modal";
 
@@ -39,8 +41,8 @@ export function ReadFileModalButton({
 	trigger,
 }: ReadFileModalButtonProps) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [dismissedPreviewSignature, setDismissedPreviewSignature] =
-		useState("");
+	const [dismissedPreview, setDismissedPreview] =
+		useState<FileImportPreview | null>(null);
 	const [selectedFileName, setSelectedFileName] = useState<string>("");
 
 	const [state, formAction, isPending] = useActionState(
@@ -48,10 +50,7 @@ export function ReadFileModalButton({
 		{ movements: [], matches: [], error: null },
 	);
 
-	const previewSignature = JSON.stringify([state.movements, state.matches]);
-	const previewOpen =
-		state.movements.length > 0 &&
-		previewSignature !== dismissedPreviewSignature;
+	const previewOpen = isImportPreviewOpen(state, dismissedPreview);
 
 	const handleConfirm = async (
 		editedMovements: CreateMovement[],
@@ -68,7 +67,7 @@ export function ReadFileModalButton({
 		toast.success(
 			`${selectedIndices.length} importado${selectedIndices.length === 1 ? "" : "s"}, ${omitted} omitido${omitted === 1 ? "" : "s"}`,
 		);
-		setDismissedPreviewSignature(previewSignature);
+		setDismissedPreview(state);
 		setIsOpen(false);
 		setSelectedFileName("");
 		return result;
@@ -142,7 +141,6 @@ export function ReadFileModalButton({
 										accept=".pdf,.csv,.txt,.json,.png,.jpg,.jpeg,.webp"
 										required
 										onChange={(event) => {
-											setDismissedPreviewSignature("");
 											setSelectedFileName(event.target.files?.[0]?.name ?? "");
 										}}
 									/>
@@ -172,17 +170,18 @@ export function ReadFileModalButton({
 				</DialogContent>
 			</Dialog>
 
-			<MovementsPreviewModal
-				key={previewSignature}
-				open={previewOpen}
-				movements={state.movements}
-				matches={state.matches}
-				userCurrency={userCurrency}
-				categories={categories}
-				movementTypes={movementTypes}
-				onCancel={() => setDismissedPreviewSignature(previewSignature)}
-				onConfirm={handleConfirm}
-			/>
+			{previewOpen && (
+				<MovementsPreviewModal
+					open={previewOpen}
+					movements={state.movements}
+					matches={state.matches}
+					userCurrency={userCurrency}
+					categories={categories}
+					movementTypes={movementTypes}
+					onCancel={() => setDismissedPreview(state)}
+					onConfirm={handleConfirm}
+				/>
+			)}
 		</>
 	);
 }
