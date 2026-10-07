@@ -18,10 +18,15 @@ import type { Category } from "@/types/income";
 import {
 	ArrowDownCircle,
 	ArrowUpCircle,
+	CircleAlert,
 	PencilLine,
 	Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+	type ImportDuplicateMatch,
+	getInitiallySelectedImportIndices,
+} from "../lib/import-duplicate-matcher";
 import {
 	type CreateMovement,
 	MovementType as MovementKind,
@@ -31,11 +36,16 @@ import { MovementMobileCard } from "./movement-mobile-card";
 interface MovementsPreviewModalProps {
 	open: boolean;
 	movements: CreateMovement[];
+	matches?: Array<ImportDuplicateMatch | null>;
 	userCurrency: string;
 	categories?: Category[];
 	movementTypes?: MovementType[];
 	onCancel: () => void;
-	onConfirm: (movements: CreateMovement[]) => void;
+	onConfirm: (
+		movements: CreateMovement[],
+		reviewedMatchIds: Array<number | null>,
+		selectedIndices: number[],
+	) => Promise<{ success: boolean; error?: string } | undefined> | undefined;
 }
 
 function getMovementTypeLabel(typeName?: string): string {
@@ -47,6 +57,7 @@ function getMovementTypeLabel(typeName?: string): string {
 export function MovementsPreviewModal({
 	open,
 	movements,
+	matches,
 	userCurrency,
 	categories = [],
 	movementTypes = [],
@@ -55,6 +66,17 @@ export function MovementsPreviewModal({
 }: MovementsPreviewModalProps) {
 	const [editedMovements, setEditedMovements] =
 		useState<CreateMovement[]>(movements);
+	const [candidateMatches, setCandidateMatches] = useState(matches ?? []);
+	const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
+		() =>
+			new Set(
+				matches
+					? getInitiallySelectedImportIndices(matches)
+					: movements.map((_, index) => index),
+			),
+	);
+	const [saveError, setSaveError] = useState<string | null>(null);
+	const [isSaving, setIsSaving] = useState(false);
 	const [editingIdx, setEditingIdx] = useState<number | null>(null);
 	const [editDraft, setEditDraft] = useState<CreateMovement | null>(null);
 
@@ -98,7 +120,8 @@ export function MovementsPreviewModal({
 
 	const summary = useMemo(() => {
 		return editedMovements.reduce(
-			(accumulator, movement) => {
+			(accumulator, movement, index) => {
+				if (matches && !selectedIndices.has(index)) return accumulator;
 				if (movement.movement_type_id === MovementTypeDict.INCOME) {
 					accumulator.income += movement.amount;
 				} else {
@@ -109,7 +132,12 @@ export function MovementsPreviewModal({
 			},
 			{ income: 0, expense: 0 },
 		);
-	}, [editedMovements]);
+	}, [editedMovements, matches, selectedIndices]);
+
+	const selectedCount = matches
+		? editedMovements.filter((_, index) => selectedIndices.has(index)).length
+		: editedMovements.length;
+	const duplicateCount = candidateMatches.filter(Boolean).length;
 
 	const handleFieldChange = (
 		field: keyof CreateMovement,
@@ -144,8 +172,42 @@ export function MovementsPreviewModal({
 
 	const handleDelete = (idx: number) => {
 		setEditedMovements((prev) => prev.filter((_, index) => index !== idx));
+		setCandidateMatches((prev) => prev.filter((_, index) => index !== idx));
+		setSelectedIndices(
+			(previous) =>
+				new Set(
+					Array.from(previous)
+						.filter((index) => index !== idx)
+						.map((index) => (index > idx ? index - 1 : index)),
+				),
+		);
 		if (editingIdx === idx) {
 			handleCancelEdit();
+		}
+	};
+
+	const handleConfirm = async () => {
+		const reviewedMatchIds = editedMovements.map(
+			(_, index) => candidateMatches[index]?.existing.id ?? null,
+		);
+		const selected = editedMovements.flatMap((_, index) =>
+			!matches || selectedIndices.has(index) ? [index] : [],
+		);
+		setSaveError(null);
+		setIsSaving(true);
+		try {
+			const result = await onConfirm(
+				editedMovements,
+				reviewedMatchIds,
+				selected,
+			);
+			if (result && !result.success) {
+				setSaveError(result.error ?? "No se pudieron guardar los movimientos");
+			}
+		} catch {
+			setSaveError("No se pudieron guardar los movimientos");
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
@@ -165,15 +227,25 @@ export function MovementsPreviewModal({
 							{editedMovements.length} movimiento
 							{editedMovements.length === 1 ? "" : "s"}
 						</Badge>
+						{matches && duplicateCount > 0 && (
+							<Badge
+								variant="outline"
+								className="rounded-full border-amber-500/30 bg-amber-500/10 px-3 py-1 text-amber-700 dark:text-amber-300"
+							>
+								{duplicateCount} coincidencia{duplicateCount === 1 ? "" : "s"}{" "}
+								detectada{duplicateCount === 1 ? "" : "s"}
+							</Badge>
+						)}
 					</div>
 					<div className="space-y-2">
 						<DialogTitle className="text-xl sm:text-2xl">
 							Revisa, corrige y confirma antes de guardar
 						</DialogTitle>
 						<DialogDescription className="max-w-2xl text-sm leading-6">
-							Verifica nombres, montos, categorías y fechas. Puedes editar cada
-							tarjeta sin salir del flujo, una a la vez y con acciones claras al
-							final de cada edición.
+							Verifica nombres, montos, categorías y fechas.{" "}
+							{matches
+								? "Las posibles coincidencias vienen desmarcadas; puedes incluirlas si son movimientos distintos."
+								: "Puedes editar cada tarjeta antes de guardarla."}
 						</DialogDescription>
 					</div>
 
@@ -181,7 +253,7 @@ export function MovementsPreviewModal({
 						<div className="rounded-2xl border bg-background/90 p-4 shadow-xs">
 							<div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
 								<Wallet className="size-3.5" />
-								Ingresos detectados
+								Ingresos seleccionados
 							</div>
 							<p className="mt-2 text-lg font-semibold text-emerald-600 dark:text-emerald-400">
 								{formatCurrencyAmount(summary.income, userCurrency)}
@@ -190,7 +262,7 @@ export function MovementsPreviewModal({
 						<div className="rounded-2xl border bg-background/90 p-4 shadow-xs">
 							<div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
 								<ArrowDownCircle className="size-3.5" />
-								Gastos detectados
+								Gastos seleccionados
 							</div>
 							<p className="mt-2 text-lg font-semibold text-rose-600 dark:text-rose-400">
 								{formatCurrencyAmount(summary.expense, userCurrency)}
@@ -249,22 +321,63 @@ export function MovementsPreviewModal({
 									currentMovement.movement_type_id,
 								);
 
+								const match = candidateMatches[idx];
 								return (
-									<MovementMobileCard
+									<div
 										key={`${movement.name}-${movement.created_at}-${movement.transaction_date ?? "no-date"}-${idx}`}
-										movement={currentMovement}
-										categoryName={categoryName}
-										typeName={typeName}
-										userCurrency={userCurrency}
-										isEditing={editingIdx === idx}
-										categoryOptions={categoryOptions}
-										movementTypeOptions={movementTypeOptions}
-										onEdit={() => handleEdit(idx)}
-										onDelete={() => handleDelete(idx)}
-										onChange={handleFieldChange}
-										onSave={handleSave}
-										onCancel={handleCancelEdit}
-									/>
+										className="space-y-2"
+									>
+										{matches && (
+											<div className="rounded-xl border bg-muted/20 px-4 py-3">
+												<label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
+													<input
+														type="checkbox"
+														checked={selectedIndices.has(idx)}
+														onChange={(event) =>
+															setSelectedIndices((previous) => {
+																const next = new Set(previous);
+																if (event.target.checked) next.add(idx);
+																else next.delete(idx);
+																return next;
+															})
+														}
+														className="size-4 accent-primary"
+													/>
+													Incluir {movement.name} en la importación
+												</label>
+												{match && (
+													<div className="mt-2 flex items-start gap-2 text-xs leading-5 text-amber-700 dark:text-amber-300">
+														<CircleAlert className="mt-0.5 size-3.5 shrink-0" />
+														<span>
+															{match.confidence === "clear"
+																? "Duplicado probable"
+																: "Posible coincidencia"}{" "}
+															con {match.existing.name} ·{" "}
+															{formatCurrencyAmount(
+																match.existing.amount,
+																userCurrency,
+															)}{" "}
+															· {match.existing.transaction_date ?? "Sin fecha"}
+														</span>
+													</div>
+												)}
+											</div>
+										)}
+										<MovementMobileCard
+											movement={currentMovement}
+											categoryName={categoryName}
+											typeName={typeName}
+											userCurrency={userCurrency}
+											isEditing={editingIdx === idx}
+											categoryOptions={categoryOptions}
+											movementTypeOptions={movementTypeOptions}
+											onEdit={() => handleEdit(idx)}
+											onDelete={() => handleDelete(idx)}
+											onChange={handleFieldChange}
+											onSave={handleSave}
+											onCancel={handleCancelEdit}
+										/>
+									</div>
 								);
 							})
 						)}
@@ -276,8 +389,15 @@ export function MovementsPreviewModal({
 						<p className="text-sm text-muted-foreground">
 							{editingIdx !== null
 								? "Termina la edición actual para habilitar el guardado final."
-								: "Confirma solo cuando la lista esté lista para guardarse en tu cuenta."}
+								: matches
+									? `${selectedCount} de ${editedMovements.length} movimientos seleccionados para guardar.`
+									: "Confirma solo cuando la lista esté lista para guardarse en tu cuenta."}
 						</p>
+						{saveError && (
+							<p role="alert" className="text-sm text-destructive">
+								{saveError}
+							</p>
+						)}
 						<div className="flex flex-col-reverse gap-2 sm:flex-row">
 							<Button
 								variant="outline"
@@ -289,15 +409,19 @@ export function MovementsPreviewModal({
 							</Button>
 							<Button
 								type="button"
-								onClick={() => onConfirm(editedMovements)}
-								disabled={editedMovements.length === 0 || editingIdx !== null}
+								onClick={handleConfirm}
+								disabled={
+									selectedCount === 0 || editingIdx !== null || isSaving
+								}
 								className="w-full sm:w-auto"
 							>
 								{editingIdx !== null
 									? "Termina esta edición"
-									: editedMovements.length === 1
-										? "Guardar 1 movimiento"
-										: `Guardar ${editedMovements.length} movimientos`}
+									: isSaving
+										? "Guardando..."
+										: selectedCount === 1
+											? "Guardar 1 movimiento"
+											: `Guardar ${selectedCount} movimientos`}
 							</Button>
 						</div>
 					</div>

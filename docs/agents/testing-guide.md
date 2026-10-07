@@ -1,7 +1,8 @@
 # Testing Guide
 
 SmartSaver uses Playwright for web end-to-end tests and Vitest for
-the API.
+the API. Pure web utilities can use Node's test runner under
+`apps/web/test/`; run them with `pnpm test:unit`.
 
 - Put end-to-end tests under `apps/web/e2e/`.
 - Group related scenarios with `test.describe()`.

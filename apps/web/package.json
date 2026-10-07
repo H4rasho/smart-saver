@@ -10,6 +10,7 @@
 		"typecheck": "tsc --noEmit",
 		"boneyard:build": "boneyard-js build http://localhost:3000/home http://localhost:3000/movements http://localhost:3000/settings --breakpoints 390,820,1440 --wait 1200 --out ./app/bones/generated",
 		"test": "playwright test",
+		"test:unit": "node --import tsx --test test/*.test.ts",
 		"db:generate": "drizzle-kit generate --config database/drizzle.config.ts",
 		"db:migrate": "drizzle-kit migrate --config database/drizzle.config.ts",
 		"db:migrate:prod": "tsx scripts/migrate.ts",

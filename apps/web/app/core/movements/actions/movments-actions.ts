@@ -16,10 +16,15 @@ import {
 } from "../const/movement-cache";
 import { MovementTypeDict } from "../const/movement-type-dict";
 import { validateMovementData } from "../functions/movement-function";
+import {
+	type ImportDuplicateMatch,
+	matchImportedMovements,
+} from "../lib/import-duplicate-matcher";
 import { createMovementViaApi, listMovementsViaApi } from "../lib/movement-api";
 import {
 	createManyMovements,
 	deleteMovement,
+	getAllMovements,
 	getBalance,
 	getTotalsByType,
 	updateMovement,
@@ -365,16 +370,21 @@ export async function addMovmentsFromFileAction(
 }
 
 export async function extractMovementsFromFileAction(
-	_prevState: { movements: CreateMovement[]; error: string | null },
+	_prevState: FileImportPreview,
 	formData: FormData,
-): Promise<{ movements: CreateMovement[]; error: string | null }> {
+): Promise<FileImportPreview> {
 	try {
 		const file = formData.get("file");
 		if (!(file instanceof File)) {
-			return { movements: [], error: "Selecciona un archivo válido" };
+			return {
+				movements: [],
+				matches: [],
+				error: "Selecciona un archivo válido",
+			};
 		}
 		const userId = await getUserId();
-		if (!userId) return { movements: [], error: "No user id" };
+		if (!userId)
+			return { movements: [], matches: [], error: "Usuario no autenticado" };
 		const userCategories = await getUserCategoriesAction(userId);
 		const categoriesDescription = userCategories
 			.map((cat) => `${cat.name} (id: ${cat.id})`)
@@ -382,7 +392,11 @@ export async function extractMovementsFromFileAction(
 
 		const openAiKey = await getOpenAIKeyForUser();
 		if (!openAiKey) {
-			return { movements: [], error: "API key de OpenAI no configurada" };
+			return {
+				movements: [],
+				matches: [],
+				error: "API key de OpenAI no configurada",
+			};
 		}
 
 		const movementsRaw = await extractMovementsWithAI(
@@ -394,6 +408,7 @@ export async function extractMovementsFromFileAction(
 		if (movementsRaw.length === 0) {
 			return {
 				movements: [],
+				matches: [],
 				error: "No se encontraron movimientos en el archivo",
 			};
 		}
@@ -407,15 +422,83 @@ export async function extractMovementsFromFileAction(
 				...mov,
 			}),
 		);
-		return { movements, error: null };
+		const existing = await getAllMovements(userId);
+		return {
+			movements,
+			matches: matchImportedMovements(movements, existing),
+			error: null,
+		};
 	} catch (e: unknown) {
 		console.error("Error al extraer movimientos desde archivo", e);
 		return {
 			movements: [],
+			matches: [],
 			error:
 				e instanceof InvalidImportFileError
 					? e.message
 					: "No se pudo procesar el archivo. Inténtalo de nuevo",
+		};
+	}
+}
+
+export interface FileImportPreview {
+	movements: CreateMovement[];
+	matches: Array<ImportDuplicateMatch | null>;
+	error: string | null;
+}
+
+export async function saveImportedMovementsAction(
+	movements: CreateMovement[],
+	reviewedMatchIds: Array<number | null>,
+	selectedIndices: number[],
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		const userId = await getUserId();
+		if (!userId) return { success: false, error: "Usuario no autenticado" };
+		if (selectedIndices.length === 0) {
+			return { success: false, error: "Selecciona al menos un movimiento" };
+		}
+		if (
+			movements.length !== reviewedMatchIds.length ||
+			new Set(selectedIndices).size !== selectedIndices.length ||
+			selectedIndices.some(
+				(index) =>
+					!Number.isInteger(index) || index < 0 || index >= movements.length,
+			)
+		) {
+			return { success: false, error: "La selección no es válida" };
+		}
+		for (const movement of movements) {
+			ExtractedMovementSchema.parse(movement);
+			validateMovementData(movement);
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(movement.transaction_date ?? "")) {
+				return {
+					success: false,
+					error: "Hay un movimiento con fecha no válida",
+				};
+			}
+		}
+		const existing = await getAllMovements(userId);
+		const currentMatches = matchImportedMovements(movements, existing);
+		const newlyMatched = selectedIndices.find((index) => {
+			const match = currentMatches[index];
+			return match !== null && match.existing.id !== reviewedMatchIds[index];
+		});
+		if (newlyMatched !== undefined) {
+			return {
+				success: false,
+				error:
+					"Se detectó una nueva coincidencia desde la revisión. Vuelve a analizar el archivo antes de guardar.",
+			};
+		}
+		await createManyMovements(selectedIndices.map((index) => movements[index]));
+		revalidateMovementViews();
+		return { success: true };
+	} catch (error) {
+		console.error("Error al guardar movimientos importados", error);
+		return {
+			success: false,
+			error: "No se pudieron guardar los movimientos importados",
 		};
 	}
 }

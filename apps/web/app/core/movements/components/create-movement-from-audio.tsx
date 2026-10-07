@@ -147,6 +147,7 @@ export function CreateMovementFromAudio({
 		await saveManyMovementsAction(editedMovements);
 		setDismissedPreviewSignature(previewSignature);
 		setIsOpen(false);
+		return undefined;
 	};
 
 	const handleDialogOpenChange = (open: boolean) => {
