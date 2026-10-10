@@ -121,3 +121,14 @@ pnpm db:studio
 ## Git Hooks
 
 Lefthook runs Biome against staged files before each commit and stages its fixes.
+
+## Dashboard Charts
+
+The dashboard uses `@tanstack/charts` 1.1.0, with React imported from
+`@tanstack/charts/react` (React 18/19 peer compatibility). Chart definitions,
+scales and tooltip use the official package exports. See the
+[React quick start](https://tanstack.com/charts/latest/docs/framework/react/quick-start).
+Periods use `America/Santiago` calendar days, as file imports do. URL parameters
+are `period=current|previous|3|6|12|custom`, with inclusive `from` and `to`
+(`YYYY-MM-DD`) for custom ranges. Aggregations use transaction dates and decrypt
+amounts only after filtering by the authenticated owner and period.

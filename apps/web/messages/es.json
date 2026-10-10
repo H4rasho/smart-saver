@@ -186,5 +186,34 @@
 			"convertToFixed": "Convertir a gasto fijo",
 			"delete": "Eliminar"
 		}
+	},
+	"dashboard": {
+		"period": "Período",
+		"presets": {
+			"current": "Este mes",
+			"previous": "Mes anterior",
+			"3": "Últimos 3 meses",
+			"6": "Últimos 6 meses",
+			"12": "Últimos 12 meses",
+			"custom": "Rango personalizado"
+		},
+		"from": "Desde",
+		"to": "Hasta",
+		"apply": "Aplicar",
+		"invalidPeriod": "Selecciona fechas válidas y un rango ordenado.",
+		"loading": "Cargando análisis…",
+		"unavailable": "No se pudo cargar el análisis. Inténtalo nuevamente.",
+		"unauthenticated": "Inicia sesión para ver el análisis.",
+		"income": "Ingresos",
+		"expenses": "Gastos",
+		"net": "Resultado neto del período",
+		"netDetail": "Ingresos menos gastos, no saldo bancario",
+		"periodDetail": "Total del período seleccionado",
+		"notAvailable": "No disponible",
+		"chartTitle": "Ingresos vs. gastos",
+		"chartDescription": "Importes mensuales en {currency}. Usa las flechas para explorar los valores.",
+		"empty": "No hay movimientos en este período.",
+		"dataTable": "Ver datos del gráfico",
+		"month": "Mes"
 	}
 }

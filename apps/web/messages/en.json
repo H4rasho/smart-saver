@@ -186,5 +186,34 @@
 			"convertToFixed": "Convert to fixed expense",
 			"delete": "Delete"
 		}
+	},
+	"dashboard": {
+		"period": "Period",
+		"presets": {
+			"current": "This month",
+			"previous": "Previous month",
+			"3": "Last 3 months",
+			"6": "Last 6 months",
+			"12": "Last 12 months",
+			"custom": "Custom range"
+		},
+		"from": "From",
+		"to": "To",
+		"apply": "Apply",
+		"invalidPeriod": "Select valid dates in chronological order.",
+		"loading": "Loading analysis…",
+		"unavailable": "Unable to load analysis. Please try again.",
+		"unauthenticated": "Sign in to view analysis.",
+		"income": "Income",
+		"expenses": "Expenses",
+		"net": "Net result for the period",
+		"netDetail": "Income minus expenses, not bank balance",
+		"periodDetail": "Total for the selected period",
+		"notAvailable": "Not available",
+		"chartTitle": "Income vs. expenses",
+		"chartDescription": "Monthly amounts in {currency}. Use arrow keys to explore values.",
+		"empty": "No movements in this period.",
+		"dataTable": "View chart data",
+		"month": "Month"
 	}
 }
