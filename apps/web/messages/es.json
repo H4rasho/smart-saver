@@ -221,6 +221,13 @@
 		"amount": "Monto",
 		"share": "Porcentaje del total",
 		"uncategorized": "Sin categoría",
-		"noExpenses": "No hay gastos en este período."
+		"noExpenses": "No hay gastos en este período.",
+		"cumulativeTitle": "Gasto acumulado comparativo",
+		"cumulativeContext": "Contexto mensual: compara el último mes del filtro con el anterior, desde el día 1. Puede incluir fechas fuera del rango seleccionado; no proyecta gastos después del corte.",
+		"day": "Día",
+		"cutoff": "Hasta {date} (inclusive)",
+		"noSeriesExpenses": "Sin gastos registrados para este mes hasta el corte.",
+		"cumulativeEmpty": "No hay gastos registrados en los dos meses comparados.",
+		"cumulativeDifference": "Diferencia al día {day} (mes de referencia − anterior): {amount}"
 	}
 }

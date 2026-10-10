@@ -60,3 +60,11 @@ state. Start a fresh Next.js server with the **same** database/key environment
 connected to another database. Then execute the focused dashboard Chromium suite.
 Recent movements still use the API; run the API with matching test configuration
 when verifying that section. Dashboard analytics itself stays server-side in web.
+
+Cumulative expense unit tests inject an explicit Santiago calendar date to verify
+current-month cutoffs deterministically. Historical authenticated E2E cases use
+the January/February 2024 fixtures and verify monthly context outside custom
+ranges. A browser-only clock does not control Server Action time; current-month
+E2E still needs a deterministic server clock and matching isolated fixtures.
+A compared month without expense records is labeled unavailable rather than
+plotted as an observed zero series. Zero-valued records remain valid observations.

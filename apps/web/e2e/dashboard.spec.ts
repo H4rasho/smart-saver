@@ -77,6 +77,35 @@ test.describe("Dashboard with isolated synthetic fixtures", () => {
 			page.getByText("No disponible", { exact: true }),
 		).toBeVisible();
 	});
+
+	test("cumulative comparison keeps monthly context, short-month cutoffs and comparable totals", async ({
+		page,
+	}) => {
+		await page.goto("/home?period=custom&from=2024-03-15&to=2024-03-31");
+		const chart = page.locator("[data-dashboard-cumulative]");
+		await expect(
+			chart.getByText("Hasta 2024-03-31 (inclusive)", { exact: true }),
+		).toBeVisible();
+		await expect(
+			chart.getByText("Hasta 2024-02-29 (inclusive)", { exact: true }),
+		).toBeVisible();
+		await expect(
+			chart.getByText("Sin gastos registrados para este mes hasta el corte.", {
+				exact: true,
+			}),
+		).toBeVisible();
+		await chart.getByText("Ver datos del gráfico", { exact: true }).click();
+		await expect(chart.getByRole("row", { name: /31/ })).toContainText(
+			"No disponible",
+		);
+		await page.goto("/home?period=custom&from=2024-02-20&to=2024-02-29");
+		await expect(
+			chart.getByText("Hasta 2024-01-29 (inclusive)", { exact: true }),
+		).toBeVisible();
+		await expect(chart.getByText(/Diferencia al día 29/)).toContainText(
+			"No disponible",
+		);
+	});
 	test("category empty state is explicit", async ({ page }) => {
 		await page.goto("/home?period=custom&from=1901-01-01&to=1901-01-31");
 		await expect(
@@ -94,6 +123,13 @@ test.describe("Dashboard with isolated synthetic fixtures", () => {
 			categories.getByRole("heading", { name: "Expenses by category" }),
 		).toBeVisible();
 		await categories.getByText("View chart data", { exact: true }).click();
+		const cumulative = page.locator("[data-dashboard-cumulative]");
+		await expect(
+			cumulative.getByRole("heading", {
+				name: "Cumulative expense comparison",
+			}),
+		).toBeVisible();
+		await cumulative.getByText("View chart data", { exact: true }).click();
 		await expect(
 			categories.getByRole("rowheader", { name: "Uncategorized" }),
 		).toBeVisible();

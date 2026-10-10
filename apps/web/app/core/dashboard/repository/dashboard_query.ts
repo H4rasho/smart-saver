@@ -16,6 +16,7 @@ export async function queryDashboardAmounts(
 	db: LibSQLDatabase,
 	userId: string,
 	period: DashboardPeriod,
+	expensesOnly = false,
 ): Promise<DashboardAmount[]> {
 	if (!userId || !validatePeriod(period))
 		throw new Error("Invalid dashboard query");
@@ -33,6 +34,9 @@ export async function queryDashboardAmounts(
 		.where(
 			and(
 				eq(movements.clerk_id, userId),
+				expensesOnly
+					? inArray(movement_types.name, ["EXPENSE", "FIXED_EXPENSE"])
+					: undefined,
 				gte(movements.transaction_date, period.from),
 				lte(movements.transaction_date, period.to),
 			),

@@ -221,6 +221,13 @@
 		"amount": "Amount",
 		"share": "Share of total",
 		"uncategorized": "Uncategorized",
-		"noExpenses": "No expenses in this period."
+		"noExpenses": "No expenses in this period.",
+		"cumulativeTitle": "Cumulative expense comparison",
+		"cumulativeContext": "Monthly context: compares the last month in the filter with the previous month, starting on day 1. May include dates outside the selected range; expenses are not projected beyond the cutoff.",
+		"day": "Day",
+		"cutoff": "Through {date} (inclusive)",
+		"noSeriesExpenses": "No expenses recorded for this month through the cutoff.",
+		"cumulativeEmpty": "No expenses recorded in either compared month.",
+		"cumulativeDifference": "Difference through day {day} (reference month − previous): {amount}"
 	}
 }

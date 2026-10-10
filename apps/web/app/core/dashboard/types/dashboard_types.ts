@@ -46,3 +46,25 @@ export type DashboardCategoryResult =
 			success: false;
 			error: "invalidPeriod" | "unauthenticated" | "unavailable";
 	  };
+
+export interface CumulativeExpenseComparison {
+	referenceMonth: string;
+	previousMonth: string;
+	referenceCutoff: string;
+	previousCutoff: string;
+	hasReferenceExpenses: boolean;
+	hasPreviousExpenses: boolean;
+	comparableDay: number;
+	difference: number | null;
+	points: Array<{
+		day: number;
+		current: number | null;
+		previous: number | null;
+	}>;
+}
+export type DashboardCumulativeResult =
+	| { success: true; data: CumulativeExpenseComparison }
+	| {
+			success: false;
+			error: "invalidPeriod" | "unauthenticated" | "unavailable";
+	  };

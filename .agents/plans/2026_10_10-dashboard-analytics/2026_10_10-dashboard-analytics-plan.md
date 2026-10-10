@@ -14,7 +14,7 @@ implemented_by:
     name: "OpenAI GPT"
     version: "No disponible en el contexto del runtime"
     reasoning_effort: "No disponible en el contexto del runtime"
-last_implementation_at: "2026-10-10T22:17:06Z"
+last_implementation_at: "2026-10-10T23:05:16Z"
 has_completed_all_phases: false
 ---
 
@@ -24,7 +24,7 @@ has_completed_all_phases: false
 
 Ampliar el dashboard con filtros de período y tres gráficos para analizar ingresos, gastos y evolución mensual. Usar TanStack Charts con diseño responsive, modo oscuro, accesibilidad y traducciones español/inglés.
 
-Estado: aprobado por el usuario el 2026-10-10 en tres fases. Fases 1 y 2 implementadas; validación E2E autenticada y revisión visual pendientes. Usuario autorizó avanzar directo a fase 2 con el pendiente de fase 1. No hacer commit ni despliegue sin solicitud explícita; detenerse después de cada fase.
+Estado: aprobado por el usuario el 2026-10-10 en tres fases. Fases 1, 2 y 3 implementadas; validación E2E autenticada y revisión visual pendientes. Usuario autorizó avanzar directo a fase 2 con el pendiente de fase 1. No hacer commit ni despliegue sin solicitud explícita; detenerse después de cada fase.
 
 ## Contexto
 
@@ -179,15 +179,15 @@ Suite nueva propuesta: `/Users/thomassepulveda/my/save-ai/apps/web/test/dashboar
 
 #### Acciones pendientes
 
-- [ ] Resolver meses y cortes desde el filtro aplicando la regla aprobada.
-- [ ] Consultar movimientos del usuario solo para ambos períodos necesarios y agregar gastos tras descifrar en servidor.
-- [ ] Construir acumulados diarios manteniendo el importe en días válidos sin movimientos, sin fabricar fechas ni datos después del corte.
-- [ ] Mostrar líneas, meses y cortes explícitos, tooltips y diferencia calculada sobre días comparables.
-- [ ] Integrar filtro global, traducciones y carga/error/vacío; distinguir una serie disponible de falta de datos.
-- [ ] Añadir unit tests para febrero/bisiestos, meses de 30/31 días, cambio de año, día equivalente, días sin movimientos y rangos personalizados.
+- [x] Resolver meses y cortes desde el filtro aplicando la regla aprobada.
+- [x] Consultar movimientos del usuario solo para ambos períodos necesarios y agregar gastos tras descifrar en servidor.
+- [x] Construir acumulados diarios manteniendo el importe en días válidos sin movimientos, sin fabricar fechas ni datos después del corte.
+- [x] Mostrar líneas, meses y cortes explícitos, tooltips y diferencia calculada sobre días comparables.
+- [x] Integrar filtro global, traducciones y carga/error/vacío; distinguir una serie disponible de falta de datos.
+- [x] Añadir unit tests para febrero/bisiestos, meses de 30/31 días, cambio de año, día equivalente, días sin movimientos y rangos personalizados.
 - [ ] Completar E2E con reloj y datos deterministas para mes actual/cerrado y filtros; revisar visualmente móvil, escritorio, oscuro e idiomas.
-- [ ] Verificar los cambios mediante typechecking, linting y tests con el comando de verificación del proyecto (consultarlo en AGENTS.md o en la configuración del proyecto). Corregir cualquier problema encontrado.
-- [ ] DETENERSE. Presentar los cambios al usuario para su revisión y sugerir mensajes de commit (o títulos de pull request cuando las fases se implementen mediante pull requests). No continuar con la siguiente fase hasta que el usuario lo solicite explícitamente.
+- [x] Verificar los cambios mediante typechecking, linting y tests con el comando de verificación del proyecto (consultarlo en AGENTS.md o en la configuración del proyecto). Corregir cualquier problema encontrado.
+- [x] DETENERSE. Presentar los cambios al usuario para su revisión y sugerir mensajes de commit (o títulos de pull request cuando las fases se implementen mediante pull requests). No continuar con la siguiente fase hasta que el usuario lo solicite explícitamente.
 
 ## Verificación por fase
 
@@ -204,7 +204,7 @@ Preparar autenticación y fixtures E2E previamente. Si faltan credenciales o ent
 
 ## Próximo paso
 
-Revisar fase 2 y completar validación E2E autenticada y visual de fases 1/2 con usuario Clerk de prueba y storage state. Tras aprobación explícita, implementar únicamente fase 3. No avanzar automáticamente.
+Revisar fase 3 y completar E2E autenticados y revisión visual de las tres fases con sesión Clerk de prueba. Queda pendiente E2E de mes actual con reloj de servidor determinista; hoy se cubre en unit tests con fecha explícita. No declarar el plan totalmente completado hasta verificar esos pendientes. No hacer commit ni despliegue sin autorización.
 
 ## Resultado de implementación de fase 1
 
@@ -228,3 +228,14 @@ Revisar fase 2 y completar validación E2E autenticada y visual de fases 1/2 con
 - Typecheck, build y lint exitosos (warning preexistente de TanStack Table). 21 unit tests exitosos, incluidos 3 nuevos para categorías y consulta cifrada aislada.
 - E2E ampliados para actualización por filtro, categoría nula, vacío e inglés móvil. Chromium: 1 test no autenticado exitoso y 4 autenticados omitidos por falta de configuración. Revisión visual y autenticada no verificadas.
 - Sin commit, push, despliegue ni implementación de fase 3.
+
+## Resultado de implementación de fase 3
+
+- Comparación del último mes del filtro con el anterior desde día 1: actual hasta hoy en America/Santiago, cerrado hasta fin de mes, anterior hasta día equivalente limitado por calendario. El contexto mensual puede exceder el rango personalizado. Meses futuros retornan invalidPeriod para evitar proyecciones.
+- Dos consultas restringidas por propietario, fechas y tipos EXPENSE/FIXED_EXPENSE antes de descifrar. Solo agregados al navegador.
+- Acumulados diarios conservan monto en días válidos sin movimientos; null fuera del corte. Diferencia calculada al último día comparable.
+- hasReferenceExpenses/hasPreviousExpenses distinguen registros de monto cero de ausencia de gastos. Series sin registros se etiquetan y no se dibujan como ceros observados; diferencia no disponible si falta una serie.
+- TanStack lineY con puntos, leyendas, cortes inclusivos, tooltip, tabla accesible, ES/EN y tema existente. Comparte filtro global y Suspense.
+- Typecheck, build, lint y Biome exitosos; warning preexistente de TanStack Table. 26 unit tests exitosos. Chromium: 1 exitoso y 5 omitidos por falta de sesión Clerk.
+- E2E históricos y móvil inglés ampliados; ejecución autenticada, mes actual con reloj servidor y revisión visual móvil/escritorio/oscuro pendientes.
+- Sin commit, push ni despliegue. Validaciones pendientes mantienen has_completed_all_phases en false.

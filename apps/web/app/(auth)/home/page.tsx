@@ -8,9 +8,11 @@ import {
 } from "@/app/(auth)/components/summary_stat_card";
 import {
 	getDashboardCategoryExpensesAction,
+	getDashboardCumulativeExpensesAction,
 	getDashboardOverviewAction,
 } from "@/app/core/dashboard/actions/dashboard_actions";
 import { CategoryExpensesChart } from "@/app/core/dashboard/components/category_expenses_chart";
+import { CumulativeExpensesChart } from "@/app/core/dashboard/components/cumulative_expenses_chart";
 import { DashboardPeriodFilter } from "@/app/core/dashboard/components/dashboard_period_filter";
 import { IncomeExpensesChart } from "@/app/core/dashboard/components/income_expenses_chart";
 import { resolvePeriod } from "@/app/core/dashboard/lib/dashboard_period";
@@ -30,9 +32,10 @@ import { Suspense } from "react";
 
 async function HomeSummaryCards({ period }: { period: DashboardPeriod }) {
 	const t = await getTranslations("home.summary");
-	const [result, categories] = await Promise.all([
+	const [result, categories, cumulative] = await Promise.all([
 		getDashboardOverviewAction(period),
 		getDashboardCategoryExpensesAction(period),
+		getDashboardCumulativeExpensesAction(period),
 	]);
 	const dashboard = await getTranslations("dashboard");
 	if (!result.success) return <p role="alert">{dashboard(result.error)}</p>;
@@ -109,6 +112,16 @@ async function HomeSummaryCards({ period }: { period: DashboardPeriod }) {
 			) : (
 				<p className="mt-6" role="alert">
 					{dashboard(categories.error)}
+				</p>
+			)}
+			{cumulative.success ? (
+				<CumulativeExpensesChart
+					comparison={cumulative.data}
+					currency={userCurrency}
+				/>
+			) : (
+				<p className="mt-6" role="alert">
+					{dashboard(cumulative.error)}
 				</p>
 			)}
 		</div>

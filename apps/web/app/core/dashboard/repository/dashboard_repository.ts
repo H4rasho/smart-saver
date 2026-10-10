@@ -22,3 +22,10 @@ export async function getDashboardCategoryAmounts(
 ): Promise<DashboardCategoryAmount[]> {
 	return queryDashboardCategoryAmounts(db, userId, period);
 }
+
+export async function getDashboardExpenseAmounts(
+	userId: string,
+	period: DashboardPeriod,
+): Promise<DashboardAmount[]> {
+	return queryDashboardAmounts(db, userId, period, true);
+}
