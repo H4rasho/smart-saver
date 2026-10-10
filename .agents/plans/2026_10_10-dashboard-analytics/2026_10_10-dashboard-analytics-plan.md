@@ -14,7 +14,7 @@ implemented_by:
     name: "OpenAI GPT"
     version: "No disponible en el contexto del runtime"
     reasoning_effort: "No disponible en el contexto del runtime"
-last_implementation_at: "2026-10-10T22:05:47Z"
+last_implementation_at: "2026-10-10T22:17:06Z"
 has_completed_all_phases: false
 ---
 
@@ -24,7 +24,7 @@ has_completed_all_phases: false
 
 Ampliar el dashboard con filtros de período y tres gráficos para analizar ingresos, gastos y evolución mensual. Usar TanStack Charts con diseño responsive, modo oscuro, accesibilidad y traducciones español/inglés.
 
-Estado: aprobado por el usuario el 2026-10-10 en tres fases. Fase 1 implementada; validación E2E autenticada y revisión visual pendientes. No hacer commit ni despliegue sin solicitud explícita; detenerse después de cada fase.
+Estado: aprobado por el usuario el 2026-10-10 en tres fases. Fases 1 y 2 implementadas; validación E2E autenticada y revisión visual pendientes. Usuario autorizó avanzar directo a fase 2 con el pendiente de fase 1. No hacer commit ni despliegue sin solicitud explícita; detenerse después de cada fase.
 
 ## Contexto
 
@@ -140,15 +140,15 @@ Suite nueva propuesta: `/Users/thomassepulveda/my/save-ai/apps/web/test/dashboar
 
 #### Acciones pendientes
 
-- [ ] Consultar y agregar gastos por categoría usando usuario autenticado, período y descifrado server-side.
-- [ ] Agrupar por identificador, conservar categorías homónimas distintas y agrupar categoría nula; incluir gastos fijos, excluir ingresos.
-- [ ] Calcular monto y porcentaje, evitar división por cero y ordenar por monto descendente.
-- [ ] Integrar barras horizontales y tooltips, labels legibles y nombres largos en móvil.
-- [ ] Conectar filtro global; añadir traducciones y estados de carga/error/sin gastos.
-- [ ] Añadir unit tests para gastos fijos, ingresos excluidos, categorías nulas/homónimas, orden, porcentajes y vacío.
-- [ ] Ampliar E2E para categorías, actualización por filtro, inglés y móvil.
-- [ ] Verificar los cambios mediante typechecking, linting y tests con el comando de verificación del proyecto (consultarlo en AGENTS.md o en la configuración del proyecto). Corregir cualquier problema encontrado.
-- [ ] DETENERSE. Presentar los cambios al usuario para su revisión y sugerir mensajes de commit (o títulos de pull request cuando las fases se implementen mediante pull requests). No continuar con la siguiente fase hasta que el usuario lo solicite explícitamente.
+- [x] Consultar y agregar gastos por categoría usando usuario autenticado, período y descifrado server-side.
+- [x] Agrupar por identificador, conservar categorías homónimas distintas y agrupar categoría nula; incluir gastos fijos, excluir ingresos.
+- [x] Calcular monto y porcentaje, evitar división por cero y ordenar por monto descendente.
+- [x] Integrar barras horizontales y tooltips, labels legibles y nombres largos en móvil.
+- [x] Conectar filtro global; añadir traducciones y estados de carga/error/sin gastos.
+- [x] Añadir unit tests para gastos fijos, ingresos excluidos, categorías nulas/homónimas, orden, porcentajes y vacío.
+- [ ] Ampliar E2E para categorías, actualización por filtro, inglés y móvil. Tests añadidos; validación autenticada y visual pendiente por falta de sesión Clerk de prueba.
+- [x] Verificar los cambios mediante typechecking, linting y tests con el comando de verificación del proyecto (consultarlo en AGENTS.md o en la configuración del proyecto). Corregir cualquier problema encontrado.
+- [x] DETENERSE. Presentar los cambios al usuario para su revisión y sugerir mensajes de commit (o títulos de pull request cuando las fases se implementen mediante pull requests). No continuar con la siguiente fase hasta que el usuario lo solicite explícitamente.
 
 ### Fase 3. Gasto acumulado comparativo
 
@@ -204,7 +204,7 @@ Preparar autenticación y fixtures E2E previamente. Si faltan credenciales o ent
 
 ## Próximo paso
 
-Completar E2E autenticados y revisión visual de fase 1 con un usuario Clerk de prueba y storage state. Tras revisión y aprobación explícita, implementar únicamente fase 2. No avanzar automáticamente.
+Revisar fase 2 y completar validación E2E autenticada y visual de fases 1/2 con usuario Clerk de prueba y storage state. Tras aprobación explícita, implementar únicamente fase 3. No avanzar automáticamente.
 
 ## Resultado de implementación de fase 1
 
@@ -217,3 +217,14 @@ Completar E2E autenticados y revisión visual de fase 1 con un usuario Clerk de 
 - Chromium: 1 prueba de acceso no autenticado exitosa; 3 pruebas autenticadas omitidas explícitamente por falta de sesión Clerk de pruebas. El pendiente E2E sigue sin marcar. Revisión visual autenticada no verificada.
 - Seed sintético verificado en SQLite temporal; instrucciones de autenticación y configuración aislada en `docs/agents/testing-guide.md`.
 - Sin commit, push, despliegue ni cambios de fases 2/3.
+
+## Resultado de implementación de fase 2
+
+- Acción encapsulada en DashboardCategoryResult: éxito con CategoryExpenseSummary[] o error invalidPeriod/unauthenticated/unavailable, sin sustituir fallos por vacío.
+- Consulta restringida por propietario, fechas inclusivas y tipos EXPENSE/FIXED_EXPENSE; descifrado en servidor. Categorías globales o del propietario: referencias ajenas/no existentes se agrupan como nulas sin revelar sus nombres.
+- Agregación pura por identificador, categorías homónimas separadas, orden descendente y porcentajes seguros ante total cero.
+- Gráfico horizontal TanStack barX con tooltip monetario y porcentajes, labels abreviados, nombres completos en tabla accesible con ajuste de palabras, moneda configurada y traducciones ES/EN.
+- Filtro, Suspense y ocultamiento de cifras anteriores compartidos con fase 1; estados de error y sin gastos diferenciados.
+- Typecheck, build y lint exitosos (warning preexistente de TanStack Table). 21 unit tests exitosos, incluidos 3 nuevos para categorías y consulta cifrada aislada.
+- E2E ampliados para actualización por filtro, categoría nula, vacío e inglés móvil. Chromium: 1 test no autenticado exitoso y 4 autenticados omitidos por falta de configuración. Revisión visual y autenticada no verificadas.
+- Sin commit, push, despliegue ni implementación de fase 3.

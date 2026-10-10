@@ -29,3 +29,20 @@ export type DashboardResult =
 			success: false;
 			error: "invalidPeriod" | "unauthenticated" | "unavailable";
 	  };
+
+export interface DashboardCategoryAmount extends DashboardAmount {
+	categoryId: number | null;
+	categoryName: string | null;
+}
+export interface CategoryExpenseSummary {
+	categoryId: number | null;
+	categoryName: string;
+	amount: number;
+	share: number;
+}
+export type DashboardCategoryResult =
+	| { success: true; data: CategoryExpenseSummary[] }
+	| {
+			success: false;
+			error: "invalidPeriod" | "unauthenticated" | "unavailable";
+	  };

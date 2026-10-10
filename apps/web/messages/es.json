@@ -214,6 +214,13 @@
 		"chartDescription": "Importes mensuales en {currency}. Usa las flechas para explorar los valores.",
 		"empty": "No hay movimientos en este período.",
 		"dataTable": "Ver datos del gráfico",
-		"month": "Mes"
+		"month": "Mes",
+		"categoryTitle": "Gastos por categoría",
+		"categoryDescription": "Distribución del gasto del período seleccionado.",
+		"category": "Categoría",
+		"amount": "Monto",
+		"share": "Porcentaje del total",
+		"uncategorized": "Sin categoría",
+		"noExpenses": "No hay gastos en este período."
 	}
 }

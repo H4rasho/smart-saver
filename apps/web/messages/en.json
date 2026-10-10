@@ -214,6 +214,13 @@
 		"chartDescription": "Monthly amounts in {currency}. Use arrow keys to explore values.",
 		"empty": "No movements in this period.",
 		"dataTable": "View chart data",
-		"month": "Month"
+		"month": "Month",
+		"categoryTitle": "Expenses by category",
+		"categoryDescription": "Expense distribution for the selected period.",
+		"category": "Category",
+		"amount": "Amount",
+		"share": "Share of total",
+		"uncategorized": "Uncategorized",
+		"noExpenses": "No expenses in this period."
 	}
 }

@@ -22,6 +22,16 @@ test.describe("Dashboard with isolated synthetic fixtures", () => {
 				{ exact: true },
 			),
 		).toBeVisible();
+		const initialCategories = page.locator("[data-dashboard-categories]");
+		await initialCategories
+			.getByText("Ver datos del gráfico", { exact: true })
+			.click();
+		await expect(
+			initialCategories.getByRole("cell", {
+				name: formatCurrencyAmount(25000, "CLP"),
+				exact: true,
+			}),
+		).toBeVisible();
 		await page.getByLabel("Desde").fill("2024-02-01");
 		await page.getByLabel("Hasta").fill("2024-02-29");
 		await page.getByRole("button", { name: "Aplicar", exact: true }).click();
@@ -31,6 +41,22 @@ test.describe("Dashboard with isolated synthetic fixtures", () => {
 				formatCurrencyAmount(300000, "CLP", { maximumFractionDigits: 0 }),
 				{ exact: true },
 			),
+		).toBeVisible();
+		const categories = page.locator("[data-dashboard-categories]");
+		await expect(
+			categories.getByRole("heading", { name: "Gastos por categoría" }),
+		).toBeVisible();
+		await categories
+			.getByText("Ver datos del gráfico", { exact: true })
+			.click();
+		await expect(
+			categories.getByRole("rowheader", { name: "Sin categoría" }),
+		).toBeVisible();
+		await expect(
+			categories.getByRole("cell", {
+				name: formatCurrencyAmount(50000, "CLP"),
+				exact: true,
+			}),
 		).toBeVisible();
 		await page.reload();
 		await expect(page.getByLabel("Desde")).toHaveValue("2024-02-01");
@@ -51,13 +77,27 @@ test.describe("Dashboard with isolated synthetic fixtures", () => {
 			page.getByText("No disponible", { exact: true }),
 		).toBeVisible();
 	});
+	test("category empty state is explicit", async ({ page }) => {
+		await page.goto("/home?period=custom&from=1901-01-01&to=1901-01-31");
+		await expect(
+			page.getByText("No hay gastos en este período.", { exact: true }),
+		).toBeVisible();
+	});
 	test("English mobile chart does not overflow", async ({ page }) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto("/en/home?period=custom&from=2024-01-01&to=2024-02-29");
 		await expect(
 			page.getByRole("heading", { name: "Income vs. expenses" }),
 		).toBeVisible();
-		await page.getByText("View chart data", { exact: true }).click();
+		const categories = page.locator("[data-dashboard-categories]");
+		await expect(
+			categories.getByRole("heading", { name: "Expenses by category" }),
+		).toBeVisible();
+		await categories.getByText("View chart data", { exact: true }).click();
+		await expect(
+			categories.getByRole("rowheader", { name: "Uncategorized" }),
+		).toBeVisible();
+		await page.getByText("View chart data", { exact: true }).first().click();
 		await expect(page.getByRole("table").first()).toBeVisible();
 		expect(
 			await page.evaluate(
