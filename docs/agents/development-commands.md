@@ -66,7 +66,6 @@ The iOS Shortcuts endpoint additionally requires:
 SMARTSAVER_SHORTCUT_API_KEY=
 SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=
 SMARTSAVER_SHORTCUT_TIME_ZONE=America/Santiago
-OPENAI_API_KEY=
 # Optional; defaults to gpt-5.6-luna
 SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.6-luna
 ```
@@ -75,8 +74,10 @@ Define them in `apps/api/.env` for local API development.
 The web welcome flow uses the server-side `API_URL` setting for registration,
 defaulting to `http://localhost:3001`.
 
-The web file-import action uses the user's OpenAI key when present, otherwise
-`OPENAI_API_KEY` from the web environment. It defaults to `gpt-6-luna` with
+All AI flows use only the user's OpenAI key stored encrypted in the database.
+Configure it in web Settings before using AI; there is no server-key fallback.
+The Shortcut reads the configured owner's key on every request, so rotation or
+deletion takes effect without restarting the API. Missing keys return `503`. It defaults to `gpt-6-luna` with
 `medium` reasoning effort; optionally set `FILE_EXTRACTION_OPENAI_MODEL` in the
 web environment to override the model. The Shortcut parser remains on its own
 `gpt-5.6-luna` default. The web and API deployments do not share
