@@ -66,7 +66,6 @@ The iOS Shortcuts endpoint additionally requires:
 SMARTSAVER_SHORTCUT_API_KEY=
 SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=
 SMARTSAVER_SHORTCUT_TIME_ZONE=America/Santiago
-OPENAI_API_KEY=
 # Optional; defaults to gpt-5.6-luna
 SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.6-luna
 ```
@@ -75,8 +74,10 @@ Define them in `apps/api/.env` for local API development.
 The web welcome flow uses the server-side `API_URL` setting for registration,
 defaulting to `http://localhost:3001`.
 
-The web file-import action uses the user's OpenAI key when present, otherwise
-`OPENAI_API_KEY` from the web environment. It defaults to `gpt-6-luna` with
+All AI flows use only the user's OpenAI key stored encrypted in the database.
+Configure it in web Settings before using AI; there is no server-key fallback.
+The Shortcut reads the configured owner's key on every request, so rotation or
+deletion takes effect without restarting the API. Missing keys return `503`. It defaults to `gpt-6-luna` with
 `medium` reasoning effort; optionally set `FILE_EXTRACTION_OPENAI_MODEL` in the
 web environment to override the model. The Shortcut parser remains on its own
 `gpt-5.6-luna` default. The web and API deployments do not share
@@ -120,3 +121,14 @@ pnpm db:studio
 ## Git Hooks
 
 Lefthook runs Biome against staged files before each commit and stages its fixes.
+
+## Dashboard Charts
+
+The dashboard uses `@tanstack/charts` 1.1.0, with React imported from
+`@tanstack/charts/react` (React 18/19 peer compatibility). Chart definitions,
+scales and tooltip use the official package exports. See the
+[React quick start](https://tanstack.com/charts/latest/docs/framework/react/quick-start).
+Periods use `America/Santiago` calendar days, as file imports do. URL parameters
+are `period=current|previous|3|6|12|custom`, with inclusive `from` and `to`
+(`YYYY-MM-DD`) for custom ranges. Aggregations use transaction dates and decrypt
+amounts only after filtering by the authenticated owner and period.

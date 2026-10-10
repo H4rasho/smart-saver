@@ -20,7 +20,7 @@ Set these variables on the API server:
 SMARTSAVER_SHORTCUT_API_KEY=replace-with-a-generated-revocable-key
 SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID=user_your_clerk_id
 SMARTSAVER_SHORTCUT_TIME_ZONE=America/Santiago
-OPENAI_API_KEY=replace-with-a-server-side-openai-key
+ENCRYPTION_KEY=same-64-hex-character-key-as-the-web-app
 # Optional; defaults to gpt-5.6-luna
 SMARTSAVER_SHORTCUT_OPENAI_MODEL=gpt-5.6-luna
 ```
@@ -56,4 +56,6 @@ after an uncertain network outcome.
 
 Never put `CLERK_SECRET_KEY` in an iOS Shortcut. Rotate or revoke the dedicated
 SmartSaver key by changing `SMARTSAVER_SHORTCUT_API_KEY` on the API server.
-Keep `OPENAI_API_KEY` exclusively on the API server.
+Configure the owner's OpenAI key in web Settings. The API reads that encrypted
+database key for every request; there is no environment-key fallback. Missing
+keys or unreadable ciphertext return `503` without persistence.

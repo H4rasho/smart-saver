@@ -5,7 +5,6 @@ import {
 	getUserId,
 	getUserOpenAIKey,
 } from "@/app/core/user/actions/user-actions";
-import { CONFIG } from "@/config/config";
 import { createOpenAI } from "@ai-sdk/openai";
 import { Output, type UserContent, generateObject, generateText } from "ai";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -36,8 +35,6 @@ import type {
 	MovementWithCategoryAndMovementType,
 } from "../types/movement-type";
 import { CreateMovementSchema } from "../types/movement-type";
-
-const { OPENAI_API_KEY } = CONFIG;
 
 const FILE_EXTRACTION_MODEL =
 	process.env.FILE_EXTRACTION_OPENAI_MODEL ?? "gpt-6-luna";
@@ -84,7 +81,7 @@ function parseOptionalPositiveNumber(
 
 async function getOpenAIKeyForUser(): Promise<string | null> {
 	const userOpenAIKey = await getUserOpenAIKey();
-	return userOpenAIKey || OPENAI_API_KEY || null;
+	return userOpenAIKey?.trim() || null;
 }
 
 function revalidateMovementViews(): void {
@@ -369,7 +366,9 @@ export async function addMovmentsFromFileAction(
 
 	const openAiKey = await getOpenAIKeyForUser();
 	if (!openAiKey) {
-		throw new Error("API key de OpenAI no configurada");
+		throw new Error(
+			"Configura tu API key de OpenAI en Ajustes para usar la IA",
+		);
 	}
 
 	const movements = await extractMovementsWithAI(
@@ -409,7 +408,7 @@ export async function extractMovementsFromFileAction(
 			return {
 				movements: [],
 				matches: [],
-				error: "API key de OpenAI no configurada",
+				error: "Configura tu API key de OpenAI en Ajustes para usar la IA",
 			};
 		}
 
@@ -593,7 +592,10 @@ export async function extractMovementsFromAudioAction(
 			.join(", ");
 		const openAiKey = await getOpenAIKeyForUser();
 		if (!openAiKey) {
-			return { movements: [], error: "API key de OpenAI no configurada" };
+			return {
+				movements: [],
+				error: "Configura tu API key de OpenAI en Ajustes para usar la IA",
+			};
 		}
 		const scopedOpenAI = createOpenAI({ apiKey: openAiKey });
 

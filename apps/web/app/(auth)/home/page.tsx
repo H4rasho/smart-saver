@@ -7,10 +7,17 @@ import {
 	SummaryStatCard,
 } from "@/app/(auth)/components/summary_stat_card";
 import {
-	getBalanceAction,
-	getMovmentsAction,
-	getTotalsByTypeAction,
-} from "@/app/core/movements/actions/movments-actions";
+	getDashboardCategoryExpensesAction,
+	getDashboardCumulativeExpensesAction,
+	getDashboardOverviewAction,
+} from "@/app/core/dashboard/actions/dashboard_actions";
+import { CategoryExpensesChart } from "@/app/core/dashboard/components/category_expenses_chart";
+import { CumulativeExpensesChart } from "@/app/core/dashboard/components/cumulative_expenses_chart";
+import { DashboardPeriodFilter } from "@/app/core/dashboard/components/dashboard_period_filter";
+import { IncomeExpensesChart } from "@/app/core/dashboard/components/income_expenses_chart";
+import { resolvePeriod } from "@/app/core/dashboard/lib/dashboard_period";
+import type { DashboardPeriod } from "@/app/core/dashboard/types/dashboard_types";
+import { getMovmentsAction } from "@/app/core/movements/actions/movments-actions";
 import FinancialMovementsList from "@/app/core/movements/components/mobile-list";
 import { MovementsTable } from "@/app/core/movements/components/movements-table";
 import {
@@ -23,14 +30,22 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-async function HomeSummaryCards() {
+async function HomeSummaryCards({ period }: { period: DashboardPeriod }) {
 	const t = await getTranslations("home.summary");
-	const [{ total_expenses, total_income }, balance, userCurrency] =
-		await Promise.all([
-			getTotalsByTypeAction(),
-			getBalanceAction(),
-			getUserCurrency(),
-		]);
+	const [result, categories, cumulative] = await Promise.all([
+		getDashboardOverviewAction(period),
+		getDashboardCategoryExpensesAction(period),
+		getDashboardCumulativeExpensesAction(period),
+	]);
+	const dashboard = await getTranslations("dashboard");
+	if (!result.success) return <p role="alert">{dashboard(result.error)}</p>;
+	const { data } = result;
+	const {
+		income: total_income,
+		expenses: total_expenses,
+		net: balance,
+	} = data.totals;
+	const userCurrency = data.currency;
 
 	const formattedBalance = formatCurrencyAmount(balance, userCurrency, {
 		maximumFractionDigits: 0,
@@ -42,14 +57,16 @@ async function HomeSummaryCards() {
 		maximumFractionDigits: 0,
 	});
 	const savingsRatio =
-		total_income > 0 ? `${((balance / total_income) * 100).toFixed(1)}%` : "0%";
+		data.totals.savingsRate === null
+			? dashboard("notAvailable")
+			: `${data.totals.savingsRate.toFixed(1)}%`;
 
 	const cards = [
 		{
 			eyebrow: t("overview"),
-			label: t("totalBalance"),
+			label: dashboard("net"),
 			value: formattedBalance,
-			detail: t("balanceDetail"),
+			detail: dashboard("netDetail"),
 			icon: Wallet,
 			...SUMMARY_STAT_TONES.violet,
 		},
@@ -57,7 +74,7 @@ async function HomeSummaryCards() {
 			eyebrow: t("incomeEyebrow"),
 			label: t("income"),
 			value: formattedIncome,
-			detail: t("incomeDetail"),
+			detail: dashboard("periodDetail"),
 			icon: TrendingUp,
 			...SUMMARY_STAT_TONES.emerald,
 		},
@@ -65,7 +82,7 @@ async function HomeSummaryCards() {
 			eyebrow: t("expenseEyebrow"),
 			label: t("expenses"),
 			value: formattedExpenses,
-			detail: t("expensesDetail"),
+			detail: dashboard("periodDetail"),
 			icon: TrendingDown,
 			...SUMMARY_STAT_TONES.rose,
 		},
@@ -80,10 +97,33 @@ async function HomeSummaryCards() {
 	] as const;
 
 	return (
-		<div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-			{cards.map((card) => (
-				<SummaryStatCard key={card.label} {...card} />
-			))}
+		<div data-dashboard-overview>
+			<div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+				{cards.map((card) => (
+					<SummaryStatCard key={card.label} {...card} />
+				))}
+			</div>
+			<IncomeExpensesChart overview={data} />
+			{categories.success ? (
+				<CategoryExpensesChart
+					categories={categories.data}
+					currency={userCurrency}
+				/>
+			) : (
+				<p className="mt-6" role="alert">
+					{dashboard(categories.error)}
+				</p>
+			)}
+			{cumulative.success ? (
+				<CumulativeExpensesChart
+					comparison={cumulative.data}
+					currency={userCurrency}
+				/>
+			) : (
+				<p className="mt-6" role="alert">
+					{dashboard(cumulative.error)}
+				</p>
+			)}
 		</div>
 	);
 }
@@ -127,9 +167,13 @@ async function RecentMovementsSection({ userId }: { userId: string }) {
 	);
 }
 
-export default async function Home() {
+export default async function Home({
+	searchParams,
+}: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
 	const t = await getTranslations("home");
 	const userId = await getUserId();
+	const selection = resolvePeriod(await searchParams);
+	const dashboard = await getTranslations("dashboard");
 
 	if (!userId) {
 		return redirect("/welcome");
@@ -145,9 +189,27 @@ export default async function Home() {
 					<p className="text-muted-foreground">{t("description")}</p>
 				</div>
 
-				<Suspense fallback={<HomeSummaryCardsLoadingSkeleton />}>
-					<HomeSummaryCards />
-				</Suspense>
+				{selection ? (
+					<>
+						<DashboardPeriodFilter
+							key={`${selection.preset}:${selection.period.from}:${selection.period.to}`}
+							{...selection}
+						/>
+						<Suspense
+							key={`${selection.period.from}:${selection.period.to}`}
+							fallback={
+								<div aria-live="polite">
+									<p>{dashboard("loading")}</p>
+									<HomeSummaryCardsLoadingSkeleton />
+								</div>
+							}
+						>
+							<HomeSummaryCards period={selection.period} />
+						</Suspense>
+					</>
+				) : (
+					<p role="alert">{dashboard("invalidPeriod")}</p>
+				)}
 			</section>
 
 			<section className="mt-6">

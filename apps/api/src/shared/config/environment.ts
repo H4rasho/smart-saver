@@ -5,7 +5,6 @@ export interface Environment {
 	shortcutApiKey: string | null;
 	shortcutOwnerUserId: string | null;
 	shortcutTimeZone: string;
-	openaiApiKey: string | null;
 	shortcutOpenaiModel: string;
 }
 
@@ -47,7 +46,6 @@ export function getEnvironment(): Environment {
 		shortcutTimeZone: resolveShortcutTimeZone(
 			getOptionalVariable("SMARTSAVER_SHORTCUT_TIME_ZONE"),
 		),
-		openaiApiKey: getOptionalVariable("OPENAI_API_KEY"),
 		shortcutOpenaiModel:
 			getOptionalVariable("SMARTSAVER_SHORTCUT_OPENAI_MODEL") ?? "gpt-5.6-luna",
 	};

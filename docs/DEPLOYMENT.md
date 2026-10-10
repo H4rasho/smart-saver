@@ -123,7 +123,7 @@ URL. Configure `CLERK_SECRET_KEY`, `TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN`
 on that service. If iOS Shortcuts are enabled, also configure
 `SMARTSAVER_SHORTCUT_API_KEY` and
 `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` on the API service. Also set the
-server-side `OPENAI_API_KEY` and `SMARTSAVER_SHORTCUT_TIME_ZONE` (defaults to
+same `ENCRYPTION_KEY` as the web app and `SMARTSAVER_SHORTCUT_TIME_ZONE` (defaults to
 `America/Santiago`). `SMARTSAVER_SHORTCUT_OPENAI_MODEL` optionally overrides
 the default `gpt-5.6-luna` model. The Shortcut API key is a dedicated SmartSaver
 credential; never expose `CLERK_SECRET_KEY` or `OPENAI_API_KEY` to a shortcut.
@@ -194,3 +194,7 @@ Para monitorear tu base de datos Turso:
 ```bash
 pnpm db:studio
 ```
+
+All AI flows require the user’s OpenAI key configured in web Settings and stored
+encrypted in the shared database. The Shortcut uses its configured owner’s key.
+`OPENAI_API_KEY` is no longer read by either application.
