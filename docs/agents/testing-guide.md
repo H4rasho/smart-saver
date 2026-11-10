@@ -33,6 +33,12 @@ Put API tests under `apps/api/test/`. Test HTTP contracts through exported
 request handlers and cover successful responses, unsupported methods, and
 unsupported paths.
 
+MCP configuration and public-profile data minimization have focused unit tests
+under `apps/web/test/mcp_auth.test.ts`. For a hosted OAuth end-to-end check,
+register the exact HTTPS `/mcp` URL in Clerk, connect an MCP client, approve
+`profile` and `email`, and verify a tool call. Local unit tests cannot prove
+Clerk token issuance or hosted OAuth consent.
+
 ## Dashboard analytics fixtures
 
 Dashboard unit tests run the actual filtered Drizzle query against in-memory
