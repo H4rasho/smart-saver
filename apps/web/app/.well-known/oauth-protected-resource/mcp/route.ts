@@ -1,11 +1,15 @@
+import { REQUIRED_SCOPES, getMcpResourceUrl } from "@/lib/mcp-config";
 import {
 	metadataCorsOptionsRequestHandler,
 	protectedResourceHandlerClerk,
 } from "@clerk/mcp-tools/next";
 
-const handler = protectedResourceHandlerClerk({
-	scopes_supported: ["profile", "email"],
-});
+function handler(request: Request): Response {
+	return protectedResourceHandlerClerk({
+		resource: getMcpResourceUrl(),
+		scopes_supported: REQUIRED_SCOPES,
+	})(request);
+}
 
 const optionsHandler = metadataCorsOptionsRequestHandler();
 

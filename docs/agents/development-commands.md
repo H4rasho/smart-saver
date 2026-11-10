@@ -99,6 +99,27 @@ edit, delete, and totals still use the web database path.
 
 `GET /health` does not require database or Clerk configuration.
 
+## MCP server
+
+The web app serves a Clerk-authenticated MCP endpoint at `/mcp`. Configure the
+Clerk instance under **Agents → MCP servers** with the **exact** endpoint URL
+(for example, `http://localhost:3000/mcp` locally or a stable HTTPS URL in
+production). Set `MCP_RESOURCE_URL` in the web environment to the same full
+URL for every hosted deployment. Local development defaults to
+`http://localhost:3000/mcp`; non-development requests fail closed without the
+setting. Do not use a changing Vercel preview URL unless it is separately
+registered in Clerk. The server requires OAuth `profile` and `email` scopes;
+configure these as default scopes in Clerk if the client does not request them.
+The `/mcp` token verifier requires `aud` to match `MCP_RESOURCE_URL` and accepts
+only Clerk OAuth access tokens, not browser sessions or arbitrary bearer tokens.
+The `.well-known` OAuth metadata endpoints remain public. Use Node.js 22.18 or
+later, as required by the [Clerk MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server).
+
+The MCP route uses `mcp-handler` 2 and the MCP SDK 2 server. `zod-mcp` is an
+isolated Zod 4 alias for MCP tool schemas; the application keeps Zod 3. The
+root pnpm package extension pins Zod 3 for `@hookform/resolvers` so its
+existing form types do not accidentally resolve through Zod 4.
+
 `POST /movements/shortcut` uses the `X-SmartSaver-Shortcut-Key` header and the
 server-side `SMARTSAVER_SHORTCUT_API_KEY` value. The server always assigns the
 configured `SMARTSAVER_SHORTCUT_OWNER_CLERK_USER_ID` as the movement owner and
